@@ -10,6 +10,19 @@ export const list = query({
   },
 });
 
+export const getUser = query({
+  args: { tokenIdentifier: v.string() },
+  handler: async (ctx, { tokenIdentifier }) => {
+    // Get user by token identifier using the by_token index
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", tokenIdentifier))
+      .unique();
+
+    return user;
+  },
+});
+
 export const create = mutation({
   args: { name: v.string(), tokenIdentifier: v.string(), active: v.boolean() },
   handler: async (ctx, { name, tokenIdentifier, active }) => {
