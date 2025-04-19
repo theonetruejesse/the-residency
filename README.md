@@ -7,5 +7,8 @@ This is a first round interview agent for The Residency. It is a web application
 ## Tech Stack
 
 - Next.js
-- Tailwind CSS
 - TypeScript
+- Tailwind CSS
+- Agora
+- Convex
+- Shadcn UI

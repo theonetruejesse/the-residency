@@ -1,0 +1,18 @@
+{
+	"extends": "@residency/tsconfig/base.json",
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2022", "DOM"],
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"outDir": "./dist",
+		"jsx": "react-jsx",
+		"verbatimModuleSyntax": false,
+		"noUncheckedIndexedAccess": false,
+		"strictNullChecks": false,
+		"noImplicitAny": false,
+		"noImplicitReturns": false
+	},
+	"include": ["src", "convex"],
+	"exclude": ["node_modules", "dist"]
+}

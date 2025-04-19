@@ -1,3 +1,23 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/*
+  - packages/*
+  - tooling/*
+
+catalog:
+  # Dev tooling
+  tailwindcss: ^3.4.15
+  typescript: ^5.8.2
+
+  # Misc
+  zod: ^3.24.1
+  lucide-react: ^0.475.0
+
+  # API Stuff
+  convex: ^1.23.0
+
+catalogs:
+  react19:
+    react: 19.0.0
+    react-dom: 19.0.0
+    "@types/react": ^19.0.0
+    "@types/react-dom": ^19.0.0
