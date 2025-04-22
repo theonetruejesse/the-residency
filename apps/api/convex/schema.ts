@@ -5,12 +5,15 @@ import { v } from "convex/values";
 export default defineSchema({
   users: defineTable({
     name: v.string(),
-    userId: v.number(), // agora uid + roomId
-  }).index("by_user_id", ["userId"]),
+  }),
+  // interview sessions
   sessions: defineTable({
-    sessionId: v.id("users"),
-    active: v.boolean(),
+    userId: v.id("users"), // Internal link to users table
+    sessionId: v.number(), // agora uid + roomId
     sessionToken: v.string(),
     expiresAt: v.number(),
-  }).index("by_session_id", ["sessionId"]),
+    active: v.boolean(),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_session_id", ["sessionId"]),
 });
