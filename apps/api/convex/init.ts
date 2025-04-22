@@ -4,9 +4,9 @@ import { internalMutation, type MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 
 const seedUsers = [
-  { name: "Omar", tokenIdentifier: "user_omar", active: true },
-  { name: "Arya", tokenIdentifier: "user_arya", active: true },
-  { name: "Evelyn", tokenIdentifier: "user_evelyn", active: true },
+  { name: "Omar", userId: 1 },
+  { name: "Arya", userId: 2 },
+  { name: "Evelyn", userId: 3 },
 ] as const;
 
 export default internalMutation({

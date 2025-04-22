@@ -13,12 +13,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "convex": "catalog:",
     "@residency/eslint-config": "workspace:*",
-    "@residency/tsconfig": "workspace:*"
+    "@residency/tsconfig": "workspace:*",
+    "agora-token": "^2.0.4",
+    "convex": "catalog:",
+    "nanoid": "^5.1.5"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@residency/tsconfig": "workspace:*"
+    "@residency/tsconfig": "workspace:*",
+    "@types/node": "^22.14.1",
+    "typescript": "catalog:"
   }
 }

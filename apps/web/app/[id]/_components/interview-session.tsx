@@ -24,8 +24,8 @@ export const InterviewSession = (props: { user: Doc<"users"> }) => {
 
         <p className="text-md text-gray-800">
           Welcome to your first round interview for The Residency! This will be
-          a 15 minute call with <span className="font-bold">Res</span>, our
-          residental AI interviewer. The call will take ~15 minutes. MORE
+          a 15 minute call with <span className="font-bold">Visionary</span>,
+          our residental AI interviewer. The call will take ~15 minutes. MORE
           STUFF...
         </p>
         <Button size="sm">Start Interview</Button>

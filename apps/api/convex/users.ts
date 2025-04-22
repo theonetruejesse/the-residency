@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { generateUserId } from "./helpers/utils";
 
 export const list = query({
   args: {},
@@ -11,22 +12,26 @@ export const list = query({
 });
 
 export const getUser = query({
-  args: { tokenIdentifier: v.string() },
-  handler: async (ctx, { tokenIdentifier }) => {
-    // Get user by token identifier using the by_token index
+  args: { userId: v.number() },
+  handler: async (ctx, { userId }) => {
     const user = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", tokenIdentifier))
+      .withIndex("by_user_id", (q) => q.eq("userId", userId))
       .unique();
 
     return user;
   },
 });
 
-export const create = mutation({
-  args: { name: v.string(), tokenIdentifier: v.string(), active: v.boolean() },
-  handler: async (ctx, { name, tokenIdentifier, active }) => {
-    // Create a new user
-    await ctx.db.insert("users", { name, tokenIdentifier, active });
+export const createUser = mutation({
+  args: { name: v.string(), userId: v.optional(v.number()) },
+  handler: async (ctx, { name, userId }) => {
+    const id = userId ?? generateUserId();
+    await ctx.db.insert("users", { name, userId: id });
   },
 });
+
+// export const createSession = mutation({
+//   args: { userId: v.number() },
+//   handler: async (ctx, { userId }) => {},
+// });
