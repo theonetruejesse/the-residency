@@ -1,6 +1,6 @@
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import { api, Id } from "@residency/api";
-import { InterviewSession } from "./_components/interview-session";
+import { SessionRouter } from "./_components/session-router";
 import { redirect } from "next/navigation";
 import { RESIDENCY_URL } from "@/lib/constants";
 
@@ -21,5 +21,5 @@ export default async function Page({
     userId: user._id,
   });
 
-  return <InterviewSession user={user} initialSession={initialSession} />;
+  return <SessionRouter user={user} initialSession={initialSession} />;
 }

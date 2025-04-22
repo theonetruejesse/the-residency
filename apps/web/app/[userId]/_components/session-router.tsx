@@ -5,22 +5,21 @@ import { Button } from "@residency/ui/components/button";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Preloaded, useAction, usePreloadedQuery } from "convex/react";
-
+import { SessionSetup } from "./session-setup";
 interface InterviewSessionProps {
   user: Doc<"users">;
   initialSession: Preloaded<typeof api.users.getSession>;
 }
-export const InterviewSession = (props: InterviewSessionProps) => {
+export const SessionRouter = (props: InterviewSessionProps) => {
   const { user, initialSession } = props;
 
   const session = usePreloadedQuery(initialSession);
 
   if (!session) return <StartSession user={user} />;
 
-  if (session && !session.active)
-    return <InactiveSession userName={user.name} />;
+  if (!session.active) return <InactiveSession userName={user.name} />;
 
-  return <div>Active Session!</div>;
+  return <SessionSetup session={session} />;
 };
 
 const InactiveSession = (props: { userName: string }) => {
