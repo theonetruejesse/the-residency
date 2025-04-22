@@ -2,6 +2,8 @@
 
 import { api, Doc } from "@residency/api";
 import { Button } from "@residency/ui/components/button";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Preloaded, useAction, usePreloadedQuery } from "convex/react";
 
 interface InterviewSessionProps {
@@ -37,7 +39,7 @@ const StartSession = (props: { user: Doc<"users"> }) => {
 
   const createSession = useAction(api.users.createSession);
 
-  console.log("createSession", createSession);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="flex items-center justify-center min-h-svh">
@@ -50,8 +52,22 @@ const StartSession = (props: { user: Doc<"users"> }) => {
           our residental AI interviewer. The call will take ~15 minutes. MORE
           STUFF...
         </p>
-        <Button size="sm" onClick={() => createSession({ userId: user._id })}>
-          Start Interview
+        <Button
+          size="sm"
+          onClick={() => {
+            setIsLoading(true);
+            createSession({ userId: user._id });
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="animate-spin" />
+              Starting Interview...
+            </>
+          ) : (
+            "Start Interview"
+          )}
         </Button>
       </div>
     </div>
