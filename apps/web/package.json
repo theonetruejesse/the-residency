@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@11labs/react": "^0.1.3",
     "@residency/api": "workspace:*",
     "@residency/ui": "workspace:*",
     "convex": "catalog:",

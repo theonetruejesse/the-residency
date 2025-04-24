@@ -9,9 +9,25 @@ catalogs:
     convex:
       specifier: ^1.23.0
       version: 1.23.0
+    lucide-react:
+      specifier: ^0.475.0
+      version: 0.475.0
     typescript:
       specifier: ^5.8.2
       version: 5.8.3
+  react19:
+    '@types/react':
+      specifier: ^19.0.0
+      version: 19.1.2
+    '@types/react-dom':
+      specifier: ^19.0.0
+      version: 19.1.2
+    react:
+      specifier: 19.0.0
+      version: 19.0.0
+    react-dom:
+      specifier: 19.0.0
+      version: 19.0.0
 
 importers:
 
@@ -57,6 +73,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@11labs/react':
+        specifier: ^0.1.3
+        version: 0.1.3(react@19.0.0)
       '@residency/api':
         specifier: workspace:*
         version: link:../api
@@ -204,6 +223,14 @@ importers:
   tooling/tsconfig: {}
 
 packages:
+
+  '@11labs/client@0.1.3':
+    resolution: {integrity: sha512-Mvr+jau4bNq74Sm/e7pyu4pW7mkJGn7g4gfPQw0TH4RgSlCOeU355ZZ1Y/1w8U2OqUU2kV5qnLBG3yqOJn1QjA==}
+
+  '@11labs/react@0.1.3':
+    resolution: {integrity: sha512-1cQ+JcTglEnHpL3bqmnj8XrTNyBrSO8wP1r4bKXYlzrkN/XMBRSq4Uisewv3SgwGBMUVkB1Ll/gA19VVmCoABg==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
@@ -2568,6 +2595,13 @@ packages:
     resolution: {integrity: sha512-HhY1oqzWCQWuUqvBFnsyrtZRhyPeR7SUGv+C4+MsisMuVfSPx8HpwWqH8tRahSlt6M3PiFAcoeFhZAqIXTxoSg==}
 
 snapshots:
+
+  '@11labs/client@0.1.3': {}
+
+  '@11labs/react@0.1.3(react@19.0.0)':
+    dependencies:
+      '@11labs/client': 0.1.3
+      react: 19.0.0
 
   '@alloc/quick-lru@5.2.0': {}
 
