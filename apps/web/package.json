@@ -14,7 +14,6 @@
   "dependencies": {
     "@residency/api": "workspace:*",
     "@residency/ui": "workspace:*",
-    "agora-rtc-react": "^2.4.0",
     "convex": "catalog:",
     "lucide-react": "catalog:",
     "next": "^15.3.1",

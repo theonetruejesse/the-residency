@@ -48,14 +48,18 @@ export const createSession = action({
 
     if (!user) throw new Error("User not found");
 
-    const tokenData = await ctx.runAction(internal.token.generateToken, {});
+    const sessionData = await ctx.runAction(
+      internal.actions.generateSessionUrl,
+      {}
+    );
+
+    if (!sessionData.sessionUrl)
+      throw new Error("Failed to generate session URL");
 
     await ctx.runMutation(internal.users.generateSession, {
       userId: args.userId,
       active: true,
-      sessionId: tokenData.sessionId,
-      sessionToken: tokenData.rtcToken,
-      expiresAt: tokenData.expiresAt,
+      sessionUrl: sessionData.sessionUrl,
     });
   },
 });
@@ -64,9 +68,7 @@ export const generateSession = internalMutation({
   args: {
     userId: v.id("users"),
     active: v.boolean(),
-    sessionId: v.number(),
-    sessionToken: v.string(),
-    expiresAt: v.number(),
+    sessionUrl: v.string(),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("sessions", {

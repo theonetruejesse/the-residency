@@ -15,7 +15,6 @@
   "dependencies": {
     "@residency/eslint-config": "workspace:*",
     "@residency/tsconfig": "workspace:*",
-    "agora-token": "^2.0.4",
     "convex": "catalog:",
     "nanoid": "^5.1.5"
   },
