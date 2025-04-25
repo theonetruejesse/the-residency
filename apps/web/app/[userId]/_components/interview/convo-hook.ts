@@ -43,7 +43,7 @@ export function useConvo(props: InterviewProps) {
       const conversationId = await conversation.startSession({
         signedUrl: session.sessionUrl,
         dynamicVariables: {
-          user_name: user.name,
+          user_name: user.firstName,
         },
       });
       console.log(conversationId);

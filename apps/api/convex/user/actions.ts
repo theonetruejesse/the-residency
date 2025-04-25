@@ -1,7 +1,7 @@
 "use node";
 
 import { v } from "convex/values";
-import { internalAction } from "./_generated/server.js";
+import { internalAction } from "../_generated/server";
 
 const ELEVEN_LABS_AGENT_ID = process.env.ELEVEN_LABS_AGENT_ID;
 const ELEVEN_LABS_API_KEY = process.env.ELEVEN_LABS_API_KEY;
