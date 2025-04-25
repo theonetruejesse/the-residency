@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { internal } from "../_generated/api";
-import { MISSIONS } from "../schema";
+import { MISSION } from "../schema";
 
 // only exposed mutation for creating a user
 
@@ -9,7 +9,7 @@ export const intakeForm = mutation({
   args: {
     firstName: v.string(),
     lastName: v.string(),
-    ...MISSIONS,
+    ...MISSION,
   },
   handler: async (ctx, args) => {
     const userId = await ctx.runMutation(internal.user.users.createUser, {

@@ -14,7 +14,7 @@ export const STATUSES = v.union(
   v.literal("rejected")
 );
 
-export const BACKGROUNDS = {
+export const BACKGROUND = {
   gender: v.string(),
   email: v.string(),
   phoneNumber: v.string(),
@@ -23,14 +23,14 @@ export const BACKGROUNDS = {
   referrals: v.optional(v.string()),
 };
 
-export const LINKS = {
+export const LINK = {
   twitter: v.optional(v.string()),
   linkedin: v.optional(v.string()),
   github: v.optional(v.string()),
   website: v.optional(v.string()), // todo, array of url + description
 };
 
-export const MISSIONS = {
+export const MISSION = {
   interest: v.string(),
   accomplishment: v.string(),
 };
@@ -48,19 +48,19 @@ export default defineSchema({
   // user background info
   backgrounds: defineTable({
     userId: v.id("users"),
-    ...BACKGROUNDS,
+    ...BACKGROUND,
   }).index("by_user_id", ["userId"]),
 
   // user social media links
   links: defineTable({
     userId: v.id("users"),
-    ...LINKS,
+    ...LINK,
   }).index("by_user_id", ["userId"]),
 
   // focus for the first round interview
   missions: defineTable({
     userId: v.id("users"),
-    ...MISSIONS,
+    ...MISSION,
   }).index("by_user_id", ["userId"]),
 
   // first round interview sessions
