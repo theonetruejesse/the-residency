@@ -20,7 +20,7 @@ export const SessionRouter = (props: SessionRouterProps) => {
 
   if (!session.active) return <InactiveSession userName={user.name} />;
 
-  return <Interview session={session} />;
+  return <Interview session={session} user={user} />;
 };
 
 const InactiveSession = (props: { userName: string }) => {
