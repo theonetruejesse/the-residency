@@ -10,9 +10,11 @@ export const listUsers = query({
 });
 
 export const getUser = query({
-  args: { userId: v.id("users") },
+  args: { userId: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.userId);
+    const documentId = ctx.db.normalizeId("users", args.userId);
+    if (!documentId) return null;
+    return await ctx.db.get(documentId);
   },
 });
 

@@ -11,9 +11,6 @@ export const generateSessionUrl = internalAction({
     sessionUrl: v.union(v.string(), v.null()),
   }),
   handler: async (_ctx, _args) => {
-    console.log("ELEVEN_LABS_AGENT_ID", ELEVEN_LABS_AGENT_ID);
-    console.log("ELEVEN_LABS_API_KEY", ELEVEN_LABS_API_KEY);
-
     if (!ELEVEN_LABS_AGENT_ID || !ELEVEN_LABS_API_KEY) {
       throw new Error("Eleven Labs credentials not configured");
     }

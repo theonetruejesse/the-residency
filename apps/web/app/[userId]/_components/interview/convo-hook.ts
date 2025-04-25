@@ -17,6 +17,22 @@ async function requestMicrophonePermission() {
 export function useConvo(props: InterviewProps) {
   const { session, user } = props;
 
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log("connected");
+    },
+    onDisconnect: () => {
+      console.log("disconnected");
+    },
+    onError: (error) => {
+      console.log(error);
+      alert("An error occurred during the conversation");
+    },
+    onMessage: (message) => {
+      console.log(message);
+    },
+  });
+
   async function startConversation() {
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) {
@@ -36,22 +52,6 @@ export function useConvo(props: InterviewProps) {
       alert("Failed to start conversation. Please check the console.");
     }
   }
-
-  const conversation = useConversation({
-    onConnect: () => {
-      console.log("connected");
-    },
-    onDisconnect: () => {
-      console.log("disconnected");
-    },
-    onError: (error) => {
-      console.log(error);
-      alert("An error occurred during the conversation");
-    },
-    onMessage: (message) => {
-      console.log(message);
-    },
-  });
 
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
