@@ -9,7 +9,7 @@ import { Interview } from "./interview";
 
 interface SessionRouterProps {
   user: Doc<"users">;
-  initialSession: Preloaded<typeof api.users.getSession>;
+  initialSession: Preloaded<typeof api.user.session.getSession>;
 }
 export const SessionRouter = (props: SessionRouterProps) => {
   const { user, initialSession } = props;
@@ -18,7 +18,7 @@ export const SessionRouter = (props: SessionRouterProps) => {
 
   if (!session) return <StartSession user={user} />;
 
-  if (!session.active) return <InactiveSession userName={user.name} />;
+  if (!session.active) return <InactiveSession userName={user.firstName} />;
 
   return <Interview session={session} user={user} />;
 };
@@ -37,14 +37,14 @@ const InactiveSession = (props: { userName: string }) => {
 const StartSession = (props: { user: Doc<"users"> }) => {
   const { user } = props;
 
-  const createSession = useAction(api.users.createSession);
+  const createSession = useAction(api.user.session.createSession);
 
   const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="flex items-center justify-center min-h-svh">
       <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Hi {user.name}!</h1>
+        <h1 className="text-2xl font-bold">Hi {user.firstName}!</h1>
 
         <p className="text-md text-gray-800">
           Welcome to your first round interview for The Residency! This will be

@@ -11,13 +11,13 @@ export default async function Page({
 }) {
   const { userId } = await params;
 
-  const user = await fetchQuery(api.users.getUser, {
+  const user = await fetchQuery(api.user.users.getUser, {
     userId,
   });
 
   if (!user) redirect(RESIDENCY_URL);
 
-  const initialSession = await preloadQuery(api.users.getSession, {
+  const initialSession = await preloadQuery(api.user.session.getSession, {
     userId: user._id,
   });
 

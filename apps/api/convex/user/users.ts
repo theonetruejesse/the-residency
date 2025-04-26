@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation, internalMutation } from "../_generated/server.js";
+import { query, internalMutation } from "../_generated/server.js";
 import { ROUNDS, STATUSES } from "../schema.js";
 
 export const listUsers = query({
