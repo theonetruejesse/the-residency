@@ -11,15 +11,17 @@ export default async function Page({
 }) {
   const { userId } = await params;
 
-  const user = await fetchQuery(api.user.users.getUser, {
+  const applicant = await fetchQuery(api.user.application.getApplicant, {
     userId,
   });
 
-  if (!user) redirect(RESIDENCY_URL);
+  if (!applicant) redirect(RESIDENCY_URL);
 
   const initialSession = await preloadQuery(api.user.session.getSession, {
-    userId: user._id,
+    userId: applicant.user._id,
   });
 
-  return <SessionRouter user={user} initialSession={initialSession} />;
+  return (
+    <SessionRouter applicant={applicant} initialSession={initialSession} />
+  );
 }

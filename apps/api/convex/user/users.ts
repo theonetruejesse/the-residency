@@ -1,16 +1,22 @@
+// internal queries and mutations for user data
+// keep these internal to reduce chances of data leakage
+// TODO: simple service-repo pattern
+
 import { v } from "convex/values";
-import { query, internalMutation } from "../_generated/server.js";
+import { internalMutation, internalQuery } from "../_generated/server.js";
 import { ROUNDS, STATUSES } from "../schema.js";
+import { internal } from "../_generated/api.js";
 
-export const listUsers = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("users").collect();
-  },
-});
+// TODO: needs authentication
+// export const listUsers = query({
+//   args: {},
+//   handler: async (ctx) => {
+//     return await ctx.db.query("users").collect();
+//   },
+// });
 
-export const getUser = query({
-  args: { userId: v.string() },
+export const getUser = internalQuery({
+  args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     const documentId = ctx.db.normalizeId("users", args.userId);
     if (!documentId) return null;
@@ -18,6 +24,15 @@ export const getUser = query({
   },
 });
 
+export const getMission = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("missions")
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .unique();
+  },
+});
 export const createUser = internalMutation({
   args: {
     firstName: v.string(),

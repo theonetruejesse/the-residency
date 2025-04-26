@@ -15,7 +15,7 @@ interface ResidencyFormProps {
 }
 
 export function ResidencyForm({ setUserId }: ResidencyFormProps) {
-  const submitApplication = useMutation(api.user.intake.submitApplication);
+  const submitIntake = useMutation(api.user.application.submitIntake);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -37,7 +37,7 @@ export function ResidencyForm({ setUserId }: ResidencyFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
-    const userId = await submitApplication(formData);
+    const userId = await submitIntake(formData);
     setUserId(userId);
   };
 

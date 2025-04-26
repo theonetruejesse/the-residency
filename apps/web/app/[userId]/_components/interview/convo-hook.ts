@@ -15,7 +15,7 @@ async function requestMicrophonePermission() {
 }
 
 export function useConvo(props: InterviewProps) {
-  const { session, user } = props;
+  const { session, applicant } = props;
 
   const conversation = useConversation({
     onConnect: () => {
@@ -43,7 +43,7 @@ export function useConvo(props: InterviewProps) {
       const conversationId = await conversation.startSession({
         signedUrl: session.sessionUrl,
         dynamicVariables: {
-          user_name: user.firstName,
+          user_name: applicant.user.firstName,
         },
       });
       console.log(conversationId);

@@ -8,19 +8,20 @@ import { Preloaded, useAction, usePreloadedQuery } from "convex/react";
 import { Interview } from "./interview";
 
 interface SessionRouterProps {
-  user: Doc<"users">;
+  applicant: { user: Doc<"users">; mission: Doc<"missions"> };
   initialSession: Preloaded<typeof api.user.session.getSession>;
 }
 export const SessionRouter = (props: SessionRouterProps) => {
-  const { user, initialSession } = props;
+  const { applicant, initialSession } = props;
 
   const session = usePreloadedQuery(initialSession);
 
-  if (!session) return <StartSession user={user} />;
+  if (!session) return <StartSession user={applicant.user} />;
 
-  if (!session.active) return <InactiveSession userName={user.firstName} />;
+  if (!session.active)
+    return <InactiveSession userName={applicant.user.firstName} />;
 
-  return <Interview session={session} user={user} />;
+  return <Interview session={session} applicant={applicant} />;
 };
 
 const InactiveSession = (props: { userName: string }) => {

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { api, internal } from "../_generated/api";
+import { internal } from "../_generated/api";
 import { query, action, internalMutation } from "../_generated/server";
 
 export const getSession = query({
@@ -17,7 +17,7 @@ export const createSession = action({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.runQuery(api.user.users.getUser, {
+    const user = await ctx.runQuery(internal.user.users.getUser, {
       userId: args.userId,
     });
 
@@ -31,7 +31,7 @@ export const createSession = action({
     if (!sessionData.sessionUrl)
       throw new Error("Failed to generate session URL");
 
-    await ctx.runMutation(internal.user.session.generateSession, {
+    await ctx.runMutation(internal.user.session.insertSession, {
       userId: args.userId,
       active: true,
       sessionUrl: sessionData.sessionUrl,
@@ -39,7 +39,7 @@ export const createSession = action({
   },
 });
 
-export const generateSession = internalMutation({
+export const insertSession = internalMutation({
   args: {
     userId: v.id("users"),
     active: v.boolean(),
