@@ -5,6 +5,7 @@ import { ResidencyForm } from "./_components/intake-form";
 import { Button } from "@residency/ui/components/button";
 
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 export default function Page() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -21,6 +22,8 @@ export default function Page() {
 }
 
 const Submitted = (props: { userId: string }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   return (
     <div className="text-center glass h-[280px] flex flex-col px-16 items-center justify-center">
       <h1 className="text-5xl font-bold mb-4">
@@ -31,8 +34,22 @@ const Submitted = (props: { userId: string }) => {
       </p>
 
       {/* this will be removed for production */}
-      <Button size="lg" className="w-full mt-10 text-xl p-6">
-        <Link href={`/${props.userId}`}>Start Interview</Link>
+      <Button
+        size="lg"
+        className="w-full mt-10 text-xl p-6"
+        onClick={() => {
+          setIsLoading(true);
+        }}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="animate-spin" />
+            Approving Application...
+          </>
+        ) : (
+          <Link href={`/${props.userId}`}>Approve Application</Link>
+        )}
       </Button>
     </div>
   );

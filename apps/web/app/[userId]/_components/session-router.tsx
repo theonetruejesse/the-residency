@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Preloaded, useAction, usePreloadedQuery } from "convex/react";
 import { Interview } from "./interview";
+import { Card } from "@residency/ui/components/card";
+import { SessionCopy } from "./session-copy";
 
 interface SessionRouterProps {
   applicant: { user: Doc<"users">; mission: Doc<"missions"> };
@@ -44,17 +46,11 @@ const StartSession = (props: { user: Doc<"users"> }) => {
 
   return (
     <div className="flex items-center justify-center min-h-svh">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Hi {user.firstName}!</h1>
-
-        <p className="text-md text-gray-800">
-          Welcome to your first round interview for The Residency! This will be
-          a 15 minute call with <span className="font-bold">Visionary</span>,
-          our residental AI interviewer. The call will take ~15 minutes. MORE
-          STUFF...
-        </p>
+      <Card className="flex flex-col items-center justify-center gap-4 glass w-[900px] p-8">
+        <SessionCopy userName={user.firstName} />
         <Button
-          size="sm"
+          size="lg"
+          className="w-full text-xl p-6 mt-6"
           onClick={() => {
             setIsLoading(true);
             createSession({ userId: user._id });
@@ -70,7 +66,7 @@ const StartSession = (props: { user: Doc<"users"> }) => {
             "Start Interview"
           )}
         </Button>
-      </div>
+      </Card>
     </div>
   );
 };

@@ -11,8 +11,8 @@ import {
 import { cn } from "@residency/ui/lib/utils";
 import { useConvo } from "./convo-hook";
 import { Doc } from "@residency/api";
-import { BackgroundWave } from "@/components/assets/wave-background";
-import { ChaliceCup } from "@/components/assets/chalice-cup";
+import { BackgroundWave } from "@/app/[userId]/_components/assets/wave-background";
+import { ChaliceCup } from "@/app/[userId]/_components/assets/chalice-cup";
 export interface InterviewProps {
   session: Doc<"sessions">;
   applicant: { user: Doc<"users">; mission: Doc<"missions"> };
@@ -26,7 +26,7 @@ export function Interview(props: InterviewProps) {
     <>
       <BackgroundWave />
       <ChaliceCup />
-      <div className={"flex justify-center items-center gap-x-4"}>
+      {/* <div className={"flex justify-center items-center gap-x-4"}>
         <Card className={"rounded-3xl"}>
           <CardContent>
             <CardHeader>
@@ -71,7 +71,7 @@ export function Interview(props: InterviewProps) {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </>
   );
 }
