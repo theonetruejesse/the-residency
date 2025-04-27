@@ -127,7 +127,7 @@
 }
 
 /* Orb Styling */
-.orb {
+/* .orb {
   width: 180px;
   height: 180px;
   border-radius: 50%;
@@ -154,10 +154,10 @@
     rgba(150, 150, 150, 0.6),
     rgba(100, 100, 100, 0.4)
   );
-}
+} */
 
 /* Inner Gradient Layer for Waving Effect */
-.orb::before {
+/* .orb::before {
   content: "";
   position: absolute;
   top: -50%;
@@ -167,7 +167,7 @@
 
   border-radius: 50%;
   animation: wave-motion 6s infinite linear;
-}
+} */
 
 /* Glassmorphism */
 .glass {

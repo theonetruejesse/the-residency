@@ -29,7 +29,6 @@ const ChaliceCup = () => {
   );
 };
 
-// outline of the chalice content; for potion effect
 const ChalicePotion = (props: { isActivated: boolean }) => {
   const clipPathId = "chalicePotionClipPath";
   const blurFilterId = "potionBlurFilter"; // ID for the blur filter

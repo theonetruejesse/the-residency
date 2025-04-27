@@ -60,10 +60,10 @@ const StartSession = (props: { user: Doc<"users"> }) => {
           {isLoading ? (
             <>
               <Loader2 className="animate-spin" />
-              Starting Interview...
+              Joining Interview...
             </>
           ) : (
-            "Start Interview"
+            "Join Interview"
           )}
         </Button>
       </Card>
