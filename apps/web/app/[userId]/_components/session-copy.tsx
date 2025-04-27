@@ -9,18 +9,17 @@ export const SessionCopy = (props: { userName: string }) => {
         <p>This is your first round interview for The Residency.</p>
         <p>
           We’ve designed this conversation to feel like a day in the life at The
-          Residency: casual yet technical. Think of it as an open chat with a
-          smart, genuinely curious peer—someone eager to hear about your
-          research journey, what drives you, and the ideas you’re most
+          Residency: casual yet technical. Think of this interview as a coffee
+          chat with a smart, genuinely curious peer—someone eager to hear about
+          your research journey, what drives you, and the ideas you’re most
           passionate about.
         </p>
         <p>
           Our AI interviewer will guide the conversation based on our program’s
-          criteria, so you can simply focus on sharing what excites you. The
-          Chalice Chat is structured to give you plenty of space to talk about
-          your interests and experiences. Most importantly, we want you to enjoy
-          a delightful conversation where you’re free to nerd out as much as
-          you’d like.
+          criteria, so just focus on sharing what excites you. Chalice Chat is
+          designed to give you plenty of space to discuss your interests and
+          experiences. Most importantly, we want you to enjoy a delightful
+          conversation where you’re free to nerd out as much as you’d like.
         </p>
       </div>
 

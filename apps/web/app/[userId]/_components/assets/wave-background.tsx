@@ -19,7 +19,7 @@ export const BackgroundWave = (props: { isActivated: boolean }) => {
             muted
             loop
             controls={false}
-            className="fixed grayscale object-cover bottom-[-130px] z-[-1] w-full h-full pointer-events-none"
+            className="fixed grayscale object-cover bottom-[-100px] z-[-1] w-full h-full pointer-events-none"
           />
         </motion.div>
       )}

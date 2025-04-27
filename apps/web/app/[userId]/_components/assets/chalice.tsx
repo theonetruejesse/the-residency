@@ -37,7 +37,7 @@ const ChalicePotion = (props: { isActivated: boolean }) => {
     <AnimatePresence>
       {props.isActivated && (
         <motion.div
-          className="relative right-8 top-1"
+          className="relative right-8"
           style={{ filter: "drop-shadow(0 0 2px white)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
