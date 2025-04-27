@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@residency/ui", "@residency/api"],
+  experimental: {
+    reactCompiler: true,
+  },
   images: {
     remotePatterns: [
       {
