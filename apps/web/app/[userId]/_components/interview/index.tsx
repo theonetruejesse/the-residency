@@ -26,7 +26,7 @@ export function Interview(props: InterviewProps) {
       <div className="relative w-full max-w-xl mx-auto mb-8">
         <Card className="relative w-full h-60 overflow-visible glass">
           <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-[85%] z-30  h-[70vh] w-[110%]">
-            <Chalice isActivated={isConnected} />
+            <Chalice isActivated={isConnected} isSpeaking={isSpeaking} />
           </div>
 
           <div className="absolute bottom-8 left-0 right-0 z-20 px-10">

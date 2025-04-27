@@ -2,13 +2,21 @@ import { POTION_VIDEO_URL, CHALICE_IMG_URL } from "@/lib/constants";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 
-export const Chalice = (props: { isActivated: boolean }) => {
+interface ChaliceProps {
+  isActivated: boolean;
+  isSpeaking: boolean;
+}
+
+export const Chalice = (props: ChaliceProps) => {
   return (
     // This outer div handles the overall positioning and sizing
     <div className="w-full h-full relative left-5">
       {/* Position the potion absolutely within the container */}
       <div className="absolute left-1/2 -translate-x-1/2 z-10">
-        <ChalicePotion isActivated={props.isActivated} />
+        <ChalicePotion
+          isActivated={props.isActivated}
+          isSpeaking={props.isSpeaking}
+        />
       </div>
       <ChaliceCup />
     </div>
@@ -29,9 +37,11 @@ const ChaliceCup = () => {
   );
 };
 
-const ChalicePotion = (props: { isActivated: boolean }) => {
+const ChalicePotion = (props: ChaliceProps) => {
   const clipPathId = "chalicePotionClipPath";
   const blurFilterId = "potionBlurFilter"; // ID for the blur filter
+
+  const potionOpacity = props.isSpeaking ? 1 : 0.5;
 
   return (
     <AnimatePresence>
@@ -40,7 +50,7 @@ const ChalicePotion = (props: { isActivated: boolean }) => {
           className="relative right-8"
           style={{ filter: "drop-shadow(0 0 2px white)" }}
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: potionOpacity }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.7 }}
         >
