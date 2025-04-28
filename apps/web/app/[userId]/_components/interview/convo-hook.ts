@@ -44,6 +44,8 @@ export function useConvo(props: InterviewProps) {
         signedUrl: session.sessionUrl,
         dynamicVariables: {
           user_name: applicant.user.firstName,
+          user_interest: applicant.mission.interest,
+          user_accomplishment: applicant.mission.accomplishment,
         },
       });
       console.log(conversationId);

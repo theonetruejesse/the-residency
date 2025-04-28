@@ -1,4 +1,4 @@
-export const SessionCopy = (props: { userName: string }) => {
+export const ChaliceChatCopy = (props: { userName: string }) => {
   return (
     <div className="flex flex-col items-center gap-8">
       <h1 className="text-4xl font-bold">

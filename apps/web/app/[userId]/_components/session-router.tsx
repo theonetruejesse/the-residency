@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Preloaded, useAction, usePreloadedQuery } from "convex/react";
 import { Interview } from "./interview";
 import { Card } from "@residency/ui/components/card";
-import { SessionCopy } from "./session-copy";
+import { ChaliceChatCopy } from "./assets/chat-copy";
 
 interface SessionRouterProps {
   applicant: { user: Doc<"users">; mission: Doc<"missions"> };
@@ -47,7 +47,7 @@ const StartSession = (props: { user: Doc<"users"> }) => {
   return (
     <div className="flex items-center justify-center min-h-svh">
       <Card className="flex flex-col items-center justify-center gap-4 glass w-[900px] p-8">
-        <SessionCopy userName={user.firstName} />
+        <ChaliceChatCopy userName={user.firstName} />
         <Button
           size="lg"
           className="w-full text-xl p-6 mt-6"

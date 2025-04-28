@@ -11,7 +11,6 @@ const nextConfig = {
         hostname: "the-residency.ufs.sh",
         pathname: "/f/*",
       },
-      // todo, figure out if migration necessary
       {
         protocol: "https",
         hostname: "xaq0c80u7p.ufs.sh",
