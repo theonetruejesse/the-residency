@@ -10,11 +10,7 @@ interface ChaliceProps {
 export const Chalice = (props: ChaliceProps) => {
   return (
     <div className="relative chalice">
-      <ChalicePotion
-        // {...props}
-        isActivated={true}
-        isSpeaking={true}
-      />
+      <ChalicePotion {...props} />
       <ChaliceCup />
     </div>
   );

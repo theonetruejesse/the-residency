@@ -23,7 +23,7 @@ export function Interview(props: InterviewProps) {
 
   return (
     <div className="absolute bottom-0 left-0 right-0 flex flex-col justify-center items-center interview-container">
-      <BackgroundWave isActivated={true} />
+      <BackgroundWave isActivated={isConnected} />
       <div className="w-full flex flex-col justify-center items-center">
         <div className="flex justify-center items-end chalice-base">
           <Chalice isActivated={isConnected} isSpeaking={isSpeaking} />
