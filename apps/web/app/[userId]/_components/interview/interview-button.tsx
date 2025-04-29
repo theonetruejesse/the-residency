@@ -55,13 +55,13 @@ export function InterviewButton({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isConnected, stopConversation]);
+  }, [isConnected]);
 
-  // Format time as MM:SS
+  // Format time as (MM:SS)
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+    return `(${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")})`;
   };
 
   // Handle button click
@@ -102,7 +102,7 @@ export function InterviewButton({
         {isConnected ? (
           <span className="flex items-center justify-center">
             End Interview
-            <span className="ml-2 text-muted-foreground font-mono tabular-nums">
+            <span className="ml-3 text-muted-foreground font-mono tabular-nums">
               {formatTime(timeLeft)}
             </span>
           </span>
