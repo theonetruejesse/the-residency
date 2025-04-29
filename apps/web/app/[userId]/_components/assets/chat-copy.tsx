@@ -10,9 +10,9 @@ export const ChaliceChatCopy = (props: { userName: string }) => {
         <p>
           We've designed this conversation to feel like a day in the life at The
           Residency: casual yet technical. Think of this interview as a coffee
-          chat with a smart, genuinely curious peer—someone eager to hear about
-          your research journey, what drives you, and the ideas you're most
-          passionate about.
+          chat that doesn't drain your energy. Instead, we're eager to hear
+          about your technical journey, what drives you, and the ideas you're
+          currently the most passionate about.
         </p>
         <p>
           Our AI interviewer will guide the conversation based on our program's
@@ -49,7 +49,6 @@ export const ChaliceChatCopy = (props: { userName: string }) => {
           </li>
         </ul>
       </div>
-
       <div className="flex flex-col items-start w-full">
         <p className="text-md text-gray-800">
           We're excited to get a glimpse into your journey during our Chalice
