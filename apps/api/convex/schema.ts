@@ -66,7 +66,18 @@ export default defineSchema({
   // first round interview sessions
   sessions: defineTable({
     userId: v.id("users"),
+    missionId: v.id("missions"),
     active: v.boolean(),
-    sessionUrl: v.string(), // expires in 15 minutes
+    firstQuestion: v.string(), // first question of the interview; ai generated using the user's mission
+    sessionUrl: v.optional(v.string()), // expires in 15 minutes; used for denoting which users joined the interview
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_mission_id", ["missionId"]),
+
+  // first round interview evaluation; webhook from elevenlabs
+  grades: defineTable({
+    userId: v.id("users"),
+    conversationId: v.string(),
+    feedback: v.string(),
   }).index("by_user_id", ["userId"]),
 });

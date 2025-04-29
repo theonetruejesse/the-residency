@@ -13,9 +13,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/genai": "^0.10.0",
     "@residency/eslint-config": "workspace:*",
     "@residency/tsconfig": "workspace:*",
     "convex": "catalog:",
+    "elevenlabs": "^1.57.0",
     "nanoid": "^5.1.5"
   },
   "devDependencies": {

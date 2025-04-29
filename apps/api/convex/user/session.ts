@@ -1,8 +1,7 @@
 import { v } from "convex/values";
-import { internal } from "../_generated/api";
-import { query, action, internalMutation } from "../_generated/server";
+import { internalQuery, internalMutation } from "../_generated/server";
 
-export const getSession = query({
+export const getSession = internalQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     return await ctx.db
@@ -12,42 +11,30 @@ export const getSession = query({
   },
 });
 
-export const createSession = action({
+export const createSession = internalMutation({
   args: {
     userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.user.users.getUser, {
-      userId: args.userId,
-    });
-
-    if (!user) throw new Error("User not found");
-
-    const sessionData = await ctx.runAction(
-      internal.user.actions.generateSessionUrl,
-      {}
-    );
-
-    if (!sessionData.sessionUrl)
-      throw new Error("Failed to generate session URL");
-
-    await ctx.runMutation(internal.user.session.insertSession, {
-      userId: args.userId,
-      active: true,
-      sessionUrl: sessionData.sessionUrl,
-    });
-  },
-});
-
-export const insertSession = internalMutation({
-  args: {
-    userId: v.id("users"),
+    missionId: v.id("missions"),
     active: v.boolean(),
-    sessionUrl: v.string(),
+    firstQuestion: v.string(),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("sessions", {
       ...args,
+    });
+  },
+});
+
+export const updateSession = internalMutation({
+  args: {
+    sessionId: v.id("sessions"),
+    sessionUrl: v.optional(v.string()),
+    active: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.sessionId, {
+      sessionUrl: args.sessionUrl,
+      active: args.active,
     });
   },
 });

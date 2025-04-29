@@ -1,10 +1,10 @@
 import { v } from "convex/values";
-import { mutation, query } from "../_generated/server";
-import { internal } from "../_generated/api";
+import { action, mutation, query } from "../_generated/server";
+import { api, internal } from "../_generated/api";
 import { MISSION } from "../schema";
 import { Id, Doc } from "../_generated/dataModel";
 
-// only exposed mutation for creating a user
+// only exposed functions for the application
 
 export const submitIntake = mutation({
   args: {
@@ -35,6 +35,102 @@ export const submitIntake = mutation({
     // todo, rest of the intake form
 
     return userId;
+  },
+});
+
+// assume we are approving the intake; todo, update later
+export const approveIntake = action({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const applicant = await ctx.runQuery(api.user.application.getApplicant, {
+      userId: args.userId,
+    });
+    if (!applicant) throw new Error("Applicant not found");
+
+    const { user, mission } = applicant;
+
+    await ctx.runMutation(internal.user.users.updateUser, {
+      userId: user._id,
+      status: user.status,
+      round: "first_round",
+    });
+
+    const generate = await ctx.runAction(
+      internal.user.actions.generateFirstQuestion,
+      {
+        interest: mission.interest,
+        accomplishment: mission.accomplishment,
+      }
+    );
+
+    if (!generate.firstQuestion)
+      throw new Error("Failed to generate first question");
+
+    await ctx.runMutation(internal.user.session.createSession, {
+      userId: user._id,
+      missionId: mission._id,
+      firstQuestion: generate.firstQuestion,
+      active: false,
+    });
+  },
+});
+export const joinCall = mutation({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+      userId: args.userId,
+    });
+    if (!session) throw new Error("Session not found");
+    await ctx.db.patch(session._id, {
+      active: true,
+    });
+  },
+});
+
+// creates the call url and update the session
+export const createCall = action({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+      userId: args.userId,
+    });
+    if (!session) throw new Error("Session not found");
+
+    const sessionData = await ctx.runAction(
+      internal.user.actions.generateSessionUrl,
+      {}
+    );
+    if (!sessionData.sessionUrl)
+      throw new Error("Failed to generate session URL");
+
+    await ctx.runMutation(internal.user.session.updateSession, {
+      sessionId: session._id,
+      sessionUrl: sessionData.sessionUrl,
+      active: true,
+    });
+
+    // todo, schedule to mark interview as inactive after 20 minutes
+  },
+});
+
+export const endCall = mutation({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+      userId: args.userId,
+    });
+    if (!session) throw new Error("Session not found");
+    await ctx.db.patch(session._id, {
+      active: false,
+    });
   },
 });
 
