@@ -95,7 +95,7 @@ export function InterviewButton({
     <>
       <Button
         variant={isConnected ? "secondary" : "outline"}
-        className="rounded-full w-full text-lg p-6"
+        className="rounded-full interview-button w-full"
         size="lg"
         onClick={handleButtonClick}
       >

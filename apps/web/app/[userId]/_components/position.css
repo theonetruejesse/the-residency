@@ -1,0 +1,115 @@
+/* css for positioning the interview page for various screen sizes */
+
+/* Base variables (desktop default; 1440px width) */
+:root {
+  --interview-container-height: 800px;
+  --wave-transform-y: -230px;
+  --interview-button-font-size: xxx-large;
+  --interview-card-width: 900px;
+  --chalice-cup-height: 1100px;
+  --interview-card-height: 350px;
+
+  /* relative variables */
+  --chalice-base-height: calc(var(--interview-card-height) * 0.543);
+  --interview-button-padding-y: 1.2em;
+  --chalice-base-transform-y: calc(var(--chalice-base-height) * 1.105);
+  --chalice-transform-x: calc(var(--chalice-cup-height) * 0.032);
+  --chalice-transform-y: calc(var(--chalice-cup-height) * 0.128);
+  --chalice-cup-width: calc(var(--chalice-cup-height) / 1.5);
+  --chalice-potion-transform-x: calc(var(--chalice-cup-height) * 0.091);
+  --chalice-potion-transform-y: calc(var(--chalice-cup-height) * 0.195);
+  --chalice-potion-width: calc(var(--chalice-cup-height) * 0.418);
+  --interview-button-container-padding: calc(
+    var(--interview-card-width) * 0.067
+  );
+}
+
+/* Laptop screens */
+@media (max-width: 1024px) {
+  :root {
+    --interview-container-height: 800px;
+    --wave-transform-y: -200px;
+    --interview-button-font-size: xx-large;
+    --interview-card-height: 300px;
+    --interview-card-width: 900px;
+    --chalice-cup-height: 900px;
+  }
+}
+
+/* Tablet screens */
+@media (max-width: 768px) {
+  :root {
+    --interview-container-height: 800px;
+    --wave-transform-y: -100px;
+    --interview-button-font-size: x-large;
+    --interview-card-height: 250px;
+    --interview-card-width: 500px;
+    --chalice-cup-height: 800px;
+  }
+}
+
+/* Mobile screens */
+@media (max-width: 480px) {
+  :root {
+    --interview-container-height: 800px;
+    --wave-transform-y: 10px;
+    --interview-button-font-size: large;
+    --interview-card-height: 200px;
+    --interview-card-width: 300px;
+    --chalice-cup-height: 600px;
+
+    --chalice-transform-x: calc(var(--chalice-cup-height) * 0.01);
+  }
+}
+
+.interview-container {
+  height: var(--interview-container-height);
+}
+
+.wave-container {
+  z-index: -1;
+}
+
+.wave {
+  transform: translateY(var(--wave-transform-y));
+}
+
+.interview-card {
+  height: var(--interview-card-height);
+  width: var(--interview-card-width);
+}
+
+.chalice-base {
+  height: var(--chalice-base-height);
+  transform: translateY(var(--chalice-base-transform-y));
+  z-index: 5;
+}
+
+.chalice {
+  transform: translateX(var(--chalice-transform-x))
+    translateY(var(--chalice-transform-y));
+}
+
+.chalice-cup {
+  height: var(--chalice-cup-height);
+  width: var(--chalice-cup-width);
+}
+
+.chalice-potion {
+  transform: translateX(var(--chalice-potion-transform-x))
+    translateY(var(--chalice-potion-transform-y));
+  width: var(--chalice-potion-width);
+  z-index: 11;
+}
+
+.interview-button-container {
+  z-index: 10;
+  padding-left: var(--interview-button-container-padding);
+  padding-right: var(--interview-button-container-padding);
+}
+
+.interview-button {
+  font-size: var(--interview-button-font-size);
+  padding-top: var(--interview-button-padding-y);
+  padding-bottom: var(--interview-button-padding-y);
+}

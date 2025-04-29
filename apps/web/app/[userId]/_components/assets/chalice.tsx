@@ -9,15 +9,12 @@ interface ChaliceProps {
 
 export const Chalice = (props: ChaliceProps) => {
   return (
-    // This outer div handles the overall positioning and sizing
-    <div className="w-full h-full relative left-5">
-      {/* Position the potion absolutely within the container */}
-      <div className="absolute left-1/2 -translate-x-1/2 z-10">
-        <ChalicePotion
-          isActivated={props.isActivated}
-          isSpeaking={props.isSpeaking}
-        />
-      </div>
+    <div className="relative chalice">
+      <ChalicePotion
+        // {...props}
+        isActivated={true}
+        isSpeaking={true}
+      />
       <ChaliceCup />
     </div>
   );
@@ -25,15 +22,16 @@ export const Chalice = (props: ChaliceProps) => {
 
 const ChaliceCup = () => {
   return (
-    <Image
-      src={CHALICE_IMG_URL}
-      alt="Chalice Cup"
-      height={1536}
-      width={1024}
-      // slight adjustment to the left to center the cup handle
-      className="h-full w-full object-cover"
-      priority
-    />
+    <div className="chalice-cup">
+      <Image
+        src={CHALICE_IMG_URL}
+        alt="Chalice Cup"
+        height={1536}
+        width={1024}
+        className="w-full h-full"
+        priority
+      />
+    </div>
   );
 };
 
@@ -41,13 +39,13 @@ const ChalicePotion = (props: ChaliceProps) => {
   const clipPathId = "chalicePotionClipPath";
   const blurFilterId = "potionBlurFilter"; // ID for the blur filter
 
-  const potionOpacity = props.isSpeaking ? 1 : 0.5;
+  const potionOpacity = props.isSpeaking ? 1 : 0.6;
 
   return (
     <AnimatePresence>
       {props.isActivated && (
         <motion.div
-          className="relative right-8"
+          className="absolute chalice-potion"
           style={{ filter: "drop-shadow(0 0 2px white)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: potionOpacity }}
@@ -55,8 +53,6 @@ const ChalicePotion = (props: ChaliceProps) => {
           transition={{ duration: 1.7 }}
         >
           <svg
-            width="385"
-            height="200"
             viewBox="0 0 122 20"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

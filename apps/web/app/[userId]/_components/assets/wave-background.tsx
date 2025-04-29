@@ -6,9 +6,9 @@ export const BackgroundWave = (props: { isActivated: boolean }) => {
     <AnimatePresence>
       {props.isActivated && (
         <motion.div
-          className="absolute inset-0 z-10"
+          className="relative w-full h-full inset-0 wave-container"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.5 }}
+          animate={{ opacity: 0.8 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.7 }}
           style={{ mixBlendMode: "multiply" }}
@@ -19,7 +19,7 @@ export const BackgroundWave = (props: { isActivated: boolean }) => {
             muted
             loop
             controls={false}
-            className="fixed grayscale object-cover bottom-[-100px] z-[-1] w-full h-full pointer-events-none"
+            className="fixed grayscale object-cover w-full h-full pointer-events-none wave"
           />
         </motion.div>
       )}

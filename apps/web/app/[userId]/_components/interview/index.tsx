@@ -1,5 +1,7 @@
 "use client";
 
+import "../position.css";
+
 import * as React from "react";
 import { Card } from "@residency/ui/components/card";
 import { useConvo } from "./convo-hook";
@@ -20,16 +22,14 @@ export function Interview(props: InterviewProps) {
   const isConnected = status === "connected";
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-end relative overflow-hidden">
-      <BackgroundWave isActivated={isConnected} />
-
-      <div className="relative w-full max-w-xl mx-auto mb-8">
-        <Card className="relative w-full h-60 overflow-visible glass">
-          <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-[85%] z-30  h-[70vh] w-[110%]">
-            <Chalice isActivated={isConnected} isSpeaking={isSpeaking} />
-          </div>
-
-          <div className="absolute bottom-8 left-0 right-0 z-20 px-10">
+    <div className="absolute bottom-0 left-0 right-0 flex flex-col justify-center items-center interview-container">
+      <BackgroundWave isActivated={true} />
+      <div className="w-full flex flex-col justify-center items-center">
+        <div className="flex justify-center items-end chalice-base">
+          <Chalice isActivated={isConnected} isSpeaking={isSpeaking} />
+        </div>
+        <Card className="interview-card glass flex flex-col justify-end mb-5">
+          <div className="interview-button-container w-full justify-center flex">
             <InterviewButton
               isConnected={isConnected}
               startConversation={startConversation}

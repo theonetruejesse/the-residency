@@ -46,7 +46,7 @@ const StartSession = (props: { user: Doc<"users"> }) => {
 
   return (
     <div className="flex items-center justify-center min-h-svh">
-      <Card className="flex flex-col items-center justify-center gap-4 glass w-[900px] p-8">
+      <Card className="flex flex-col items-center justify-center gap-4 glass w-[900px] p-8 mx-2">
         <ChaliceChatCopy userName={user.firstName} />
         <Button
           size="lg"

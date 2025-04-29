@@ -43,7 +43,10 @@ export function ResidencyForm({ setUserId }: ResidencyFormProps) {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit} className="p-8 space-y-6 rounded-lg glass">
+      <form
+        onSubmit={handleSubmit}
+        className="p-8 space-y-6 rounded-lg glass mx-2"
+      >
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">
             The Residency Application
