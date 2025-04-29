@@ -1,16 +1,23 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "../_generated/server";
 import { api, internal } from "../_generated/api";
-import { MISSION } from "../schema";
 import { Id, Doc } from "../_generated/dataModel";
+import {
+  MISSION_ARGS,
+  MISSION_RETURN,
+  SESSION,
+  SESSION_RETURN,
+  USER_RETURN,
+} from "../schema.types";
+import { MAX_ACTIVE_SESSIONS } from "../constants";
 
-// only exposed functions for the application
+// client endpoints
 
 export const submitIntake = mutation({
   args: {
     firstName: v.string(),
     lastName: v.string(),
-    ...MISSION,
+    ...MISSION_ARGS,
   },
   returns: v.id("users"),
   handler: async (ctx, args): Promise<Id<"users">> => {
@@ -44,12 +51,13 @@ export const approveIntake = action({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const applicant = await ctx.runQuery(api.user.application.getApplicant, {
+    const user = await ctx.runQuery(internal.user.users.getUser, {
       userId: args.userId,
     });
-    if (!applicant) throw new Error("Applicant not found");
-
-    const { user, mission } = applicant;
+    const mission = await ctx.runQuery(internal.user.users.getMission, {
+      userId: args.userId,
+    });
+    if (!user || !mission) throw new Error("User or mission not found");
 
     await ctx.runMutation(internal.user.users.updateUser, {
       userId: user._id,
@@ -76,28 +84,19 @@ export const approveIntake = action({
     });
   },
 });
-export const joinCall = mutation({
-  args: {
-    userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    const session = await ctx.runQuery(internal.user.users.getUserSession, {
-      userId: args.userId,
-    });
-    if (!session) throw new Error("Session not found");
-    await ctx.db.patch(session._id, {
-      active: true,
-    });
-  },
-});
 
 // creates the call url and update the session
-export const createCall = action({
+export const joinCall = action({
   args: {
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+    const activeSessions = await ctx.runQuery(
+      api.user.application.activeSessionsCount
+    );
+    if (activeSessions >= MAX_ACTIVE_SESSIONS) throw new Error("Wait in line");
+
+    const session = await ctx.runQuery(internal.user.session.getSession, {
       userId: args.userId,
     });
     if (!session) throw new Error("Session not found");
@@ -106,6 +105,7 @@ export const createCall = action({
       internal.user.actions.generateSessionUrl,
       {}
     );
+
     if (!sessionData.sessionUrl)
       throw new Error("Failed to generate session URL");
 
@@ -119,12 +119,13 @@ export const createCall = action({
   },
 });
 
+// remove from the queue
 export const endCall = mutation({
   args: {
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+    const session = await ctx.runQuery(internal.user.session.getSession, {
       userId: args.userId,
     });
     if (!session) throw new Error("Session not found");
@@ -134,35 +135,27 @@ export const endCall = mutation({
   },
 });
 
-// the only data that matters for evaluating applicants
+// QUERIES
 export const getApplicant = query({
   args: {
     userId: v.string(),
   },
   returns: v.union(
     v.object({
-      user: v.object({
-        _id: v.id("users"),
-        _creationTime: v.number(),
-        firstName: v.string(),
-        lastName: v.string(),
-        round: v.string(),
-        status: v.string(),
-      }),
-      mission: v.object({
-        _id: v.id("missions"),
-        _creationTime: v.number(),
-        userId: v.id("users"),
-        interest: v.string(),
-        accomplishment: v.string(),
-      }),
+      user: USER_RETURN,
+      mission: MISSION_RETURN,
+      session: SESSION_RETURN,
     }),
     v.null()
   ),
   handler: async (
     ctx,
     args
-  ): Promise<{ user: Doc<"users">; mission: Doc<"missions"> } | null> => {
+  ): Promise<{
+    user: Doc<"users">;
+    mission: Doc<"missions">;
+    session: Doc<"sessions">;
+  } | null> => {
     const documentId = ctx.db.normalizeId("users", args.userId);
     if (!documentId) return null;
 
@@ -172,12 +165,40 @@ export const getApplicant = query({
     const mission = await ctx.runQuery(internal.user.users.getMission, {
       userId: documentId,
     });
+    const session = await ctx.runQuery(internal.user.session.getSession, {
+      userId: documentId,
+    });
 
-    if (!user || !mission) {
-      console.error(`User or mission not found for documentId: ${documentId}`);
+    if (!user || !mission || !session) {
+      console.error(
+        `User or mission or session not found for documentId: ${documentId}`
+      );
       return null;
     }
 
-    return { user, mission };
+    return { user, mission, session };
+  },
+});
+
+export const activeSessionsCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_active", (q) => q.eq("active", true))
+      .collect();
+    return sessions.length;
+  },
+});
+
+export const getUserSession = query({
+  args: {
+    userId: v.id("users"),
+  },
+  returns: v.union(SESSION_RETURN, v.null()),
+  handler: async (ctx, args): Promise<Doc<"sessions"> | null> => {
+    return await ctx.runQuery(internal.user.session.getSession, {
+      userId: args.userId,
+    });
   },
 });

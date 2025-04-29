@@ -1,4 +1,4 @@
-import { fetchQuery, preloadQuery } from "convex/nextjs";
+import { preloadQuery } from "convex/nextjs";
 import { api } from "@residency/api";
 import { SessionRouter } from "./_components/session-router";
 import { redirect } from "next/navigation";
@@ -11,17 +11,10 @@ export default async function Page({
 }) {
   const { userId } = await params;
 
-  const applicant = await fetchQuery(api.user.application.getApplicant, {
+  const applicant = await preloadQuery(api.user.application.getApplicant, {
     userId,
   });
 
   if (!applicant) redirect(RESIDENCY_URL);
-
-  const initialSession = await preloadQuery(api.user.session.getSession, {
-    userId: applicant.user._id,
-  });
-
-  return (
-    <SessionRouter applicant={applicant} initialSession={initialSession} />
-  );
+  return <SessionRouter applicant={applicant} />;
 }

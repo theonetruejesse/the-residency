@@ -2,7 +2,20 @@
 
 import { useConversation } from "@11labs/react";
 import { useCallback } from "react";
-import { InterviewProps } from ".";
+import { InterviewProps } from "./index.js";
+
+const sessionConfig = (props: InterviewProps) => {
+  const { session, user, mission } = props.applicant;
+  return {
+    signedUrl: session.sessionUrl!, // at this point, sessionUrl should be non-null
+    dynamicVariables: {
+      user_name: user.firstName,
+      user_interest: mission.interest,
+      user_accomplishment: mission.accomplishment,
+      first_question: session.firstQuestion,
+    },
+  };
+};
 
 async function requestMicrophonePermission() {
   try {
@@ -15,8 +28,6 @@ async function requestMicrophonePermission() {
 }
 
 export function useConvo(props: InterviewProps) {
-  const { session, applicant } = props;
-
   const conversation = useConversation({
     onConnect: () => {
       console.log("connected");
@@ -41,12 +52,7 @@ export function useConvo(props: InterviewProps) {
     }
     try {
       const conversationId = await conversation.startSession({
-        signedUrl: session.sessionUrl,
-        dynamicVariables: {
-          user_name: applicant.user.firstName,
-          user_interest: applicant.mission.interest,
-          user_accomplishment: applicant.mission.accomplishment,
-        },
+        ...sessionConfig(props),
       });
       console.log(conversationId);
     } catch (error) {

@@ -4,15 +4,7 @@
 
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server.js";
-import { ROUNDS, STATUSES } from "../schema.js";
-
-// TODO: needs authentication
-// export const listUsers = query({
-//   args: {},
-//   handler: async (ctx) => {
-//     return await ctx.db.query("users").collect();
-//   },
-// });
+import { ROUNDS_OPTIONS, STATUSES_OPTIONS } from "../schema.types";
 
 export const getUser = internalQuery({
   args: { userId: v.id("users") },
@@ -20,16 +12,6 @@ export const getUser = internalQuery({
     const documentId = ctx.db.normalizeId("users", args.userId);
     if (!documentId) return null;
     return await ctx.db.get(documentId);
-  },
-});
-
-export const getUserSession = internalQuery({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("sessions")
-      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
-      .unique();
   },
 });
 
@@ -47,8 +29,8 @@ export const createUser = internalMutation({
   args: {
     firstName: v.string(),
     lastName: v.string(),
-    round: ROUNDS,
-    status: STATUSES,
+    round: ROUNDS_OPTIONS,
+    status: STATUSES_OPTIONS,
   },
   returns: v.id("users"),
   handler: async (ctx, args) => {
@@ -65,8 +47,8 @@ export const createUser = internalMutation({
 export const updateUser = internalMutation({
   args: {
     userId: v.id("users"),
-    status: STATUSES,
-    round: ROUNDS,
+    round: ROUNDS_OPTIONS,
+    status: STATUSES_OPTIONS,
   },
   handler: async (ctx, args) => {
     return await ctx.db.patch(args.userId, {

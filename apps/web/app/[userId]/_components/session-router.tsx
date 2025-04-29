@@ -10,23 +10,22 @@ import { Card } from "@residency/ui/components/card";
 import { ChaliceChatCopy } from "./assets/chat-copy";
 
 interface SessionRouterProps {
-  applicant: { user: Doc<"users">; mission: Doc<"missions"> };
-  initialSession: Preloaded<typeof api.user.session.getSession>;
+  applicant: Preloaded<typeof api.user.application.getApplicant>;
 }
 export const SessionRouter = (props: SessionRouterProps) => {
-  const { applicant, initialSession } = props;
+  const applicant = usePreloadedQuery(props.applicant)!; // should be non-null at this point
+  const { session, user } = applicant;
 
-  const session = usePreloadedQuery(initialSession);
+  if (!session.active && session.sessionUrl)
+    return <PostSession userName={user.firstName} />;
 
-  if (!session) return <StartSession user={applicant.user} />;
+  if (!session.active && !session.sessionUrl)
+    return <JoinSession user={user} />;
 
-  if (!session.active)
-    return <InactiveSession userName={applicant.user.firstName} />;
-
-  return <Interview session={session} applicant={applicant} />;
+  return <Interview applicant={applicant} />;
 };
 
-const InactiveSession = (props: { userName: string }) => {
+const PostSession = (props: { userName: string }) => {
   return (
     <div className="flex items-center justify-center min-h-svh">
       <h1>
@@ -37,10 +36,12 @@ const InactiveSession = (props: { userName: string }) => {
   );
 };
 
-const StartSession = (props: { user: Doc<"users"> }) => {
+// todo, might need to check for race conditions
+// todo, add queue logic here
+const JoinSession = (props: { user: Doc<"users"> }) => {
   const { user } = props;
 
-  const createSession = useAction(api.user.session.createSession);
+  const joinCall = useAction(api.user.application.joinCall);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -53,7 +54,7 @@ const StartSession = (props: { user: Doc<"users"> }) => {
           className="w-full text-xl p-6 mt-6"
           onClick={() => {
             setIsLoading(true);
-            createSession({ userId: user._id });
+            joinCall({ userId: user._id });
           }}
           disabled={isLoading}
         >

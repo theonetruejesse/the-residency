@@ -8,10 +8,10 @@ import { Input } from "@residency/ui/components/input";
 import { Label } from "@residency/ui/components/label";
 import { Textarea } from "@residency/ui/components/textarea";
 import { useMutation } from "convex/react";
-import { api } from "@residency/api";
+import { api, Id } from "@residency/api";
 
 interface ResidencyFormProps {
-  setUserId: (userId: string) => void;
+  setUserId: (userId: Id<"users">) => void;
 }
 
 export function ResidencyForm({ setUserId }: ResidencyFormProps) {

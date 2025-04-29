@@ -4,15 +4,18 @@ import "../position.css";
 
 import * as React from "react";
 import { Card } from "@residency/ui/components/card";
-import { useConvo } from "./convo-hook";
+import { useConvo } from "./conversation-hook";
 import { Doc } from "@residency/api";
 import { BackgroundWave } from "@/app/[userId]/_components/assets/wave-background";
 import { Chalice } from "@/app/[userId]/_components/assets/chalice";
 import { InterviewButton } from "./interview-button";
 
 export interface InterviewProps {
-  session: Doc<"sessions">;
-  applicant: { user: Doc<"users">; mission: Doc<"missions"> };
+  applicant: {
+    user: Doc<"users">;
+    mission: Doc<"missions">;
+    session: Doc<"sessions">;
+  };
 }
 export function Interview(props: InterviewProps) {
   const { status, isSpeaking, startConversation, stopConversation } = useConvo({
