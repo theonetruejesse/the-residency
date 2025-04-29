@@ -5,11 +5,10 @@ import { Id, Doc } from "../_generated/dataModel";
 import {
   MISSION_ARGS,
   MISSION_RETURN,
-  SESSION,
   SESSION_RETURN,
   USER_RETURN,
 } from "../schema.types";
-import { MAX_ACTIVE_SESSIONS } from "../constants";
+import { MAX_ACTIVE_SESSIONS, MAX_SESSION_DURATION } from "../constants";
 
 // client endpoints
 
@@ -115,7 +114,13 @@ export const joinCall = action({
       active: true,
     });
 
-    // todo, schedule to mark interview as inactive after 20 minutes
+    await ctx.scheduler.runAfter(
+      MAX_SESSION_DURATION,
+      api.user.application.endCall,
+      {
+        userId: args.userId,
+      }
+    );
   },
 });
 

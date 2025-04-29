@@ -44,6 +44,7 @@ The acknowledgment should be brief, specific to an accomplishment, convey genuin
 The question should be concise, directly related to their stated interests, and invite an expansive response.
 Crucially, the acknowledgment and the question must be intellectually or thematically connected. The acknowledgment should naturally lead into or set the context for the question about their interests.
 Avoid generic phrases; tailor the language to sound insightful, personally engaged, appreciative in a professional manner, and highlight the connection between their past achievements and current interests, while balancing intellectual depth and professionalism.
+If no interests or accomplishments are provided, simply ask: "What are you passionate about?"
 </guardrails>
 
 <example>
@@ -61,7 +62,7 @@ It's great to see your publication in Nature, that's quite an achievement. Given
     `;
 
     const response = await geminiClient.models.generateContent({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-2.0-flash",
       contents: prompt,
     });
 
