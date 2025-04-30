@@ -13,6 +13,14 @@ export const STATUSES_OPTIONS = v.union(
   v.literal("rejected")
 );
 
+export const INTERVIEW_STATUS_OPTIONS = v.union(
+  v.literal("active_call"),
+  v.literal("in_queue"),
+  v.literal("post_interview"),
+  v.literal("join_queue"),
+  v.literal("join_call")
+);
+
 export const BACKGROUND = {
   userId: v.id("users"),
   gender: v.string(),
@@ -60,14 +68,31 @@ export const USER_RETURN = v.object({
   _creationTime: v.number(),
 });
 
+export const PERSONA_RELATIONS = {
+  sessionId: v.id("sessions"),
+};
+export const PERSONA_ARGS = {
+  role: v.string(), // generated role for the persona using the user's mission
+  tagline: v.string(), // generated tagline for the persona using the user's mission
+};
+export const PERSONA = {
+  ...PERSONA_RELATIONS,
+  ...PERSONA_ARGS,
+};
+
+export const SESSION_RELATIONS = {
+  userId: v.id("users"),
+  missionId: v.id("missions"),
+  // scheduled function id for ending call; used for kicking out users after a certain time
+  // we use this to implement a queue system for the first round interview
+  endCallFnId: v.optional(v.id("_scheduled_functions")),
+};
+
 export const SESSION_ARGS = {
   active: v.boolean(),
   firstQuestion: v.string(), // first question of the interview; ai generated using the user's mission
   sessionUrl: v.optional(v.string()), // expires in 15 minutes; used for denoting which users joined the interview
-};
-export const SESSION_RELATIONS = {
-  userId: v.id("users"),
-  missionId: v.id("missions"),
+  updatedAt: v.number(), // used for ordering sessions in the queue
 };
 export const SESSION = {
   ...SESSION_RELATIONS,

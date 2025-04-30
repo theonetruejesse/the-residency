@@ -9,17 +9,25 @@ import { ROUNDS_OPTIONS, STATUSES_OPTIONS } from "../schema.types";
 export const getUser = internalQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    const documentId = ctx.db.normalizeId("users", args.userId);
-    if (!documentId) return null;
-    return await ctx.db.get(documentId);
+    return await ctx.db.get(args.userId);
   },
 });
 
-export const getMission = internalQuery({
+export const getUserMission = internalQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("missions")
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .unique();
+  },
+});
+
+export const getUserSession = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("sessions")
       .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
       .unique();
   },

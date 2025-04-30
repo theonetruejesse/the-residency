@@ -1,16 +1,18 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "../_generated/server";
-import { api, internal } from "../_generated/api";
+import { internal } from "../_generated/api";
 import { Id, Doc } from "../_generated/dataModel";
 import {
+  INTERVIEW_STATUS_OPTIONS,
   MISSION_ARGS,
   MISSION_RETURN,
   SESSION_RETURN,
   USER_RETURN,
 } from "../schema.types";
-import { MAX_ACTIVE_SESSIONS, MAX_SESSION_DURATION } from "../constants";
 
 // client endpoints
+
+// we use userIds so people can't just finesse the queue by knowing other users' sessionId
 
 export const submitIntake = mutation({
   args: {
@@ -44,7 +46,7 @@ export const submitIntake = mutation({
   },
 });
 
-// assume we are approving the intake; todo, update later
+// approving applicant for the first round; todo, update later to handle rejections
 export const approveIntake = action({
   args: {
     userId: v.id("users"),
@@ -53,7 +55,7 @@ export const approveIntake = action({
     const user = await ctx.runQuery(internal.user.users.getUser, {
       userId: args.userId,
     });
-    const mission = await ctx.runQuery(internal.user.users.getMission, {
+    const mission = await ctx.runQuery(internal.user.users.getUserMission, {
       userId: args.userId,
     });
     if (!user || !mission) throw new Error("User or mission not found");
@@ -64,78 +66,68 @@ export const approveIntake = action({
       round: "first_round",
     });
 
-    const generate = await ctx.runAction(
-      internal.user.actions.generateFirstQuestion,
+    const { firstQuestion, role, tagline } = await ctx.runAction(
+      internal.user.actions.generateContent,
       {
         interest: mission.interest,
         accomplishment: mission.accomplishment,
       }
     );
 
-    if (!generate.firstQuestion)
-      throw new Error("Failed to generate first question");
+    const sessionId = await ctx.runMutation(
+      internal.user.session.createSession,
+      {
+        userId: user._id,
+        missionId: mission._id,
+        firstQuestion: firstQuestion,
+        active: false,
+      }
+    );
 
-    await ctx.runMutation(internal.user.session.createSession, {
-      userId: user._id,
-      missionId: mission._id,
-      firstQuestion: generate.firstQuestion,
-      active: false,
+    await ctx.runMutation(internal.user.session.createSessionPersona, {
+      sessionId,
+      role,
+      tagline,
     });
   },
 });
 
-// creates the call url and update the session
-export const joinCall = action({
+// we either join the queue or join the call; this function handles both
+export const handleJoin = action({
   args: {
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const activeSessions = await ctx.runQuery(
-      api.user.application.activeSessionsCount
-    );
-    if (activeSessions >= MAX_ACTIVE_SESSIONS) throw new Error("Wait in line");
+    const { userId } = args;
 
-    const session = await ctx.runQuery(internal.user.session.getSession, {
-      userId: args.userId,
+    const userSession = await ctx.runQuery(internal.user.users.getUserSession, {
+      userId,
     });
-    if (!session) throw new Error("Session not found");
+    if (!userSession) throw new Error("User session not found");
 
-    const sessionData = await ctx.runAction(
-      internal.user.actions.generateSessionUrl,
-      {}
-    );
-
-    if (!sessionData.sessionUrl)
-      throw new Error("Failed to generate session URL");
-
-    await ctx.runMutation(internal.user.session.updateSession, {
-      sessionId: session._id,
-      sessionUrl: sessionData.sessionUrl,
-      active: true,
+    await ctx.runAction(internal.user.queue.handleQueue, {
+      sessionId: userSession._id,
+      userId,
     });
-
-    await ctx.scheduler.runAfter(
-      MAX_SESSION_DURATION,
-      api.user.application.endCall,
-      {
-        userId: args.userId,
-      }
-    );
   },
 });
 
-// remove from the queue
+// remove user from the active call list
 export const endCall = mutation({
   args: {
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
-    const session = await ctx.runQuery(internal.user.session.getSession, {
-      userId: args.userId,
+    const { userId } = args;
+
+    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+      userId,
     });
     if (!session) throw new Error("Session not found");
-    await ctx.db.patch(session._id, {
-      active: false,
+
+    await ctx.runMutation(internal.user.queue.leaveQueue, {
+      sessionId: session._id,
+      endCallFnId: session.endCallFnId,
     });
   },
 });
@@ -167,10 +159,10 @@ export const getApplicant = query({
     const user = await ctx.runQuery(internal.user.users.getUser, {
       userId: documentId,
     });
-    const mission = await ctx.runQuery(internal.user.users.getMission, {
+    const mission = await ctx.runQuery(internal.user.users.getUserMission, {
       userId: documentId,
     });
-    const session = await ctx.runQuery(internal.user.session.getSession, {
+    const session = await ctx.runQuery(internal.user.users.getUserSession, {
       userId: documentId,
     });
 
@@ -185,25 +177,72 @@ export const getApplicant = query({
   },
 });
 
-export const activeSessionsCount = query({
-  args: {},
-  handler: async (ctx) => {
-    const sessions = await ctx.db
-      .query("sessions")
-      .withIndex("by_active", (q) => q.eq("active", true))
-      .collect();
-    return sessions.length;
-  },
-});
-
-export const getUserSession = query({
+export const getInterviewStatus = query({
   args: {
     userId: v.id("users"),
   },
-  returns: v.union(SESSION_RETURN, v.null()),
-  handler: async (ctx, args): Promise<Doc<"sessions"> | null> => {
-    return await ctx.runQuery(internal.user.session.getSession, {
+  returns: INTERVIEW_STATUS_OPTIONS,
+  handler: async (
+    ctx,
+    args
+  ): Promise<
+    "active_call" | "in_queue" | "post_interview" | "join_queue" | "join_call"
+  > => {
+    const userSession = await ctx.runQuery(internal.user.users.getUserSession, {
       userId: args.userId,
     });
+    if (!userSession) throw new Error("User session not found");
+
+    const { active, sessionUrl } = userSession;
+
+    if (active && sessionUrl) return "active_call";
+    if (active && !sessionUrl) return "in_queue";
+    if (!active && sessionUrl) return "post_interview";
+
+    // else: if (!active && !sessionUrl)
+    const isQueueFull: boolean = await ctx.runQuery(
+      internal.user.queue.isQueueFull
+    );
+    return isQueueFull ? "join_queue" : "join_call";
+  },
+});
+
+// returns all active sessions, personas
+export const getWaitingList = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      sessionId: v.id("sessions"),
+      role: v.string(),
+      tagline: v.string(),
+    })
+  ),
+  handler: async (
+    ctx
+  ): Promise<
+    {
+      sessionId: Id<"sessions">;
+      role: string;
+      tagline: string;
+    }[]
+  > => {
+    const sessions = await ctx.runQuery(internal.user.queue.listQueueSessions);
+
+    return await Promise.all(
+      sessions.map(async (session) => {
+        const persona: Doc<"personas"> | null = await ctx.runQuery(
+          internal.user.session.getSessionPersona,
+          { sessionId: session._id }
+        );
+        if (!persona)
+          throw new Error(`No persona found for session ${session._id}`);
+
+        return {
+          sessionId: session._id,
+          role: persona.role,
+          tagline: persona.tagline,
+        };
+      })
+    );
   },
 });

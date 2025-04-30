@@ -1,0 +1,16 @@
+<instructions>
+read through and fully comprehend the protocol outlined in
+@lgtm-protocol.md 
+
+follow our protocol's entire procedure, explicitly, and do not stop until you have a fully fleshed out report. 
+you need to follow the entire procedure, including the loops fully as specified in the protocol.
+
+IMPORTANT: DO NOT EXECUTE THE REPORT. I NEED TO APPROVE THE REPORT FIRST.
+
+use `run` as your run folder.
+
+</instructions>
+
+<question>
+
+</question>

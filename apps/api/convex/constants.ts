@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { ElevenLabsClient } from "elevenlabs";
 
 // SETTINGS
-export const MAX_ACTIVE_SESSIONS = 5;
+export const MAX_CONCURRENT_CALLS = 5;
 // 5 minutes to start, 15 minutes for the call itself; user gets kicked out after this time
 export const MAX_SESSION_DURATION = 20 * 60 * 1000; // 20 minutes in milliseconds
 
