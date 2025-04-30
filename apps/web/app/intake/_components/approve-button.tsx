@@ -1,24 +1,25 @@
 "use client";
 
-import { Id, api } from "@residency/api";
+import { Doc, Id, api } from "@residency/api";
 import { Button } from "@residency/ui/components/button";
-import { useAction, useQuery } from "convex/react";
+import { useAction } from "convex/react";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-export const ApproveButton = (props: { userId: Id<"users"> }) => {
+interface ApproveButtonProps {
+  userId: Id<"users">;
+}
+export const ApproveButton = ({ userId }: ApproveButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const approve = useAction(api.user.application.approveIntake);
+  const [session, setSession] = useState<Doc<"sessions"> | null>(null);
 
-  const session = useQuery(api.user.application.getUserSession, {
-    userId: props.userId,
-  });
+  const router = useRouter();
+  const approve = useAction(api.user.admin.approveIntake);
 
   useEffect(() => {
     if (session) {
-      router.push(`/${props.userId}`);
+      router.push(`/${userId}`);
     }
   }, [session]);
 
@@ -27,9 +28,10 @@ export const ApproveButton = (props: { userId: Id<"users"> }) => {
       <Button
         size="lg"
         className="w-full mt-10 text-xl p-6"
-        onClick={() => {
-          approve({ userId: props.userId });
+        onClick={async () => {
           setIsLoading(true);
+          const session = await approve({ userId });
+          setSession(session);
         }}
         disabled={isLoading}
       >

@@ -34,6 +34,8 @@ export const generateContent = internalAction({
   },
   returns: v.object({
     firstQuestion: v.string(),
+    role: v.string(),
+    tagline: v.string(),
   }),
   handler: async (_ctx, args) => {
     const { interest, accomplishment } = args;

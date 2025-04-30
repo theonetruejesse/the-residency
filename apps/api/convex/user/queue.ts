@@ -7,6 +7,7 @@ import {
 } from "../_generated/server";
 import { MAX_CONCURRENT_CALLS, MAX_SESSION_DURATION } from "../constants";
 import { Doc, Id } from "../_generated/dataModel";
+import { SESSION_RETURN } from "../schema.types";
 
 // active sessions are within the queue
 // active sessions with endCallFnId are active calls
@@ -159,6 +160,7 @@ export const getSessionWaitTime = internalQuery({
 // returns all active sessions; in queue order
 export const listQueueSessions = internalQuery({
   args: {},
+  returns: v.array(SESSION_RETURN),
   handler: async (ctx) => {
     return await ctx.db
       .query("sessions")
