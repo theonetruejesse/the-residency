@@ -10,8 +10,8 @@ import { useState, useEffect } from "react";
 export const ApproveButton = (props: { userId: Id<"users"> }) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
   const approve = useAction(api.user.application.approveIntake);
+
   const session = useQuery(api.user.application.getUserSession, {
     userId: props.userId,
   });

@@ -12,6 +12,8 @@ import {
 
 // client endpoints
 
+// todo, check security of all these things without using client auth
+
 // we use userIds so people can't just finesse the queue by knowing other users' sessionId
 
 export const submitIntake = mutation({
