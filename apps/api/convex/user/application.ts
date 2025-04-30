@@ -215,6 +215,7 @@ export const getWaitingList = query({
       sessionId: v.id("sessions"),
       role: v.string(),
       tagline: v.string(),
+      waitTime: v.number(),
     })
   ),
   handler: async (
@@ -224,6 +225,7 @@ export const getWaitingList = query({
       sessionId: Id<"sessions">;
       role: string;
       tagline: string;
+      waitTime: number;
     }[]
   > => {
     const sessions = await ctx.runQuery(internal.user.queue.listQueueSessions);
@@ -237,10 +239,16 @@ export const getWaitingList = query({
         if (!persona)
           throw new Error(`No persona found for session ${session._id}`);
 
+        // Fetch estimated wait time for this session
+        const waitTime: number = await ctx.runQuery(
+          internal.user.queue.getSessionWaitTime,
+          { sessionId: session._id }
+        );
         return {
           sessionId: session._id,
           role: persona.role,
           tagline: persona.tagline,
+          waitTime,
         };
       })
     );

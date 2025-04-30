@@ -129,26 +129,32 @@ export const isUserInQueue = internalQuery({
   },
 });
 
-// export const maxCallWaitTime = internalQuery({
-//   args: {
-//     sessionId: v.id("sessions"),
-//   },
-//   returns: v.number(),
-//   handler: async (ctx, args) => {
-//     const session = await ctx.db.get(args.sessionId);
-//     if (!session) throw new Error("Session not found");
-
-//     if (session.endCallFnId) return 0; // call is active
-
-//     const endCallFn = await ctx.db.system.get(session.endCallFnId);
-//     if (!endCallFn) throw new Error("End call function not found");
-
-//     const endCallTime = new Date(endCallFn.scheduledAt);
-//     const now = new Date();
-//     const timeDiff = now.getTime() - endCallTime.getTime();
-//     return timeDiff;
-//   },
-// });
+// returns the wait time for a session in the queue
+export const getSessionWaitTime = internalQuery({
+  args: { sessionId: v.id("sessions") },
+  returns: v.number(),
+  handler: async (ctx, { sessionId }): Promise<number> => {
+    const now = Date.now();
+    const sessions = await ctx.runQuery(internal.user.queue.listQueueSessions);
+    const endTimes: number[] = [];
+    for (let i = 0; i < MAX_CONCURRENT_CALLS; i++) {
+      const s = sessions[i];
+      if (s?.endCallFnId) {
+        const job = await ctx.db.system.get(s.endCallFnId);
+        endTimes.push(job ? new Date(job.scheduledTime).getTime() : now);
+      } else {
+        endTimes.push(now);
+      }
+    }
+    const pos = sessions.findIndex((s) => s._id === sessionId);
+    if (pos < 0 || pos < MAX_CONCURRENT_CALLS) return 0; // active call
+    const queueIndex = pos - MAX_CONCURRENT_CALLS;
+    const slot = queueIndex % MAX_CONCURRENT_CALLS;
+    const rounds = Math.floor(queueIndex / MAX_CONCURRENT_CALLS);
+    const scheduledAt = endTimes[slot] + rounds * MAX_SESSION_DURATION;
+    return Math.max(0, scheduledAt - now);
+  },
+});
 
 // returns all active sessions; in queue order
 export const listQueueSessions = internalQuery({
