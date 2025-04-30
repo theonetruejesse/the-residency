@@ -48,52 +48,6 @@ export const submitIntake = mutation({
   },
 });
 
-// approving applicant for the first round; todo, update later to handle rejections
-export const approveIntake = action({
-  args: {
-    userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.runQuery(internal.user.users.getUser, {
-      userId: args.userId,
-    });
-    const mission = await ctx.runQuery(internal.user.users.getUserMission, {
-      userId: args.userId,
-    });
-    if (!user || !mission) throw new Error("User or mission not found");
-
-    await ctx.runMutation(internal.user.users.updateUser, {
-      userId: user._id,
-      status: user.status,
-      round: "first_round",
-    });
-
-    const { firstQuestion, role, tagline } = await ctx.runAction(
-      internal.user.actions.generateContent,
-      {
-        interest: mission.interest,
-        accomplishment: mission.accomplishment,
-      }
-    );
-
-    const sessionId = await ctx.runMutation(
-      internal.user.session.createSession,
-      {
-        userId: user._id,
-        missionId: mission._id,
-        firstQuestion: firstQuestion,
-        active: false,
-      }
-    );
-
-    await ctx.runMutation(internal.user.session.createSessionPersona, {
-      sessionId,
-      role,
-      tagline,
-    });
-  },
-});
-
 // we either join the queue or join the call; this function handles both
 export const handleJoin = action({
   args: {
@@ -114,8 +68,8 @@ export const handleJoin = action({
   },
 });
 
-// remove user from the active call list
-export const endCall = mutation({
+// remove user from the active call list or queue
+export const handleLeave = mutation({
   args: {
     userId: v.id("users"),
   },
@@ -217,7 +171,6 @@ export const getWaitingList = query({
       sessionId: v.id("sessions"),
       role: v.string(),
       tagline: v.string(),
-      waitTime: v.number(),
     })
   ),
   handler: async (
@@ -227,7 +180,6 @@ export const getWaitingList = query({
       sessionId: Id<"sessions">;
       role: string;
       tagline: string;
-      waitTime: number;
     }[]
   > => {
     const sessions = await ctx.runQuery(internal.user.queue.listQueueSessions);
@@ -241,23 +193,35 @@ export const getWaitingList = query({
         if (!persona)
           throw new Error(`No persona found for session ${session._id}`);
 
-        // Fetch estimated wait time for this session
-        const waitTime: number = await ctx.runQuery(
-          internal.user.queue.getSessionWaitTime,
-          { sessionId: session._id }
-        );
         return {
           sessionId: session._id,
           role: persona.role,
           tagline: persona.tagline,
-          waitTime,
         };
       })
     );
   },
 });
 
-// returns the userId if the string is a valid userId
+// returns the max wait time for a session in the queue (in minutes)
+export const getMaxWaitTime = query({
+  args: { userId: v.id("users") },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+      userId: args.userId,
+    });
+    if (!session) throw new Error("Session not found");
+
+    const waitTime: number = await ctx.runQuery(
+      internal.user.queue.getSessionWaitTime,
+      { sessionId: session._id }
+    );
+    return waitTime;
+  },
+});
+
+// check if userIdString is valid and return userId
 export const userIdFromStr = query({
   args: { userIdString: v.string() },
   returns: v.union(v.id("users"), v.null()),

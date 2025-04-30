@@ -130,13 +130,18 @@ export const isUserInQueue = internalQuery({
   },
 });
 
-// returns the wait time for a session in the queue
+// returns the wait time for a session in the queue (in minutes)
 export const getSessionWaitTime = internalQuery({
   args: { sessionId: v.id("sessions") },
   returns: v.number(),
   handler: async (ctx, { sessionId }): Promise<number> => {
-    const now = Date.now();
     const sessions = await ctx.runQuery(internal.user.queue.listQueueSessions);
+    let pos = sessions.findIndex((s) => s._id === sessionId);
+
+    // If session not found, estimate time as if joining at the end
+    const effectivePos = pos === -1 ? sessions.length : pos;
+
+    const now = Date.now();
     const endTimes: number[] = [];
     for (let i = 0; i < MAX_CONCURRENT_CALLS; i++) {
       const s = sessions[i];
@@ -147,13 +152,15 @@ export const getSessionWaitTime = internalQuery({
         endTimes.push(now);
       }
     }
-    const pos = sessions.findIndex((s) => s._id === sessionId);
-    if (pos < 0 || pos < MAX_CONCURRENT_CALLS) return 0; // active call
-    const queueIndex = pos - MAX_CONCURRENT_CALLS;
+    // If joining now would put them straight into a call (or they are already), wait is 0
+    if (effectivePos < MAX_CONCURRENT_CALLS) return 0;
+
+    const queueIndex = effectivePos - MAX_CONCURRENT_CALLS;
     const slot = queueIndex % MAX_CONCURRENT_CALLS;
     const rounds = Math.floor(queueIndex / MAX_CONCURRENT_CALLS);
     const scheduledAt = endTimes[slot] + rounds * MAX_SESSION_DURATION;
-    return Math.max(0, scheduledAt - now);
+    const waitTimeMillis = Math.max(0, scheduledAt - now);
+    return Math.ceil(waitTimeMillis / (60 * 1000)); // Convert to minutes and round up
   },
 });
 
