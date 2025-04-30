@@ -8,18 +8,24 @@ import { PreloadProvider } from "./_components/preload-provider";
 export default async function Page({
   params,
 }: {
-  params: Promise<{ userIdString: string }>;
+  params: Promise<{ userId: string }>;
 }) {
-  const { userIdString } = await params;
-  const userId = await fetchQuery(api.user.application.userIdFromStr, {
-    userIdString,
+  const { userId } = await params;
+  const validatedUserId = await fetchQuery(api.user.application.userIdFromStr, {
+    userIdString: userId,
   });
-  if (!userId) redirect(RESIDENCY_URL);
+  if (!validatedUserId) redirect(RESIDENCY_URL);
 
   const props = await Promise.all([
-    preloadQuery(api.user.application.getApplicant, { userId }),
-    preloadQuery(api.user.application.getInterviewStatus, { userId }),
-    preloadQuery(api.user.application.getMaxWaitTime, { userId }),
+    preloadQuery(api.user.application.getApplicant, {
+      userId: validatedUserId,
+    }),
+    preloadQuery(api.user.application.getInterviewStatus, {
+      userId: validatedUserId,
+    }),
+    preloadQuery(api.user.application.getMaxWaitTime, {
+      userId: validatedUserId,
+    }),
     preloadQuery(api.user.application.getWaitingList, {}),
   ]);
 
