@@ -9,6 +9,6 @@ This is a first round interview agent for The Residency. It is a web application
 - Next.js
 - TypeScript
 - Tailwind CSS
-- Agora
+- Eleven Labs
 - Convex
 - Shadcn UI
