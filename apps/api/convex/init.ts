@@ -246,18 +246,6 @@ const generateFirstQuestions = (missions: typeof seedMissions) => [
   "Building a sentiment analysis tool with 95% accuracy across multiple languages is remarkable. What aspects of computational linguistics are you most eager to explore further?",
 ];
 
-// Define a dummy endCall function to schedule
-export const endCall = internalMutation({
-  args: { sessionId: v.id("sessions") },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    // In a real implementation, this would end the call and update the session
-    // Here it's just a placeholder for the scheduler to target
-    console.log("Ending call for session:", args.sessionId);
-    return null;
-  },
-});
-
 export default internalMutation({
   args: {},
   returns: v.null(),
@@ -328,13 +316,13 @@ export default internalMutation({
       sessionIds.push(sessionId);
 
       // Schedule the end call function to run after 1 hour
+      // first active call will be 5 minutes instead
       const oneHourInMs = 60 * 60 * 1000;
+      const fiveMinutesInMs = 5 * 60 * 1000;
       const endCallFnId = await ctx.scheduler.runAfter(
-        oneHourInMs,
-        internal.init.endCall,
-        {
-          sessionId,
-        }
+        i === 4 ? fiveMinutesInMs : oneHourInMs,
+        internal.user.queue.leaveQueue,
+        { sessionId }
       );
 
       // Update the session with the scheduled function ID
