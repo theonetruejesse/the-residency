@@ -114,7 +114,7 @@ function PersonaCard({
       }`}
     >
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium mb-1">{role}</p>
+        <p className="text-sm font-medium">{role}</p>
         <p className="text-xs text-muted-foreground">{tagline}</p>
       </div>
 
