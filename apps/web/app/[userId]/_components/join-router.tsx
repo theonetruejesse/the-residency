@@ -24,19 +24,18 @@ export const JoinRouter = ({ status, userName }: JoinRouterProps) => {
   }
 
   return (
-    <>
-      <JoinSession userName={userName} />
+    <JoinWrapper>
+      <ChaliceChatCopy userName={userName} />
       {StatusComponent}
-    </>
+    </JoinWrapper>
   );
 };
 
-const JoinSession = ({ userName }: { userName: string }) => {
+// layout component, we define it here instead of layout.tsx since interview.tsx uses different layout
+const JoinWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex items-center justify-center min-h-svh">
-      <Card className="flex flex-col items-center justify-center gap-4 glass w-[900px] p-8 mx-2">
-        <ChaliceChatCopy userName={userName} />
-      </Card>
+    <div className="flex flex-col items-center justify-center w-full">
+      <div className="w-[900px] mt-15">{children}</div>
     </div>
   );
 };
@@ -50,6 +49,9 @@ export const JoinButton = ({ isQueue, isDisabled }: JoinButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const handleJoin = useAction(api.user.application.handleJoin);
   const applicant = useApplicant();
+
+  let buttonText = isQueue ? "Join Queue" : "Join Call";
+  if (isDisabled && isQueue) buttonText = "In Queue";
 
   return (
     <Button
@@ -67,7 +69,7 @@ export const JoinButton = ({ isQueue, isDisabled }: JoinButtonProps) => {
           Joining...
         </>
       ) : (
-        `Join ${isQueue ? "Queue" : "Call"}`
+        buttonText
       )}
     </Button>
   );

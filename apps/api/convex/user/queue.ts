@@ -188,3 +188,15 @@ export const listActiveCalls = internalQuery({
     return activeSessions.filter((session) => session.endCallFnId);
   },
 });
+
+// returns all inactive calls in active sessions
+export const listWaitingSessions = internalQuery({
+  args: {},
+  handler: async (ctx): Promise<Doc<"sessions">[]> => {
+    const activeSessions = await ctx.runQuery(
+      internal.user.queue.listQueueSessions
+    );
+
+    return activeSessions.filter((session) => !session.endCallFnId);
+  },
+});

@@ -12,8 +12,6 @@ import {
 
 // client endpoints
 
-// todo, check security of all these things without using client auth
-
 // we use userIds so people can't just finesse the queue by knowing other users' sessionId
 
 export const submitIntake = mutation({
@@ -163,7 +161,7 @@ export const getInterviewStatus = query({
   },
 });
 
-// returns all active sessions, personas
+// returns all waiting list members: sessions, personas
 export const getWaitingList = query({
   args: {},
   returns: v.array(
@@ -182,7 +180,9 @@ export const getWaitingList = query({
       tagline: string;
     }[]
   > => {
-    const sessions = await ctx.runQuery(internal.user.queue.listQueueSessions);
+    const sessions = await ctx.runQuery(
+      internal.user.queue.listWaitingSessions
+    );
 
     return await Promise.all(
       sessions.map(async (session) => {
@@ -222,6 +222,7 @@ export const getMaxWaitTime = query({
 });
 
 // check if userIdString is valid and return userId
+// todo, hash the userId url param to make links more secure
 export const userIdFromStr = query({
   args: { userIdString: v.string() },
   returns: v.union(v.id("users"), v.null()),
