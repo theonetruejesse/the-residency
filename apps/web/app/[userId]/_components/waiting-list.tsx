@@ -19,7 +19,7 @@ import {
   useMaxWaitTime,
   useWaitingList,
 } from "./queries/preload-hooks";
-import { useMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { JoinButton } from "./join-router";
 import { useState } from "react";
 
@@ -125,7 +125,7 @@ function PersonaCard({
 
 // todo, use our button component for loading state
 const LeaveQueueButton = ({ userId }: { userId: Id<"users"> }) => {
-  const handleLeave = useMutation(api.user.application.handleLeave);
+  const handleLeave = useAction(api.user.application.handleLeave);
 
   return (
     <div className="absolute right-2 top-1/2 -translate-y-1/2 h-full items-center justify-center flex flex-col border-l-2 border-muted-foreground/20 pl-2">

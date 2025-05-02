@@ -63,14 +63,13 @@ export const handleJoin = action({
     if (!userSession) throw new Error("User session not found");
 
     await ctx.runAction(internal.user.queue.handleQueue, {
-      sessionId: userSession._id,
       userId,
     });
   },
 });
 
 // remove user from the active call list or queue
-export const handleLeave = mutation({
+export const handleLeave = action({
   args: {
     userId: v.id("users"),
   },
@@ -82,7 +81,7 @@ export const handleLeave = mutation({
     });
     if (!session) throw new Error("Session not found");
 
-    await ctx.runMutation(internal.user.queue.leaveQueue, {
+    await ctx.runAction(internal.user.queue.leaveQueue, {
       sessionId: session._id,
       endCallFnId: session.endCallFnId,
     });

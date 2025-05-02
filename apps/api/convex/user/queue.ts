@@ -1,10 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import {
-  internalAction,
-  internalMutation,
-  internalQuery,
-} from "../_generated/server";
+import { internalAction, internalQuery } from "../_generated/server";
 import { MAX_CONCURRENT_CALLS, MAX_SESSION_DURATION } from "../constants";
 import { Doc, Id } from "../_generated/dataModel";
 import { SESSION_RETURN } from "../schema.types";
@@ -14,35 +10,37 @@ import { SESSION_RETURN } from "../schema.types";
 
 export const handleQueue = internalAction({
   args: {
-    sessionId: v.id("sessions"),
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    const { userId } = args;
+
     const isQueueFull = await ctx.runQuery(internal.user.queue.isQueueFull);
+
     const isNextUser =
-      (await ctx.runQuery(internal.user.queue.nextUserInQueue)) === args.userId;
+      (await ctx.runQuery(internal.user.queue.nextUserInQueue)) === userId;
+
     const isUserInQueue = await ctx.runQuery(
       internal.user.queue.isUserInQueue,
-      {
-        userId: args.userId,
-      }
+      { userId }
     );
 
-    // start call
-    if (!isQueueFull || (isNextUser && isUserInQueue)) {
-      await ctx.runAction(internal.user.queue.createActiveCall, {
-        sessionId: args.sessionId,
-      });
-      return;
-    }
+    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+      userId: args.userId,
+    });
+    if (!session) throw new Error("Session not found");
 
-    // join queue
-    if (!isUserInQueue) {
+    if (!isQueueFull || (isNextUser && isUserInQueue)) {
+      // start call
+      await ctx.runAction(internal.user.queue.createActiveCall, {
+        sessionId: session._id,
+      });
+    } else if (!isUserInQueue) {
+      // join queue
       await ctx.runMutation(internal.user.session.updateSession, {
-        sessionId: args.sessionId,
+        sessionId: session._id,
         active: true,
       });
-      return;
     }
 
     // else, do nothing (otherwise we ruin the queue ordering)
@@ -74,7 +72,7 @@ export const createActiveCall = internalAction({
   },
 });
 
-export const leaveQueue = internalMutation({
+export const leaveQueue = internalAction({
   args: {
     sessionId: v.id("sessions"),
     endCallFnId: v.optional(v.id("_scheduled_functions")),
@@ -83,11 +81,19 @@ export const leaveQueue = internalMutation({
     if (args.endCallFnId) {
       await ctx.scheduler.cancel(args.endCallFnId);
     }
+
     await ctx.runMutation(internal.user.session.updateSession, {
       sessionId: args.sessionId,
       active: false,
       endCallFnId: null,
     });
+
+    const nextUser = await ctx.runQuery(internal.user.queue.nextUserInQueue);
+    if (nextUser) {
+      await ctx.runAction(internal.user.queue.handleQueue, {
+        userId: nextUser,
+      });
+    }
   },
 });
 

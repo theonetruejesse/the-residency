@@ -5,6 +5,11 @@ import { internalMutation, type MutationCtx } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 
+const thirtySecondsInMs = 30 * 1000;
+const twoMinutesInMs = 2 * 60 * 1000;
+const tenMinutesInMs = 10 * 60 * 1000;
+const oneHourInMs = 60 * 60 * 1000;
+
 const seedUsers = [
   { firstName: "Arya", lastName: "Kumar", round: "intake", status: "pending" },
   { firstName: "John", lastName: "Doe", round: "intake", status: "pending" },
@@ -318,14 +323,11 @@ export default internalMutation({
       sessionIds.push(sessionId);
 
       // delays for queues
-      const oneHourInMs = 60 * 60 * 1000;
-      const thirtySecondsInMs = 30 * 1000;
-      const tenMinutesInMs = 10 * 60 * 1000;
-      const twoMinutesInMs = 2 * 60 * 1000;
       let time = oneHourInMs;
       if (i === 4) time = thirtySecondsInMs;
       if (i === 5) time = twoMinutesInMs;
-      if (i === 6) time = tenMinutesInMs;
+      if (i === 6) time = twoMinutesInMs;
+      if (i === 7) time = tenMinutesInMs;
 
       const endCallFnId = await ctx.scheduler.runAfter(
         time,
