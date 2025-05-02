@@ -80,14 +80,14 @@ export const leaveQueue = internalMutation({
     endCallFnId: v.optional(v.id("_scheduled_functions")),
   },
   handler: async (ctx, args) => {
-    await ctx.runMutation(internal.user.session.updateSession, {
-      sessionId: args.sessionId,
-      active: false,
-      endCallFnId: undefined,
-    });
     if (args.endCallFnId) {
       await ctx.scheduler.cancel(args.endCallFnId);
     }
+    await ctx.runMutation(internal.user.session.updateSession, {
+      sessionId: args.sessionId,
+      active: false,
+      endCallFnId: null,
+    });
   },
 });
 

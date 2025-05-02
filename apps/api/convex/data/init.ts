@@ -1,9 +1,9 @@
 // seed the database
 
-import { Id } from "./_generated/dataModel";
-import { internalMutation, type MutationCtx } from "./_generated/server";
+import { Id } from "../_generated/dataModel";
+import { internalMutation, type MutationCtx } from "../_generated/server";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
+import { internal } from "../_generated/api";
 
 const seedUsers = [
   { firstName: "Arya", lastName: "Kumar", round: "intake", status: "pending" },
@@ -291,16 +291,18 @@ export default internalMutation({
     }
 
     // 2. 2 inactive sessions with sessionUrl (index 2-3)
+    let j = 0;
     for (let i = 2; i < 4; i++) {
       const sessionId = await ctx.db.insert("sessions", {
         userId: userIds[i],
         missionId: missionIds[i],
         active: false,
-        sessionUrl: "https://example.com/session/placeholder-" + i,
+        sessionUrl: "https://example.com/session/placeholder-" + j,
         firstQuestion: generateFirstQuestions(seedMissions)[i],
         updatedAt: Date.now(),
       });
       sessionIds.push(sessionId);
+      j++;
     }
 
     // 3. 5 active sessions with sessionUrl and endCallFnId (index 4-8)
@@ -315,12 +317,16 @@ export default internalMutation({
       });
       sessionIds.push(sessionId);
 
-      // Schedule the end call function to run after 1 hour
-      // first active call will be 5 minutes instead
+      // delays for queues
       const oneHourInMs = 60 * 60 * 1000;
-      const fiveMinutesInMs = 5 * 60 * 1000;
+      const twoMinutesInMs = 2 * 60 * 1000;
+      const tenMinutesInMs = 10 * 60 * 1000;
+      let time = oneHourInMs;
+      if (i === 4) time = twoMinutesInMs;
+      if (i === 5) time = tenMinutesInMs;
+
       const endCallFnId = await ctx.scheduler.runAfter(
-        i === 4 ? fiveMinutesInMs : oneHourInMs,
+        time,
         internal.user.queue.leaveQueue,
         { sessionId }
       );

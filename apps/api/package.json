@@ -6,7 +6,8 @@
   "main": "./src/index.ts",
   "scripts": {
     "dev": "convex dev",
-    "predev": "convex dev --run init --until-success",
+    "predev": "convex dev --run data/init --until-success",
+    "nuke": "convex dev --run data/reset --until-success",
     "build": "tsc",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --max-warnings 0 --fix",

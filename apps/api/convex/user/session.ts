@@ -27,16 +27,23 @@ export const updateSession = internalMutation({
   args: {
     sessionId: v.id("sessions"),
     sessionUrl: v.optional(v.string()),
-    endCallFnId: v.optional(v.id("_scheduled_functions")),
     active: v.optional(v.boolean()),
+    endCallFnId: v.optional(v.union(v.id("_scheduled_functions"), v.null())),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.sessionId, {
-      sessionUrl: args.sessionUrl,
-      endCallFnId: args.endCallFnId,
-      active: args.active,
+    const patch: any = {
       updatedAt: Date.now(),
-    });
+    };
+    // false also counts as undefined
+    if (args.active !== undefined) patch.active = args.active;
+
+    if (args.sessionUrl) patch.sessionUrl = args.sessionUrl;
+
+    // if null, remove the field
+    if (args.endCallFnId !== undefined)
+      patch.endCallFnId = args.endCallFnId ?? undefined;
+
+    await ctx.db.patch(args.sessionId, patch);
   },
 });
 
