@@ -123,7 +123,7 @@ function PersonaCard({
   );
 }
 
-// todo, use our button component
+// todo, use our button component for loading state
 const LeaveQueueButton = ({ userId }: { userId: Id<"users"> }) => {
   const handleLeave = useMutation(api.user.application.handleLeave);
 

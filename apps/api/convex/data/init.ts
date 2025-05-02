@@ -319,11 +319,13 @@ export default internalMutation({
 
       // delays for queues
       const oneHourInMs = 60 * 60 * 1000;
-      const twoMinutesInMs = 2 * 60 * 1000;
+      const thirtySecondsInMs = 30 * 1000;
       const tenMinutesInMs = 10 * 60 * 1000;
+      const twoMinutesInMs = 2 * 60 * 1000;
       let time = oneHourInMs;
-      if (i === 4) time = twoMinutesInMs;
-      if (i === 5) time = tenMinutesInMs;
+      if (i === 4) time = thirtySecondsInMs;
+      if (i === 5) time = twoMinutesInMs;
+      if (i === 6) time = tenMinutesInMs;
 
       const endCallFnId = await ctx.scheduler.runAfter(
         time,

@@ -46,7 +46,10 @@ export const submitIntake = mutation({
   },
 });
 
+// we need to re-run this action when waiting list changes
+
 // we either join the queue or join the call; this function handles both
+// automatically re-runs when a user joins or leaves the queue
 export const handleJoin = action({
   args: {
     userId: v.id("users"),

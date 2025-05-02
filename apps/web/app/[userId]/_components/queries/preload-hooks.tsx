@@ -20,25 +20,22 @@ export function useApplicant() {
   return applicant;
 }
 
+export function useWaitingList() {
+  const { waitingListPreload } = usePreloadContext();
+  const waitingList = usePreloadedQuery(waitingListPreload);
+  return waitingList;
+}
+
 export function useInterviewStatus() {
   const { interviewStatusPreload } = usePreloadContext();
   const status = usePreloadedQuery(interviewStatusPreload);
-  if (!status) throw new Error("Interview status not found");
   return status;
 }
 
 export function useMaxWaitTime() {
   const { maxWaitTimePreload } = usePreloadContext();
   const maxWaitTime = usePreloadedQuery(maxWaitTimePreload);
-  if (!maxWaitTime) throw new Error("Max wait time not found");
   return maxWaitTime;
-}
-
-export function useWaitingList() {
-  const { waitingListPreload } = usePreloadContext();
-  const waitingList = usePreloadedQuery(waitingListPreload);
-  if (!waitingList) throw new Error("Waiting list not found");
-  return waitingList;
 }
 
 const PreloadContext = createContext<PreloadedApplicationData | null>(null);

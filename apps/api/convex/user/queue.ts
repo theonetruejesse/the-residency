@@ -160,6 +160,7 @@ export const getSessionWaitTime = internalQuery({
     const rounds = Math.floor(queueIndex / MAX_CONCURRENT_CALLS);
     const scheduledAt = endTimes[slot] + rounds * MAX_SESSION_DURATION;
     const waitTimeMillis = Math.max(0, scheduledAt - now);
+
     return Math.ceil(waitTimeMillis / (60 * 1000)); // Convert to minutes and round up
   },
 });
@@ -176,6 +177,8 @@ export const listQueueSessions = internalQuery({
       .collect();
   },
 });
+
+// TODO; index these things properly
 
 // returns all active calls in active sessions
 export const listActiveCalls = internalQuery({

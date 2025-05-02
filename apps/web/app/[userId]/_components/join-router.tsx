@@ -1,9 +1,8 @@
 import { api } from "@residency/api";
 import { Button } from "@residency/ui/components/button";
-import { Card } from "@residency/ui/components/card";
 import { useAction } from "convex/react";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChaliceChatCopy } from "./assets/chat-copy";
 import { useApplicant } from "./queries/preload-hooks";
 import { WaitingList } from "./waiting-list";
@@ -49,6 +48,10 @@ export const JoinButton = ({ isQueue, isDisabled }: JoinButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const handleJoin = useAction(api.user.application.handleJoin);
   const applicant = useApplicant();
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, [isDisabled]);
 
   let buttonText = isQueue ? "Join Queue" : "Join Call";
   if (isDisabled && isQueue) buttonText = "In Queue";

@@ -3,14 +3,14 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { action } from "../_generated/server";
-import { Doc } from "../_generated/dataModel";
+import { Id } from "../_generated/dataModel";
 
 // approving applicant for the first round; todo, update later to handle rejections
 export const approveIntake = action({
   args: {
     userId: v.id("users"),
   },
-  handler: async (ctx, args): Promise<Doc<"sessions">> => {
+  handler: async (ctx, args): Promise<Id<"sessions">> => {
     const user = await ctx.runQuery(internal.user.users.getUser, {
       userId: args.userId,
     });
@@ -49,11 +49,6 @@ export const approveIntake = action({
       tagline,
     });
 
-    // return session for the flow; port to different setup later
-    const session = await ctx.runQuery(internal.user.users.getUserSession, {
-      userId: args.userId,
-    });
-    if (!session) throw new Error("Session not found");
-    return session;
+    return sessionId;
   },
 });
