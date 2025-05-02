@@ -18,7 +18,7 @@ import {
   useApplicant,
   useMaxWaitTime,
   useWaitingList,
-} from "./preload-provider";
+} from "./queries/preload-hooks";
 import { useMutation } from "convex/react";
 import { JoinButton } from "./join-router";
 import { useState } from "react";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useApplicant, useInterviewStatus } from "./preload-provider";
+import { useApplicant, useInterviewStatus } from "./queries/preload-hooks";
 import { JoinRouter } from "./join-router";
 import { Interview } from "./interview";
 

@@ -5,7 +5,7 @@ import { useAction } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { ChaliceChatCopy } from "./assets/chat-copy";
-import { useApplicant } from "./preload-provider";
+import { useApplicant } from "./queries/preload-hooks";
 import { WaitingList } from "./waiting-list";
 
 interface JoinRouterProps {

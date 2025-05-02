@@ -89,7 +89,7 @@ export const handleLeave = mutation({
 // QUERIES
 export const getApplicant = query({
   args: {
-    userId: v.string(),
+    userId: v.id("users"),
   },
   returns: v.union(
     v.object({
@@ -107,22 +107,21 @@ export const getApplicant = query({
     mission: Doc<"missions">;
     session: Doc<"sessions">;
   } | null> => {
-    const documentId = ctx.db.normalizeId("users", args.userId);
-    if (!documentId) return null;
+    const { userId } = args;
 
     const user = await ctx.runQuery(internal.user.users.getUser, {
-      userId: documentId,
+      userId,
     });
     const mission = await ctx.runQuery(internal.user.users.getUserMission, {
-      userId: documentId,
+      userId,
     });
     const session = await ctx.runQuery(internal.user.users.getUserSession, {
-      userId: documentId,
+      userId,
     });
 
     if (!user || !mission || !session) {
       console.error(
-        `User or mission or session not found for documentId: ${documentId}`
+        `User or mission or session not found for userId: ${userId}`
       );
       return null;
     }
