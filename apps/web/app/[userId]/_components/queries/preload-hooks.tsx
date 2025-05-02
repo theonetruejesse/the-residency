@@ -1,5 +1,7 @@
 "use client";
 
+// todo, migrate to react query
+
 import { api } from "@residency/api";
 import { Preloaded, usePreloadedQuery } from "convex/react";
 import { createContext, useContext, ReactNode } from "react";

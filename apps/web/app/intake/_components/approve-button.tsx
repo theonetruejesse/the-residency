@@ -1,9 +1,8 @@
 "use client";
 
+import { ActionButton } from "@/components/action-button";
 import { Id, api } from "@residency/api";
-import { Button } from "@residency/ui/components/button";
 import { useAction } from "convex/react";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -11,7 +10,6 @@ interface ApproveButtonProps {
   userId: Id<"users">;
 }
 export const ApproveButton = ({ userId }: ApproveButtonProps) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<Id<"sessions"> | null>(null);
 
   const router = useRouter();
@@ -23,31 +21,22 @@ export const ApproveButton = ({ userId }: ApproveButtonProps) => {
     }
   }, [sessionId]);
 
+  const handleClick = async () => {
+    const sessionId = await approve({ userId });
+    setSessionId(sessionId);
+  };
+
   return (
-    <>
-      <Button
-        size="lg"
-        className="w-full mt-10 text-xl p-6"
-        onClick={async () => {
-          setIsLoading(true);
-          const sessionId = await approve({ userId });
-          setSessionId(sessionId);
-        }}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="animate-spin" />
-            Approving Application...
-          </>
-        ) : (
-          "Approve Application*"
-        )}
-      </Button>
+    <div className="flex flex-col gap-2 mt-10">
+      <ActionButton
+        handleClick={handleClick}
+        actionText="Approve Application*"
+        loadingText="Approving..."
+      />
       <p className="text-gray-600 text-sm opacity-80 mt-2">
         *Does not exist in production. Approving the application takes a couple
         seconds since we need to generate the first interiew question.
       </p>
-    </>
+    </div>
   );
 };

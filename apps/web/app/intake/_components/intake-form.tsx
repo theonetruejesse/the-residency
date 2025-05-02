@@ -3,12 +3,12 @@
 import type React from "react";
 
 import { useState } from "react";
-import { Button } from "@residency/ui/components/button";
 import { Input } from "@residency/ui/components/input";
 import { Label } from "@residency/ui/components/label";
 import { Textarea } from "@residency/ui/components/textarea";
 import { useMutation } from "convex/react";
 import { api, Id } from "@residency/api";
+import { ActionButton } from "@/components/action-button";
 
 interface ResidencyFormProps {
   setUserId: (userId: Id<"users">) => void;
@@ -34,19 +34,14 @@ export function ResidencyForm({ setUserId }: ResidencyFormProps) {
 
   const submitIntake = useMutation(api.user.application.submitIntake);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
+  const handleSubmit = async () => {
     const userId = await submitIntake(formData);
     setUserId(userId);
   };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <form
-        onSubmit={handleSubmit}
-        className="p-8 space-y-6 rounded-lg glass mx-2"
-      >
+      <form className="p-8 space-y-6 rounded-lg glass mx-2">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">
             The Residency Application
@@ -115,12 +110,11 @@ export function ResidencyForm({ setUserId }: ResidencyFormProps) {
           />
         </div>
 
-        <Button
-          type="submit"
-          className="w-full bg-black hover:bg-black/80 text-white"
-        >
-          Submit Application
-        </Button>
+        <ActionButton
+          handleClick={handleSubmit}
+          actionText="Submit Application"
+          loadingText="Submitting..."
+        />
       </form>
     </div>
   );

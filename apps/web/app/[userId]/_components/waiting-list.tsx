@@ -20,8 +20,8 @@ import {
   useWaitingList,
 } from "./queries/preload-hooks";
 import { useAction } from "convex/react";
-import { JoinButton } from "./join-router";
 import { useState } from "react";
+import { ActionButton } from "@/components/action-button";
 
 interface WaitingListProps {
   status: "in_queue" | "join_queue";
@@ -33,15 +33,8 @@ export const WaitingList = ({ status }: WaitingListProps) => {
     <Card className="w-full glass mb-10">
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
         <WaitingListHeader isOpen={isOpen} />
-        <QueueList />
-        <CardFooter>
-          <div className="flex flex-col gap-2 w-full justify-center">
-            <JoinButton isQueue={true} isDisabled={status === "in_queue"} />
-            <p className="text-sm text-muted-foreground">
-              You'll automatically join the interview once your spot opens up.
-            </p>
-          </div>
-        </CardFooter>
+        <WaitingListQueue />
+        <WaitingListFooter status={status} />
       </Collapsible>
     </Card>
   );
@@ -71,7 +64,7 @@ const WaitingListHeader = ({ isOpen }: { isOpen: boolean }) => {
   );
 };
 
-const QueueList = () => {
+const WaitingListQueue = () => {
   const waitingList = useWaitingList();
   const applicant = useApplicant();
 
@@ -141,5 +134,40 @@ const LeaveQueueButton = ({ userId }: { userId: Id<"users"> }) => {
         <X className="h-4 w-4" />
       </button>
     </div>
+  );
+};
+
+const WaitingListFooter = ({ status }: WaitingListProps) => {
+  const isShowNote = status === "in_queue";
+  return (
+    <CardFooter>
+      <div className="flex flex-col gap-2 w-full justify-center">
+        <QueueButton status={status} />
+        {isShowNote && (
+          <p className="text-sm text-muted-foreground">
+            *You'll automatically join the interview once your spot opens up.
+          </p>
+        )}
+      </div>
+    </CardFooter>
+  );
+};
+
+const QueueButton = ({ status }: WaitingListProps) => {
+  const applicant = useApplicant();
+  const handleJoin = useAction(api.user.application.handleJoin);
+
+  const actionText = status === "in_queue" ? "In Queue*" : "Join Queue";
+  const isDisabled = status === "in_queue";
+
+  return (
+    <ActionButton
+      handleClick={async () => {
+        await handleJoin({ userId: applicant.user._id });
+      }}
+      actionText={actionText}
+      loadingText="Joining..."
+      isDisabled={isDisabled}
+    />
   );
 };
