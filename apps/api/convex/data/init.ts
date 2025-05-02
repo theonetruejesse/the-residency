@@ -5,8 +5,6 @@ import { internalMutation, type MutationCtx } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 
-const thirtySecondsInMs = 30 * 1000;
-const twoMinutesInMs = 2 * 60 * 1000;
 const tenMinutesInMs = 10 * 60 * 1000;
 const oneHourInMs = 60 * 60 * 1000;
 
@@ -289,6 +287,7 @@ export default internalMutation({
         userId: userIds[i],
         missionId: missionIds[i],
         active: false,
+        inCall: false,
         firstQuestion: generateFirstQuestions(seedMissions)[i],
         updatedAt: Date.now(),
       });
@@ -302,6 +301,7 @@ export default internalMutation({
         userId: userIds[i],
         missionId: missionIds[i],
         active: false,
+        inCall: false,
         sessionUrl: "https://example.com/session/placeholder-" + j,
         firstQuestion: generateFirstQuestions(seedMissions)[i],
         updatedAt: Date.now(),
@@ -316,18 +316,17 @@ export default internalMutation({
         userId: userIds[i],
         missionId: missionIds[i],
         active: true,
-        sessionUrl: "https://example.com/session/placeholder-" + i,
+        inCall: true,
+        sessionUrl: "https://example.com/session/placeholder-" + j,
         firstQuestion: generateFirstQuestions(seedMissions)[i],
         updatedAt: Date.now(),
       });
       sessionIds.push(sessionId);
+      j++;
 
       // delays for queues
       let time = oneHourInMs;
-      if (i === 4) time = thirtySecondsInMs;
-      if (i === 5) time = twoMinutesInMs;
-      if (i === 6) time = twoMinutesInMs;
-      if (i === 7) time = tenMinutesInMs;
+      if (i === 4) time = tenMinutesInMs;
 
       const endCallFnId = await ctx.scheduler.runAfter(
         time,
@@ -345,6 +344,7 @@ export default internalMutation({
         userId: userIds[i],
         missionId: missionIds[i],
         active: true,
+        inCall: false,
         firstQuestion: generateFirstQuestions(seedMissions)[i],
         updatedAt: Date.now(),
       });

@@ -22,73 +22,22 @@ export function InterviewButton({
   startConversation,
   stopConversation,
 }: InterviewButtonProps) {
-  const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes in seconds
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeLeft = useInterviewTimer(isConnected, stopConversation);
 
-  // Start or stop timer based on connection status
-  useEffect(() => {
-    if (isConnected) {
-      // Start timer when interview starts
-      setTimeLeft(15 * 60); // Reset to 15 minutes
-      intervalRef.current = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            clearInterval(intervalRef.current as NodeJS.Timeout);
-            // Auto-stop the conversation when timer reaches zero
-            stopConversation();
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    } else {
-      // Stop timer when interview ends
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    }
-
-    // Cleanup on unmount
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isConnected]);
-
-  // Format time as (MM:SS)
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `(${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")})`;
-  };
-
-  // Handle button click
   const handleButtonClick = () => {
     if (!isConnected) {
-      // Start interview
       startConversation();
+    } else if (timeLeft > 5 * 60) {
+      setShowConfirmation(true);
     } else {
-      // Check if more than 10 minutes left
-      if (timeLeft > 10 * 60) {
-        setShowConfirmation(true);
-      } else {
-        // Less than 10 minutes left, end directly
-        stopConversation();
-      }
+      stopConversation();
     }
   };
 
-  // Handle confirmation
   const handleConfirm = () => {
     setShowConfirmation(false);
     stopConversation();
-  };
-
-  // Handle cancellation
-  const handleCancel = () => {
-    setShowConfirmation(false);
   };
 
   return (
@@ -111,25 +60,94 @@ export function InterviewButton({
         )}
       </Button>
 
-      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>End Interview Early?</DialogTitle>
-            <DialogDescription>
-              There are still {formatTime(timeLeft)} left in this interview. Are
-              you sure you want to end it now?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-row justify-end gap-2 sm:justify-end">
-            <Button variant="outline" onClick={handleCancel}>
-              Continue Interview
-            </Button>
-            <Button variant="destructive" onClick={handleConfirm}>
-              End Interview
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmationDialog
+        timeLeft={timeLeft}
+        showConfirmation={showConfirmation}
+        setShowConfirmation={setShowConfirmation}
+        onConfirm={handleConfirm}
+        onCancel={() => setShowConfirmation(false)}
+      />
     </>
+  );
+}
+
+// Timer hook
+const useInterviewTimer = (
+  isConnected: boolean,
+  stopConversation: () => void
+) => {
+  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isConnected) {
+      setTimeLeft(15 * 60);
+      intervalRef.current = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(intervalRef.current as NodeJS.Timeout);
+            stopConversation();
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isConnected, stopConversation]);
+
+  return timeLeft;
+};
+
+// Time formatting utility
+function formatTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `(${minutes.toString().padStart(2, "0")}:${remainingSeconds
+    .toString()
+    .padStart(2, "0")})`;
+}
+
+// Confirmation Dialog Component
+function ConfirmationDialog({
+  timeLeft,
+  showConfirmation,
+  setShowConfirmation,
+  onConfirm,
+  onCancel,
+}: {
+  timeLeft: number;
+  showConfirmation: boolean;
+  setShowConfirmation: (show: boolean) => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>End Interview Early?</DialogTitle>
+          <DialogDescription>
+            There are still {formatTime(timeLeft)} left in this interview. Are
+            you sure you want to end it now?
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="flex flex-row justify-end gap-2 sm:justify-end">
+          <Button variant="outline" onClick={onCancel}>
+            Continue Interview
+          </Button>
+          <Button variant="destructive" onClick={onConfirm}>
+            End Interview
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

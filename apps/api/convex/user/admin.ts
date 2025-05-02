@@ -39,7 +39,6 @@ export const approveIntake = action({
         userId: user._id,
         missionId: mission._id,
         firstQuestion: firstQuestion,
-        active: false,
       }
     );
 

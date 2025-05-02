@@ -3,6 +3,8 @@
 import { useConversation } from "@11labs/react";
 import { useCallback } from "react";
 import { InterviewProps } from "./index.js";
+import { useAction } from "convex/react";
+import { api } from "@residency/api";
 
 const sessionConfig = (props: InterviewProps) => {
   const { session, user, mission } = props.applicant;
@@ -44,24 +46,26 @@ export function useConvo(props: InterviewProps) {
     },
   });
 
-  async function startConversation() {
+  const startConversation = async () => {
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) {
       alert("No permission");
       return;
     }
     try {
-      const conversationId = await conversation.startSession({
+      await conversation.startSession({
         ...sessionConfig(props),
       });
-      console.log(conversationId);
     } catch (error) {
       console.error("Error starting conversation:", error);
       alert("Failed to start conversation. Please check the console.");
     }
-  }
+  };
 
   const stopConversation = useCallback(async () => {
+    const leave = useAction(api.user.application.handleLeave);
+
+    await leave({ userId: props.applicant.user._id });
     await conversation.endSession();
   }, [conversation]);
 

@@ -89,9 +89,11 @@ export const SESSION_RELATIONS = {
 };
 
 export const SESSION_ARGS = {
-  active: v.boolean(),
-  firstQuestion: v.string(), // first question of the interview; ai generated using the user's mission
+  active: v.boolean(), // in-queue flag
+  inCall: v.boolean(), // in-call flag
+  queuedAt: v.optional(v.number()), // timestamp when the session first joined the queue
   sessionUrl: v.optional(v.string()), // expires in 15 minutes; used for denoting which users joined the interview
+  firstQuestion: v.string(), // first question of the interview; ai generated using the user's mission
   updatedAt: v.number(), // used for ordering sessions in the queue
 };
 export const SESSION = {

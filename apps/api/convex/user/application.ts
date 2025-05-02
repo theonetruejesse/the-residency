@@ -148,13 +148,12 @@ export const getInterviewStatus = query({
     });
     if (!userSession) throw new Error("User session not found");
 
-    const { active, sessionUrl } = userSession;
+    const { active, inCall, sessionUrl } = userSession;
 
-    if (active && sessionUrl) return "active_call";
-    if (active && !sessionUrl) return "in_queue";
     if (!active && sessionUrl) return "post_interview";
+    if (inCall && sessionUrl) return "active_call";
+    if (active) return "in_queue";
 
-    // else: if (!active && !sessionUrl)
     const isQueueFull: boolean = await ctx.runQuery(
       internal.user.queue.isQueueFull
     );

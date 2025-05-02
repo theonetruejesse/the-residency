@@ -35,7 +35,12 @@ export const WaitingList = ({ status }: WaitingListProps) => {
         <WaitingListHeader isOpen={isOpen} />
         <QueueList />
         <CardFooter>
-          <JoinButton isQueue={true} isDisabled={status === "in_queue"} />
+          <div className="flex flex-col gap-2 w-full justify-center">
+            <JoinButton isQueue={true} isDisabled={status === "in_queue"} />
+            <p className="text-sm text-muted-foreground">
+              You'll automatically join the interview once your spot opens up.
+            </p>
+          </div>
         </CardFooter>
       </Collapsible>
     </Card>

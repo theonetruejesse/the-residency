@@ -8,67 +8,182 @@ import { SESSION_RETURN } from "../schema.types";
 // active sessions are within the queue
 // active sessions with endCallFnId are active calls
 
-export const handleQueue = internalAction({
-  args: {
-    userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    const { userId } = args;
+/*
+ * INTERNAL QUERIES
+ */
 
-    const isQueueFull = await ctx.runQuery(internal.user.queue.isQueueFull);
-
-    const isNextUser =
-      (await ctx.runQuery(internal.user.queue.nextUserInQueue)) === userId;
-
-    const isUserInQueue = await ctx.runQuery(
-      internal.user.queue.isUserInQueue,
-      { userId }
-    );
-
-    const session = await ctx.runQuery(internal.user.users.getUserSession, {
-      userId: args.userId,
-    });
-    if (!session) throw new Error("Session not found");
-
-    if (!isQueueFull || (isNextUser && isUserInQueue)) {
-      // start call
-      await ctx.runAction(internal.user.queue.createActiveCall, {
-        sessionId: session._id,
-      });
-    } else if (!isUserInQueue) {
-      // join queue
-      await ctx.runMutation(internal.user.session.updateSession, {
-        sessionId: session._id,
-        active: true,
-      });
-    }
-
-    // else, do nothing (otherwise we ruin the queue ordering)
-    return;
+export const listQueueSessions = internalQuery({
+  args: {},
+  returns: v.array(SESSION_RETURN),
+  handler: async (ctx): Promise<Doc<"sessions">[]> => {
+    return await ctx.db
+      .query("sessions")
+      .withIndex("by_active_updatedAt", (q: any) => q.eq("active", true))
+      .order("asc")
+      .collect();
   },
 });
 
-export const createActiveCall = internalAction({
-  args: {
-    sessionId: v.id("sessions"),
+export const listActiveCalls = internalQuery({
+  args: {},
+  returns: v.array(SESSION_RETURN),
+  handler: async (ctx): Promise<Doc<"sessions">[]> => {
+    return await ctx.db
+      .query("sessions")
+      .withIndex("by_inCall_updatedAt", (q) => q.eq("inCall", true))
+      .order("asc")
+      .collect();
   },
-  handler: async (ctx, args) => {
-    const { sessionId } = args;
+});
 
+export const listWaitingSessions = internalQuery({
+  args: {},
+  returns: v.array(SESSION_RETURN),
+  handler: async (ctx): Promise<Doc<"sessions">[]> => {
+    // Return queued sessions in order of original queue time
+    return await ctx.db
+      .query("sessions")
+      .withIndex("by_active_queuedAt", (q) => q.eq("active", true))
+      .filter((q) => q.eq(q.field("inCall"), false))
+      .order("asc")
+      .collect();
+  },
+});
+
+export const isQueueFull = internalQuery({
+  args: {},
+  returns: v.boolean(),
+  handler: async (ctx): Promise<boolean> => {
+    const activeCalls = await ctx.runQuery(
+      internal.user.queue.listActiveCalls,
+      {}
+    );
+    return activeCalls.length >= MAX_CONCURRENT_CALLS;
+  },
+});
+
+export const getSessionWaitTime = internalQuery({
+  args: { sessionId: v.id("sessions") },
+  returns: v.number(),
+  handler: async (ctx, { sessionId }): Promise<number> => {
+    // Get queued and in-call sessions via internal queries
+    const waiting = await ctx.runQuery(
+      internal.user.queue.listWaitingSessions,
+      {}
+    );
+    const inCalls = await ctx.runQuery(internal.user.queue.listActiveCalls, {});
+    // If slots free or already in call, no wait
+    if (
+      inCalls.length < MAX_CONCURRENT_CALLS ||
+      inCalls.some((s) => s._id === sessionId)
+    ) {
+      return 0;
+    }
+    const now = Date.now();
+    // Build a min-heap via sorted array of end times
+    const endTimes: number[] = [];
+    for (const call of inCalls) {
+      if (call.endCallFnId) {
+        const job = await ctx.db.system.get(call.endCallFnId);
+        endTimes.push(job ? new Date(job.scheduledTime).getTime() : now);
+      } else {
+        endTimes.push(now);
+      }
+    }
+    endTimes.sort((a, b) => a - b);
+    // Simulate assigning each waiting session to earliest slot
+    for (const session of waiting) {
+      // Get earliest slot free time
+      const slotTime = endTimes.shift()!;
+      if (session._id === sessionId) {
+        const waitMs = Math.max(0, slotTime - now);
+        return Math.ceil(waitMs / (60 * 1000));
+      }
+      // Schedule this session's end
+      endTimes.push(slotTime + MAX_SESSION_DURATION);
+      endTimes.sort((a, b) => a - b);
+    }
+    // If not found in waiting list, estimate end of last slot
+    const lastEnd = endTimes[endTimes.length - 1];
+    const waitMs = Math.max(0, lastEnd - now);
+    return Math.ceil(waitMs / (60 * 1000));
+  },
+});
+
+/*
+ * INTERNAL ACTIONS
+ */
+
+export const handleQueue = internalAction({
+  args: { userId: v.id("users") },
+  returns: v.null(),
+  handler: async (ctx, { userId }) => {
+    const session = await ctx.runQuery(internal.user.users.getUserSession, {
+      userId,
+    });
+    if (!session) throw new Error("Session not found");
+    if (!session.active && !session.inCall) {
+      // Preserve original queuedAt; set only on initial enqueue
+      const now = Date.now();
+      const updateArgs: {
+        sessionId: Id<"sessions">;
+        active: boolean;
+        queuedAt?: number;
+      } = {
+        sessionId: session._id,
+        active: true,
+      };
+      if (session.queuedAt === undefined) {
+        updateArgs.queuedAt = now;
+      }
+      await ctx.runMutation(internal.user.session.updateSession, updateArgs);
+    }
+    await ctx.runAction(internal.user.queue.processQueue, {});
+    return null;
+  },
+});
+
+export const processQueue = internalAction({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    const waiting: Doc<"sessions">[] = await ctx.runQuery(
+      internal.user.queue.listWaitingSessions,
+      {}
+    );
+    const inCalls: Doc<"sessions">[] = await ctx.runQuery(
+      internal.user.queue.listActiveCalls,
+      {}
+    );
+    if (inCalls.length < MAX_CONCURRENT_CALLS && waiting.length > 0) {
+      await ctx.runAction(internal.user.queue.startCall, {
+        sessionId: waiting[0]._id,
+      });
+    }
+    return null;
+  },
+});
+
+export const startCall = internalAction({
+  args: { sessionId: v.id("sessions") },
+  returns: v.null(),
+  handler: async (ctx, { sessionId }) => {
     await ctx.runAction(internal.user.actions.generateSessionUrl, {
       sessionId,
     });
-
     const endCallFnId = await ctx.scheduler.runAfter(
       MAX_SESSION_DURATION,
       internal.user.queue.leaveQueue,
       { sessionId }
     );
+    // Move session into an active call (no longer in queue)
     await ctx.runMutation(internal.user.session.updateSession, {
       sessionId,
+      active: false,
+      inCall: true,
       endCallFnId,
-      active: true,
     });
+    return null;
   },
 });
 
@@ -77,32 +192,19 @@ export const leaveQueue = internalAction({
     sessionId: v.id("sessions"),
     endCallFnId: v.optional(v.id("_scheduled_functions")),
   },
-  handler: async (ctx, args) => {
-    if (args.endCallFnId) {
-      await ctx.scheduler.cancel(args.endCallFnId);
+  returns: v.null(),
+  handler: async (ctx, { sessionId, endCallFnId }) => {
+    if (endCallFnId) {
+      await ctx.scheduler.cancel(endCallFnId);
     }
-
     await ctx.runMutation(internal.user.session.updateSession, {
-      sessionId: args.sessionId,
+      sessionId,
       active: false,
+      inCall: false,
       endCallFnId: null,
     });
-
-    const nextUser = await ctx.runQuery(internal.user.queue.nextUserInQueue);
-    if (nextUser) {
-      await ctx.runAction(internal.user.queue.handleQueue, {
-        userId: nextUser,
-      });
-    }
-  },
-});
-
-export const isQueueFull = internalQuery({
-  args: {},
-  returns: v.boolean(),
-  handler: async (ctx): Promise<boolean> => {
-    const activeCalls = await ctx.runQuery(internal.user.queue.listActiveCalls);
-    return activeCalls.length >= MAX_CONCURRENT_CALLS;
+    await ctx.runAction(internal.user.queue.processQueue, {});
+    return null;
   },
 });
 
@@ -110,14 +212,9 @@ export const nextUserInQueue = internalQuery({
   args: {},
   returns: v.union(v.id("users"), v.null()),
   handler: async (ctx): Promise<Id<"users"> | null> => {
-    const firstSession = await ctx.db
-      .query("sessions")
-      .withIndex("by_active_updatedAt", (q) => q.eq("active", true))
-      .filter((q) => q.eq(q.field("endCallFnId"), undefined))
-      .order("asc") // Oldest updated first
-      .first();
-
-    return firstSession?.userId ?? null;
+    const f = await ctx.runQuery(internal.user.queue.listWaitingSessions, {});
+    if (f.length === 0) return null;
+    return f[0].userId;
   },
 });
 
@@ -129,83 +226,9 @@ export const isUserInQueue = internalQuery({
   handler: async (ctx, args) => {
     const session = await ctx.db
       .query("sessions")
-      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user_id", (q: any) => q.eq("userId", args.userId))
       .first();
 
     return session !== null && session.active;
-  },
-});
-
-// returns the wait time for a session in the queue (in minutes)
-export const getSessionWaitTime = internalQuery({
-  args: { sessionId: v.id("sessions") },
-  returns: v.number(),
-  handler: async (ctx, { sessionId }): Promise<number> => {
-    const sessions = await ctx.runQuery(internal.user.queue.listQueueSessions);
-    let pos = sessions.findIndex((s) => s._id === sessionId);
-
-    // If session not found, estimate time as if joining at the end
-    const effectivePos = pos === -1 ? sessions.length : pos;
-
-    const now = Date.now();
-    const endTimes: number[] = [];
-    for (let i = 0; i < MAX_CONCURRENT_CALLS; i++) {
-      const s = sessions[i];
-      if (s?.endCallFnId) {
-        const job = await ctx.db.system.get(s.endCallFnId);
-        endTimes.push(job ? new Date(job.scheduledTime).getTime() : now);
-      } else {
-        endTimes.push(now);
-      }
-    }
-    // If joining now would put them straight into a call (or they are already), wait is 0
-    if (effectivePos < MAX_CONCURRENT_CALLS) return 0;
-
-    const queueIndex = effectivePos - MAX_CONCURRENT_CALLS;
-    const slot = queueIndex % MAX_CONCURRENT_CALLS;
-    const rounds = Math.floor(queueIndex / MAX_CONCURRENT_CALLS);
-    const scheduledAt = endTimes[slot] + rounds * MAX_SESSION_DURATION;
-    const waitTimeMillis = Math.max(0, scheduledAt - now);
-
-    return Math.ceil(waitTimeMillis / (60 * 1000)); // Convert to minutes and round up
-  },
-});
-
-// returns all active sessions; in queue order
-export const listQueueSessions = internalQuery({
-  args: {},
-  returns: v.array(SESSION_RETURN),
-  handler: async (ctx) => {
-    return await ctx.db
-      .query("sessions")
-      .withIndex("by_active_updatedAt", (q) => q.eq("active", true))
-      .order("asc") // Oldest updated first
-      .collect();
-  },
-});
-
-// TODO; index these things properly
-
-// returns all active calls in active sessions
-export const listActiveCalls = internalQuery({
-  args: {},
-  handler: async (ctx): Promise<Doc<"sessions">[]> => {
-    const activeSessions = await ctx.runQuery(
-      internal.user.queue.listQueueSessions
-    );
-
-    return activeSessions.filter((session) => session.endCallFnId);
-  },
-});
-
-// returns all inactive calls in active sessions
-export const listWaitingSessions = internalQuery({
-  args: {},
-  handler: async (ctx): Promise<Doc<"sessions">[]> => {
-    const activeSessions = await ctx.runQuery(
-      internal.user.queue.listQueueSessions
-    );
-
-    return activeSessions.filter((session) => !session.endCallFnId);
   },
 });
