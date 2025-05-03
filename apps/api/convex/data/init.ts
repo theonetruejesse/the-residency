@@ -270,7 +270,7 @@ export default internalMutation({
     // Create missions and store their IDs
     for (let i = 0; i < seedUsers.length; i++) {
       const missionId = await ctx.db.insert("missions", {
-        userId: userIds[i],
+        userId: userIds[i]!,
         interest: seedMissions[i].interest,
         accomplishment: seedMissions[i].accomplishment,
       });
