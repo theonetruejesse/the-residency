@@ -96,7 +96,7 @@ export const joinCall = internalAction({
   handler: async (ctx, { sessionId }) => {
     console.log(`joinCall invoked for session ${sessionId}`);
     try {
-      // this is where the issue seems to be
+      // schedule the end of the call
       const scheduledEndTime = Date.now() + MAX_SESSION_DURATION;
       const endCallFnId = await ctx.scheduler.runAt(
         new Date(scheduledEndTime),

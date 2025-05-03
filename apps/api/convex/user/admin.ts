@@ -55,7 +55,7 @@ export const approveIntake = action({
 
 // helpers for demo
 
-export const kickUserFromQueue = internalAction({
+export const kickSession = internalAction({
   args: {
     sessionId: v.id("sessions"),
   },
