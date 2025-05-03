@@ -62,8 +62,8 @@ export const handleJoin = action({
     });
     if (!userSession) throw new Error("User session not found");
 
-    await ctx.runAction(internal.user.queue.handleQueue, {
-      userId,
+    await ctx.runAction(internal.user.queue.handleJoin, {
+      sessionId: userSession._id,
     });
   },
 });
@@ -81,9 +81,8 @@ export const handleLeave = action({
     });
     if (!session) throw new Error("Session not found");
 
-    await ctx.runAction(internal.user.queue.leaveQueue, {
+    await ctx.runAction(internal.user.queue.handleLeave, {
       sessionId: session._id,
-      endCallFnId: session.endCallFnId,
     });
   },
 });
@@ -148,11 +147,11 @@ export const getInterviewStatus = query({
     });
     if (!userSession) throw new Error("User session not found");
 
-    const { active, inCall, sessionUrl } = userSession;
+    const { waiting, inCall, sessionUrl } = userSession;
 
-    if (!active && sessionUrl) return "post_interview";
-    if (inCall && sessionUrl) return "active_call";
-    if (active) return "in_queue";
+    if (!waiting && sessionUrl) return "post_interview";
+    if (inCall) return "active_call";
+    if (waiting) return "in_queue";
 
     const isQueueFull: boolean = await ctx.runQuery(
       internal.user.queue.isQueueFull
@@ -214,7 +213,7 @@ export const getMaxWaitTime = query({
     if (!session) throw new Error("Session not found");
 
     const waitTime: number = await ctx.runQuery(
-      internal.user.queue.getSessionWaitTime,
+      internal.user.wait.getSessionWaitTime,
       { sessionId: session._id }
     );
     return waitTime;

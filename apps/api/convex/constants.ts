@@ -4,7 +4,8 @@ import { ElevenLabsClient } from "elevenlabs";
 // SETTINGS
 export const MAX_CONCURRENT_CALLS = 5;
 // 5 minutes to start, 15 minutes for the call itself; user gets kicked out after this time
-export const MAX_SESSION_DURATION = 20 * 60 * 1000; // 20 minutes in milliseconds
+// export const MAX_SESSION_DURATION = 20 * 60 * 1000; // 20 minutes in milliseconds
+export const MAX_SESSION_DURATION = 10 * 1000; // 10 seconds in milliseconds
 
 // ENV VARIABLES (+validation)
 const ELEVEN_LABS_API_KEY = process.env.ELEVEN_LABS_API_KEY;

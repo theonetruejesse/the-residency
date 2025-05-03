@@ -5,9 +5,6 @@ import { internalMutation, type MutationCtx } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 
-const tenMinutesInMs = 10 * 60 * 1000;
-const oneHourInMs = 60 * 60 * 1000;
-
 const seedUsers = [
   { firstName: "Arya", lastName: "Kumar", round: "intake", status: "pending" },
   { firstName: "John", lastName: "Doe", round: "intake", status: "pending" },
@@ -281,15 +278,15 @@ export default internalMutation({
     }
 
     // Create sessions with varying configurations:
+
     // 1. 2 inactive sessions without sessionUrl (index 0-1)
     for (let i = 0; i < 2; i++) {
       const sessionId = await ctx.db.insert("sessions", {
         userId: userIds[i],
         missionId: missionIds[i],
-        active: false,
+        waiting: false,
         inCall: false,
         firstQuestion: generateFirstQuestions(seedMissions)[i],
-        updatedAt: Date.now(),
       });
       sessionIds.push(sessionId);
     }
@@ -300,53 +297,67 @@ export default internalMutation({
       const sessionId = await ctx.db.insert("sessions", {
         userId: userIds[i],
         missionId: missionIds[i],
-        active: false,
+        waiting: false,
         inCall: false,
         sessionUrl: "https://example.com/session/placeholder-" + j,
         firstQuestion: generateFirstQuestions(seedMissions)[i],
-        updatedAt: Date.now(),
       });
       sessionIds.push(sessionId);
       j++;
     }
 
     // 3. 5 active sessions with sessionUrl and endCallFnId (index 4-8)
+    let k = 1;
+    let baseQueueTime = Date.now() - 10 * 60 * 1000; // Simulate joining queue ~10 mins ago
+
     for (let i = 4; i < 9; i++) {
+      const queuedAt = baseQueueTime + k * 1000; // Stagger join times
       const sessionId = await ctx.db.insert("sessions", {
         userId: userIds[i],
         missionId: missionIds[i],
-        active: true,
-        inCall: true,
-        sessionUrl: "https://example.com/session/placeholder-" + j,
+        waiting: true, // Start as active (in queue)
+        inCall: false,
+        queuedAt: queuedAt, // Set initial queue time
         firstQuestion: generateFirstQuestions(seedMissions)[i],
-        updatedAt: Date.now(),
       });
       sessionIds.push(sessionId);
-      j++;
 
-      // delays for queues
-      let time = oneHourInMs;
-      if (i === 4) time = tenMinutesInMs;
+      // Simulate moving to inCall state
+      const tenSecondsInMs = 10 * 1000;
+      const timeDelay = k * tenSecondsInMs; // Delay before call starts
+      const scheduledEndTime = Date.now() + timeDelay; // Calculate actual end time relative to NOW
+      const sessionUrl = "https://example.com/session/placeholder-" + j; // Generate URL here
 
-      const endCallFnId = await ctx.scheduler.runAfter(
-        time,
-        internal.user.queue.leaveQueue,
+      const endCallFnId = await ctx.scheduler.runAt(
+        new Date(scheduledEndTime),
+        internal.user.queue.scheduledLeave,
         { sessionId }
       );
 
-      // Update the session with the scheduled function ID
-      await ctx.db.patch(sessionId, { endCallFnId });
+      // Update the session to reflect being in call
+      await ctx.db.patch(sessionId, {
+        waiting: false, // No longer in queue
+        inCall: true, // Now in call
+        sessionUrl: sessionUrl,
+        endCallFnId,
+        scheduledEndTime,
+      });
+
+      j++;
+      k++;
     }
 
     // 4. 6 active sessions without sessionUrl (index 9-14)
+    let waitingQueueTime = Date.now(); // Start queuing from now
     for (let i = 9; i < 15; i++) {
+      const queuedAt = waitingQueueTime + (i - 9) * 2000; // Stagger join times slightly
       const sessionId = await ctx.db.insert("sessions", {
         userId: userIds[i],
         missionId: missionIds[i],
-        active: true,
+        waiting: true, // Currently in queue
         inCall: false,
+        queuedAt: queuedAt, // Set queue time
         firstQuestion: generateFirstQuestions(seedMissions)[i],
-        updatedAt: Date.now(),
       });
       sessionIds.push(sessionId);
     }

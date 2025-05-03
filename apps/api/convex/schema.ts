@@ -41,10 +41,8 @@ export default defineSchema({
     ...SESSION,
   })
     .index("by_user_id", ["userId"])
-    .index("by_active", ["active"])
-    .index("by_active_updatedAt", ["active", "updatedAt"])
-    .index("by_active_queuedAt", ["active", "queuedAt"])
-    .index("by_inCall_updatedAt", ["inCall", "updatedAt"]),
+    .index("by_waiting_queuedAt", ["waiting", "queuedAt"])
+    .index("by_inCall_scheduledEndTime", ["inCall", "scheduledEndTime"]),
 
   // first round interview evaluation; webhook from elevenlabs
   grades: defineTable({

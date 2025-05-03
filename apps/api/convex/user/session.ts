@@ -18,9 +18,8 @@ export const createSession = internalMutation({
   handler: async (ctx, args) => {
     return await ctx.db.insert("sessions", {
       ...args,
-      active: false,
+      waiting: false,
       inCall: false,
-      updatedAt: Date.now(),
     });
   },
 });
@@ -29,40 +28,32 @@ export const updateSession = internalMutation({
   args: {
     sessionId: v.id("sessions"),
     sessionUrl: v.optional(v.union(v.string(), v.null())),
-    active: v.optional(v.boolean()),
+    waiting: v.optional(v.boolean()),
     inCall: v.optional(v.boolean()),
-    queuedAt: v.optional(v.number()),
+    queuedAt: v.optional(v.union(v.number(), v.null())),
     endCallFnId: v.optional(v.union(v.id("_scheduled_functions"), v.null())),
+    scheduledEndTime: v.optional(v.union(v.number(), v.null())),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
     const patch: any = {};
 
-    // Only update queuedAt when explicitly provided
-    if (args.queuedAt !== undefined) {
-      patch.queuedAt = args.queuedAt;
-    }
-
-    // Only update updatedAt when joining the queue
-    const isJoiningQueue =
-      args.active === true &&
-      args.inCall === undefined &&
-      args.endCallFnId === undefined &&
-      args.sessionUrl === undefined;
-    if (isJoiningQueue) {
-      patch.updatedAt = Date.now();
-    }
-
     // false also counts as undefined
-    if (args.active !== undefined) patch.active = args.active;
+    if (args.waiting !== undefined) patch.waiting = args.waiting;
     if (args.inCall !== undefined) patch.inCall = args.inCall;
 
-    // if sessionUrl is explicitly provided
+    // if null then remove the field
     if (args.sessionUrl !== undefined) {
       patch.sessionUrl = args.sessionUrl ?? undefined;
     }
     if (args.endCallFnId !== undefined) {
       patch.endCallFnId = args.endCallFnId ?? undefined;
+    }
+    if (args.scheduledEndTime !== undefined) {
+      patch.scheduledEndTime = args.scheduledEndTime ?? undefined;
+    }
+    if (args.queuedAt !== undefined) {
+      patch.queuedAt = args.queuedAt ?? undefined;
     }
 
     await ctx.db.patch(args.sessionId, patch);

@@ -5,22 +5,18 @@ import { internalAction } from "../_generated/server";
 import { ELEVEN_LABS_AGENT_ID, elevenClient, geminiClient } from "../constants";
 import { MISSION_ARGS } from "../schema.types";
 import { firstQuestionPrompt, rolePrompt, taglinePrompt } from "../prompts";
-import { internal } from "../_generated/api";
 
 export const generateSessionUrl = internalAction({
   args: {
     sessionId: v.id("sessions"),
   },
+  returns: v.string(),
   handler: async (ctx, args) => {
     try {
       const response = await elevenClient.conversationalAi.getSignedUrl({
         agent_id: ELEVEN_LABS_AGENT_ID as string,
       });
-
-      await ctx.runMutation(internal.user.session.updateSession, {
-        sessionId: args.sessionId,
-        sessionUrl: response.signed_url,
-      });
+      return response.signed_url;
     } catch (error) {
       console.error("Error getting signed URL:", error);
       throw error;
