@@ -118,7 +118,7 @@ function PersonaCard({
 
   return (
     <div
-      className={`p-3 rounded-lg border bg-card text-card-foreground relative ${
+      className={`p-3 rounded-lg border bg-card text-card-foreground flex flex-row ${
         isUser ? "border-2 border-muted-foreground/20" : ""
       }`}
     >
@@ -137,7 +137,7 @@ const LeaveQueueButton = ({ userId }: { userId: Id<"users"> }) => {
   const handleLeave = useAction(api.user.application.handleLeave);
 
   return (
-    <div className="absolute right-2 top-1/2 -translate-y-1/2 h-full items-center justify-center flex flex-col border-l-2 border-muted-foreground/20 pl-2">
+    <div className="flex flex-col items-center justify-center border-l-2 border-muted-foreground/20 pl-2 ml-auto">
       <button
         onClick={() => handleLeave({ userId })}
         className="h-6 w-6 rounded-full hover:bg-muted justify-center items-center flex text-muted-foreground"

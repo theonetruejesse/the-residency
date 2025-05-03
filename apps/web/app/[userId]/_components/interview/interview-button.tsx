@@ -10,34 +10,34 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@residency/ui/components/dialog";
+import { formatTime, useInterviewTimer } from "./timer-hook";
 
 interface InterviewButtonProps {
   isConnected: boolean;
-  startConversation: () => void;
-  stopConversation: () => void;
+  startConversation: () => Promise<void>;
+  stopConversation: () => Promise<void>;
 }
-
 export function InterviewButton({
   isConnected,
   startConversation,
   stopConversation,
 }: InterviewButtonProps) {
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const timeLeft = useInterviewTimer(isConnected, stopConversation);
+  const timeLeft = useInterviewTimer(isConnected);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
     if (!isConnected) {
-      startConversation();
+      await startConversation();
     } else if (timeLeft > 5 * 60) {
       setShowConfirmation(true);
     } else {
-      stopConversation();
+      await stopConversation();
     }
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setShowConfirmation(false);
-    stopConversation();
+    await stopConversation();
   };
 
   return (
@@ -46,7 +46,7 @@ export function InterviewButton({
         variant={isConnected ? "secondary" : "outline"}
         className="rounded-full interview-button w-full"
         size="lg"
-        onClick={handleButtonClick}
+        onClick={async () => await handleButtonClick()}
       >
         {isConnected ? (
           <span className="flex items-center justify-center">
@@ -71,50 +71,6 @@ export function InterviewButton({
   );
 }
 
-// Timer hook
-const useInterviewTimer = (
-  isConnected: boolean,
-  stopConversation: () => void
-) => {
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (isConnected) {
-      setTimeLeft(15 * 60);
-      intervalRef.current = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            clearInterval(intervalRef.current as NodeJS.Timeout);
-            stopConversation();
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    } else if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isConnected, stopConversation]);
-
-  return timeLeft;
-};
-
-// Time formatting utility
-function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `(${minutes.toString().padStart(2, "0")}:${remainingSeconds
-    .toString()
-    .padStart(2, "0")})`;
-}
-
 // Confirmation Dialog Component
 function ConfirmationDialog({
   timeLeft,
@@ -126,7 +82,7 @@ function ConfirmationDialog({
   timeLeft: number;
   showConfirmation: boolean;
   setShowConfirmation: (show: boolean) => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
   onCancel: () => void;
 }) {
   return (
@@ -143,7 +99,7 @@ function ConfirmationDialog({
           <Button variant="outline" onClick={onCancel}>
             Continue Interview
           </Button>
-          <Button variant="destructive" onClick={onConfirm}>
+          <Button variant="destructive" onClick={async () => await onConfirm()}>
             End Interview
           </Button>
         </DialogFooter>

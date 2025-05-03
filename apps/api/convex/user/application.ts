@@ -149,9 +149,9 @@ export const getInterviewStatus = query({
 
     const { waiting, inCall, sessionUrl } = userSession;
 
-    if (!waiting && sessionUrl) return "post_interview";
     if (inCall) return "active_call";
     if (waiting) return "in_queue";
+    if (!waiting && sessionUrl) return "post_interview";
 
     const isQueueFull: boolean = await ctx.runQuery(
       internal.user.queue.isQueueFull

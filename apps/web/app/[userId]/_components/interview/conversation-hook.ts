@@ -61,10 +61,8 @@ export function useConvo(props: InterviewProps) {
       alert("Failed to start conversation. Please check the console.");
     }
   };
-
+  const leave = useAction(api.user.application.handleLeave);
   const stopConversation = useCallback(async () => {
-    const leave = useAction(api.user.application.handleLeave);
-
     await leave({ userId: props.applicant.user._id });
     await conversation.endSession();
   }, [conversation]);
