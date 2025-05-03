@@ -3,7 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "env": ["AGORA_APP_ID", "NEXT_PUBLIC_CONVEX_URL"],
+      "env": ["NEXT_PUBLIC_CONVEX_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env"]
     },
     "dev": {

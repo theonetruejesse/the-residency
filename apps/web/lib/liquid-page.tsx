@@ -1,4 +1,5 @@
 // not being used rn, saved for future reference
+// to use @types/three, run `pnpm add three && pnpm add -D @types/three`
 
 // "use client";
 // // no idea how this works; adjusted color palette and slowed down the animation

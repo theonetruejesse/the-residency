@@ -9,6 +9,7 @@
     "predev": "pnpm seed",
     "seed": "convex dev --run data/init --until-success",
     "nuke": "convex dev --run data/reset --until-success",
+    "convex-deploy": "convex deploy",
     "build": "tsc",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --max-warnings 0 --fix",
