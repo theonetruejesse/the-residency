@@ -10,25 +10,20 @@ interface ApproveButtonProps {
   userId: Id<"users">;
 }
 export const ApproveButton = ({ userId }: ApproveButtonProps) => {
-  const [sessionId, setSessionId] = useState<Id<"sessions"> | null>(null);
-
   const router = useRouter();
   const approve = useAction(api.user.admin.approveIntake);
-
-  useEffect(() => {
-    if (sessionId) {
-      router.push(`/${userId}`);
-    }
-  }, [sessionId]);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const handleClick = async () => {
     const sessionId = await approve({ userId });
-    setSessionId(sessionId);
+    setIsDisabled(true);
+    if (sessionId) router.push(`/${userId}`);
   };
 
   return (
-    <div className="flex flex-col gap-2 mt-10">
+    <div className="flex flex-col gap-2 mt-5">
       <ActionButton
+        isDisabled={isDisabled}
         handleClick={handleClick}
         actionText="Approve Application*"
         loadingText="Approving..."

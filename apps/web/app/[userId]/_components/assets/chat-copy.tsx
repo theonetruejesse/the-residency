@@ -28,7 +28,9 @@ export const ChaliceChatCopy = (props: { userName: string }) => {
         </div>
 
         <div className="w-full">
-          <h2 className="text-lg font-semibold mt-4 mb-2">Call Logistics:</h2>
+          <h2 className="text-lg font-semibold mb-2 underline">
+            Call Logistics:
+          </h2>
           <ul className="list-disc list-inside text-md text-gray-800 space-y-1">
             <li>
               Please join from a quiet environment with a working microphone.

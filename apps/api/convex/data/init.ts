@@ -323,8 +323,9 @@ export default internalMutation({
       sessionIds.push(sessionId);
 
       // Simulate moving to inCall state
+      const minuteInMs = 60 * 1000;
       const tenSecondsInMs = 10 * 1000;
-      const timeDelay = k * tenSecondsInMs; // Delay before call starts
+      const timeDelay = minuteInMs + k * tenSecondsInMs; // Delay before call starts
       const scheduledEndTime = Date.now() + timeDelay; // Calculate actual end time relative to NOW
       const sessionUrl = "https://example.com/session/placeholder-" + j; // Generate URL here
 

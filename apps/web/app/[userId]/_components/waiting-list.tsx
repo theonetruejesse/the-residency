@@ -23,30 +23,37 @@ import { useAction } from "convex/react";
 import { useState } from "react";
 import { ActionButton } from "@/components/action-button";
 
+// todo, auto scroll to bottom of queue on join queue
 interface WaitingListProps {
   status: "in_queue" | "join_queue";
 }
 export const WaitingList = ({ status }: WaitingListProps) => {
   const [isOpen, setIsOpen] = useState(true);
+  const waitingList = useWaitingList();
 
   return (
     <Card className="w-full glass mb-10">
       <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
-        <WaitingListHeader isOpen={isOpen} />
-        <WaitingListQueue />
+        <WaitingListHeader isOpen={isOpen} queueLength={waitingList.length} />
+        <WaitingListQueue waitingList={waitingList} />
         <WaitingListFooter status={status} />
       </Collapsible>
     </Card>
   );
 };
 
-const WaitingListHeader = ({ isOpen }: { isOpen: boolean }) => {
+interface WaitingListHeaderProps {
+  isOpen: boolean;
+  queueLength: number;
+}
+
+const WaitingListHeader = ({ isOpen, queueLength }: WaitingListHeaderProps) => {
   const maxWaitTime = useMaxWaitTime();
   return (
     <CardHeader>
       <CardTitle className="flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <CollapsibleTrigger className="rounded-full h-6 w-6 inline-flex items-center justify-center hover:bg-muted">
+          <CollapsibleTrigger className="rounded-full h-6 w-6 inline-flex items-center justify-center bg-muted hover:bg-muted-foreground/30">
             {isOpen ? (
               <ChevronUp className="h-4 w-4" />
             ) : (
@@ -54,7 +61,9 @@ const WaitingListHeader = ({ isOpen }: { isOpen: boolean }) => {
             )}
             <span className="sr-only">Toggle queue</span>
           </CollapsibleTrigger>
-          <span className="text-lg font-semibold">Waiting List</span>
+          <span className="text-lg font-semibold">
+            Waiting List: {queueLength}
+          </span>
         </div>
         <span className="text-sm font-normal text-muted-foreground">
           Max Wait: ~{maxWaitTime} mins
@@ -64,8 +73,10 @@ const WaitingListHeader = ({ isOpen }: { isOpen: boolean }) => {
   );
 };
 
-const WaitingListQueue = () => {
-  const waitingList = useWaitingList();
+interface WaitingListQueueProps {
+  waitingList: Awaited<ReturnType<typeof useWaitingList>>;
+}
+const WaitingListQueue = ({ waitingList }: WaitingListQueueProps) => {
   const applicant = useApplicant();
 
   return (
