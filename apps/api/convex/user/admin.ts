@@ -2,10 +2,11 @@
 
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { action } from "../_generated/server";
+import { action, internalAction } from "../_generated/server";
 import { Id } from "../_generated/dataModel";
 
 // approving applicant for the first round; todo, update later to handle rejections
+// todo, auth admin and client endpoints using clerk
 export const approveIntake = action({
   args: {
     userId: v.id("users"),
@@ -49,5 +50,18 @@ export const approveIntake = action({
     });
 
     return sessionId;
+  },
+});
+
+// helpers for demo
+
+export const kickUserFromQueue = internalAction({
+  args: {
+    sessionId: v.id("sessions"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runAction(internal.user.queue.handleLeave, {
+      sessionId: args.sessionId,
+    });
   },
 });
