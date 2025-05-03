@@ -8,11 +8,6 @@
       "env": ["NEXT_PUBLIC_CONVEX_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env"]
     },
-    "generate": {
-      "outputs": ["apps/api/convex/_generated/**"],
-      "cache": true,
-      "dependsOn": []
-    },
     "dev": {
       "inputs": ["$TURBO_DEFAULT$", ".env", ".env.local"]
     },
