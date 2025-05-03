@@ -271,8 +271,8 @@ export default internalMutation({
     for (let i = 0; i < seedUsers.length; i++) {
       const missionId = await ctx.db.insert("missions", {
         userId: userIds[i]!,
-        interest: seedMissions[i].interest,
-        accomplishment: seedMissions[i].accomplishment,
+        interest: seedMissions[i]!.interest,
+        accomplishment: seedMissions[i]!.accomplishment,
       });
       missionIds.push(missionId);
     }
@@ -282,11 +282,11 @@ export default internalMutation({
     // 1. 2 inactive sessions without sessionUrl (index 0-1)
     for (let i = 0; i < 2; i++) {
       const sessionId = await ctx.db.insert("sessions", {
-        userId: userIds[i],
-        missionId: missionIds[i],
+        userId: userIds[i]!,
+        missionId: missionIds[i]!,
         waiting: false,
         inCall: false,
-        firstQuestion: generateFirstQuestions(seedMissions)[i],
+        firstQuestion: generateFirstQuestions(seedMissions)[i]!,
       });
       sessionIds.push(sessionId);
     }
@@ -295,12 +295,12 @@ export default internalMutation({
     let j = 0;
     for (let i = 2; i < 4; i++) {
       const sessionId = await ctx.db.insert("sessions", {
-        userId: userIds[i],
-        missionId: missionIds[i],
+        userId: userIds[i]!,
+        missionId: missionIds[i]!,
         waiting: false,
         inCall: false,
         sessionUrl: "https://example.com/session/placeholder-" + j,
-        firstQuestion: generateFirstQuestions(seedMissions)[i],
+        firstQuestion: generateFirstQuestions(seedMissions)[i]!,
       });
       sessionIds.push(sessionId);
       j++;
@@ -313,12 +313,12 @@ export default internalMutation({
     for (let i = 4; i < 9; i++) {
       const queuedAt = baseQueueTime + k * 1000; // Stagger join times
       const sessionId = await ctx.db.insert("sessions", {
-        userId: userIds[i],
-        missionId: missionIds[i],
+        userId: userIds[i]!,
+        missionId: missionIds[i]!,
         waiting: true, // Start as active (in queue)
         inCall: false,
         queuedAt: queuedAt, // Set initial queue time
-        firstQuestion: generateFirstQuestions(seedMissions)[i],
+        firstQuestion: generateFirstQuestions(seedMissions)[i]!,
       });
       sessionIds.push(sessionId);
 
@@ -353,12 +353,12 @@ export default internalMutation({
     for (let i = 9; i < 15; i++) {
       const queuedAt = waitingQueueTime + (i - 9) * 2000; // Stagger join times slightly
       const sessionId = await ctx.db.insert("sessions", {
-        userId: userIds[i],
-        missionId: missionIds[i],
+        userId: userIds[i]!,
+        missionId: missionIds[i]!,
         waiting: true, // Currently in queue
         inCall: false,
         queuedAt: queuedAt, // Set queue time
-        firstQuestion: generateFirstQuestions(seedMissions)[i],
+        firstQuestion: generateFirstQuestions(seedMissions)[i]!,
       });
       sessionIds.push(sessionId);
     }
@@ -367,9 +367,9 @@ export default internalMutation({
     const personas = generatePersonas(sessionIds);
     for (let i = 0; i < sessionIds.length; i++) {
       await ctx.db.insert("personas", {
-        sessionId: sessionIds[i],
-        role: personas[i].role,
-        tagline: personas[i].tagline,
+        sessionId: sessionIds[i]!,
+        role: personas[i]!.role,
+        tagline: personas[i]!.tagline,
       });
     }
 
