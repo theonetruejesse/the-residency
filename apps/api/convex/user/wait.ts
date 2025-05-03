@@ -150,9 +150,9 @@ class MinHeap {
 
   // Swap elements at two indices
   private swap(index1: number, index2: number): void {
-    [this.heap[index1], this.heap[index2]] = [
-      this.heap[index2],
-      this.heap[index1],
+    [this.heap[index1]!, this.heap[index2]!] = [
+      this.heap[index2]!,
+      this.heap[index1]!,
     ];
   }
 
@@ -161,7 +161,7 @@ class MinHeap {
     if (index === 0) return;
 
     const parentIndex = this.getParentIndex(index);
-    if (this.heap[parentIndex] > this.heap[index]) {
+    if (this.heap[parentIndex]! > this.heap[index]!) {
       this.swap(parentIndex, index);
       this.heapifyUp(parentIndex);
     }
@@ -175,14 +175,14 @@ class MinHeap {
 
     if (
       leftChildIndex < this.heap.length &&
-      this.heap[leftChildIndex] < this.heap[smallest]
+      this.heap[leftChildIndex]! < this.heap[smallest]!
     ) {
       smallest = leftChildIndex;
     }
 
     if (
       rightChildIndex < this.heap.length &&
-      this.heap[rightChildIndex] < this.heap[smallest]
+      this.heap[rightChildIndex]! < this.heap[smallest]!
     ) {
       smallest = rightChildIndex;
     }

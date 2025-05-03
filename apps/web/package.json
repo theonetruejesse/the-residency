@@ -28,9 +28,11 @@
   "devDependencies": {
     "@residency/eslint-config": "workspace:*",
     "@residency/tsconfig": "workspace:*",
-    "@types/node": "^20.17.30",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
-    "typescript": "^5.8.3"
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-next": "^15.1.7",
+    "typescript": "catalog:"
   }
 }

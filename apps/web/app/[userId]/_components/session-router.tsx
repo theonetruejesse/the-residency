@@ -38,8 +38,8 @@ const PostSession = ({ userName }: { userName: string }) => {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-lg">
-            Hi {userName}, we're working on evaluating your interivew. We'll
-            email you with the results as soon as possible.
+            Hi {userName}, we&apos;re working on evaluating your interivew.
+            We&apos;ll email you with the results as soon as possible.
           </p>
         </CardContent>
       </Card>

@@ -4,7 +4,7 @@ import { ActionButton } from "@/components/action-button";
 import { Id, api } from "@residency/api";
 import { useAction } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface ApproveButtonProps {
   userId: Id<"users">;

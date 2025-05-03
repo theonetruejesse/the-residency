@@ -156,7 +156,8 @@ const WaitingListFooter = ({ status }: WaitingListProps) => {
         <QueueButton status={status} />
         {isShowNote && (
           <p className="text-sm text-muted-foreground">
-            *You'll automatically join the interview once your spot opens up.
+            *You&apos;ll automatically join the interview once your spot opens
+            up.
           </p>
         )}
       </div>

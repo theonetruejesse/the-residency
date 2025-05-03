@@ -62,10 +62,11 @@ export function useConvo(props: InterviewProps) {
     }
   };
   const leave = useAction(api.user.application.handleLeave);
+  const userId = props.applicant.user._id;
   const stopConversation = useCallback(async () => {
-    await leave({ userId: props.applicant.user._id });
+    await leave({ userId });
     await conversation.endSession();
-  }, [conversation]);
+  }, [conversation, userId, leave]);
 
   return {
     status: conversation.status,

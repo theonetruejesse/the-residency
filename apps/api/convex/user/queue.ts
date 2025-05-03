@@ -137,7 +137,7 @@ export const startNextCall = internalAction({
     );
     if (waiting.length > 0) {
       await ctx.runAction(internal.user.queue.joinCall, {
-        sessionId: waiting[0]._id,
+        sessionId: waiting[0]!._id,
       });
     }
     return null;

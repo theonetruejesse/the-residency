@@ -1,4 +1,4 @@
-import config from "@residency/eslint-config";
+import { nextJsConfig } from "@residency/eslint-config/next-js";
 
 /** @type {import("eslint").Linter.Config} */
-export default config.nextJsConfig;
+export default nextJsConfig;
