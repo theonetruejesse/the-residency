@@ -12,6 +12,7 @@ const sessionConfig = (props: InterviewProps) => {
     signedUrl: session.sessionUrl!, // at this point, sessionUrl should be non-null
     dynamicVariables: {
       user_name: user.firstName,
+      user_id: user._id,
       user_interest: mission.interest,
       user_accomplishment: mission.accomplishment,
       first_question: session.firstQuestion,
