@@ -7,6 +7,7 @@ import {
   MISSION,
   SESSION,
   PERSONA,
+  GRADE,
 } from "./schema.types";
 
 export default defineSchema({
@@ -46,8 +47,6 @@ export default defineSchema({
 
   // first round interview evaluation; webhook from elevenlabs
   grades: defineTable({
-    userId: v.id("users"),
-    conversationId: v.string(),
-    feedback: v.string(),
+    ...GRADE,
   }).index("by_user_id", ["userId"]),
 });

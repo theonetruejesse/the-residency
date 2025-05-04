@@ -1,5 +1,8 @@
-import { httpAction } from "../_generated/server";
+import { v } from "convex/values";
+import { httpAction, internalMutation } from "../_generated/server";
+import { internal } from "../_generated/api";
 import { ELEVEN_LABS_WEBHOOK_SECRET } from "../constants";
+import { GRADE_ARGS } from "../schema.types";
 
 export const postCall = httpAction(async (ctx, request) => {
   console.log("postCall webhook received");
@@ -78,10 +81,71 @@ export const postCall = httpAction(async (ctx, request) => {
     // Parse and log the webhook data
     try {
       const data = JSON.parse(body);
-      console.log("Webhook payload:", JSON.stringify(data, null, 2));
+      // --------------------
+      // Extract necessary fields to create a grade record
+      // --------------------
+      const conversationId: string | undefined = data?.data?.conversation_id;
+      const dynamicVars =
+        data?.data?.conversation_initiation_client_data?.dynamic_variables ??
+        {};
+      const userIdString: string | undefined = dynamicVars?.user_id;
 
-      // Process the webhook data here
-      // For example, store the data in a database or trigger another action
+      if (!conversationId || !userIdString) {
+        console.error("Missing conversationId or userId in webhook payload");
+      } else {
+        // Helper to safely pull quote + rationale from data_collection_results
+        const dcr =
+          data?.data?.analysis?.data_collection_results ??
+          ({} as Record<string, any>);
+
+        const getField = (
+          key: string
+        ): { quote: string; rationale: string } => {
+          const obj = dcr[key] ?? {};
+          let value = obj.value ?? "None";
+
+          // Handle values with surrounding quotes (e.g., "\"quoted string\"")
+          if (
+            value.startsWith('"') &&
+            value.endsWith('"') &&
+            value.length > 2
+          ) {
+            value = value.substring(1, value.length - 1);
+          }
+
+          return {
+            quote: value,
+            rationale: obj.rationale ?? "",
+          };
+        };
+
+        const ap = getField("ambition_passion_quotes");
+        const tr = getField("track_record_quotes");
+        const id = getField("intentionality_decision_quotes");
+        const rc = getField("rationale_communication_quotes");
+
+        const gradeArgs = {
+          userIdString,
+          conversationId,
+          ambition_passion_quotes: ap.quote,
+          ambition_passion_rationale: ap.rationale,
+          track_record_quotes: tr.quote,
+          track_record_rationale: tr.rationale,
+          intentionality_decision_quotes: id.quote,
+          intentionality_decision_rationale: id.rationale,
+          rationale_communication_quotes: rc.quote,
+          rationale_communication_rationale: rc.rationale,
+        } as any;
+
+        try {
+          await ctx.runMutation(internal.webhook.post_call.setGrade, gradeArgs);
+          console.log("Grade record inserted for user", userIdString);
+        } catch (err) {
+          console.error("Failed to insert grade:", err);
+        }
+      }
+
+      // --------------------
     } catch (error) {
       console.error("Failed to parse webhook payload:", error);
     }
@@ -92,4 +156,40 @@ export const postCall = httpAction(async (ctx, request) => {
     console.error("Error processing webhook:", error);
     return new Response("Internal server error", { status: 500 });
   }
+});
+
+export const setGrade = internalMutation({
+  args: {
+    userIdString: v.id("users"),
+    ...GRADE_ARGS,
+  },
+  handler: async (ctx, args) => {
+    const userId = ctx.db.normalizeId("users", args.userIdString);
+    if (!userId) throw new Error("User not found");
+
+    const {
+      conversationId,
+      ambition_passion_rationale,
+      ambition_passion_quotes,
+      track_record_rationale,
+      track_record_quotes,
+      intentionality_decision_rationale,
+      intentionality_decision_quotes,
+      rationale_communication_rationale,
+      rationale_communication_quotes,
+    } = args;
+
+    await ctx.db.insert("grades", {
+      userId,
+      conversationId,
+      ambition_passion_rationale,
+      ambition_passion_quotes,
+      track_record_rationale,
+      track_record_quotes,
+      intentionality_decision_rationale,
+      intentionality_decision_quotes,
+      rationale_communication_rationale,
+      rationale_communication_quotes,
+    });
+  },
 });

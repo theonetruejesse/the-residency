@@ -105,3 +105,27 @@ export const SESSION_RETURN = v.object({
   _id: v.id("sessions"),
   _creationTime: v.number(),
 });
+
+export const GRADE_RELATIONS = {
+  userId: v.id("users"),
+};
+export const GRADE_ARGS = {
+  conversationId: v.string(),
+  // ap
+  ambition_passion_quotes: v.string(),
+  ambition_passion_rationale: v.string(),
+  // tr
+  track_record_quotes: v.string(),
+  track_record_rationale: v.string(),
+  // id
+  intentionality_decision_quotes: v.string(),
+  intentionality_decision_rationale: v.string(),
+  // rc
+  rationale_communication_quotes: v.string(),
+  rationale_communication_rationale: v.string(),
+  // todo: add final score
+};
+export const GRADE = {
+  ...GRADE_RELATIONS,
+  ...GRADE_ARGS,
+};
