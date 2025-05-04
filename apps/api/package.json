@@ -6,7 +6,6 @@
   "main": "./src/index.ts",
   "scripts": {
     "dev": "convex dev",
-    "predev": "pnpm seed",
     "seed": "convex dev --run data/init --until-success",
     "nuke": "convex dev --run data/reset --until-success",
     "convex-deploy": "convex deploy",

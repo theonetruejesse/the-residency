@@ -7,11 +7,19 @@ export const MAX_CONCURRENT_CALLS = 5;
 export const MAX_SESSION_DURATION = 20 * 60 * 1000; // 20 minutes in milliseconds
 
 // ENV VARIABLES (+validation)
-const ELEVEN_LABS_API_KEY = process.env.ELEVEN_LABS_API_KEY;
 export const ELEVEN_LABS_AGENT_ID = process.env.ELEVEN_LABS_AGENT_ID; // clean this up later
+export const ELEVEN_LABS_WEBHOOK_SECRET =
+  process.env.ELEVEN_LABS_WEBHOOK_SECRET;
+
+const ELEVEN_LABS_API_KEY = process.env.ELEVEN_LABS_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-if (!ELEVEN_LABS_AGENT_ID || !ELEVEN_LABS_API_KEY || !GEMINI_API_KEY) {
+if (
+  !ELEVEN_LABS_AGENT_ID ||
+  !ELEVEN_LABS_API_KEY ||
+  !GEMINI_API_KEY ||
+  !ELEVEN_LABS_WEBHOOK_SECRET
+) {
   throw new Error("Environment variables not configured");
 }
 
