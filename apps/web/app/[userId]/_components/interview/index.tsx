@@ -5,10 +5,12 @@ import "../position.css";
 import * as React from "react";
 import { Card } from "@residency/ui/components/card";
 import { useConvo } from "./conversation-hook";
-import { Doc } from "@residency/api";
+import { api, Doc, Id } from "@residency/api";
 import { BackgroundWave } from "@/app/[userId]/_components/assets/wave-background";
 import { Chalice } from "@/app/[userId]/_components/assets/chalice";
 import { InterviewButton } from "./interview-button";
+import { useAction } from "convex/react";
+import { useEffect, useRef } from "react";
 
 export interface InterviewProps {
   applicant: {
@@ -23,6 +25,8 @@ export function Interview(props: InterviewProps) {
   });
 
   const isConnected = status === "connected";
+
+  useDetectLeave(isConnected, props.applicant.user._id);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 flex flex-col justify-center items-center interview-container">
@@ -44,3 +48,18 @@ export function Interview(props: InterviewProps) {
     </div>
   );
 }
+
+const useDetectLeave = (isConnected: boolean, userId: Id<"users">) => {
+  const leave = useAction(api.user.application.handleLeave);
+  const wasConnectedRef = useRef(false);
+
+  useEffect(() => {
+    // If we were connected before but not anymore, trigger the leave action
+    if (wasConnectedRef.current && !isConnected) {
+      leave({ userId });
+    }
+
+    // Track connection state for next change
+    wasConnectedRef.current = isConnected;
+  }, [isConnected, userId, leave]);
+};
