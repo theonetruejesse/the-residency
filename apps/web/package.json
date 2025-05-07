@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@11labs/react": "^0.1.3",
+    "@clerk/nextjs": "^6.19.1",
     "@residency/api": "workspace:*",
     "@residency/ui": "workspace:*",
     "babel-plugin-react-compiler": "19.1.0-rc.1",
@@ -28,9 +29,9 @@
   "devDependencies": {
     "@residency/eslint-config": "workspace:*",
     "@residency/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
-    "@types/node": "catalog:",
     "eslint": "catalog:",
     "eslint-config-next": "^15.1.7",
     "typescript": "catalog:"
