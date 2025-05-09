@@ -17,7 +17,7 @@ export const ApproveButton = ({ userId }: ApproveButtonProps) => {
   const handleClick = async () => {
     const sessionId = await approve({ userId });
     setIsDisabled(true);
-    if (sessionId) router.push(`/interview/${sessionId}`);
+    if (sessionId) router.push(`/interview/${userId}`);
   };
 
   return (

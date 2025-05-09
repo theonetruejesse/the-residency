@@ -57,6 +57,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@clerk/backend':
+        specifier: ^1.31.4
+        version: 1.31.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@google/genai':
         specifier: ^0.10.0
         version: 0.10.0

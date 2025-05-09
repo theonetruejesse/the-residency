@@ -7,6 +7,7 @@ import { ApproveButton } from "./_components/approve-button";
 
 export default function Page() {
   const [userId, setUserId] = useState<Id<"users"> | null>(null);
+  ``;
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
