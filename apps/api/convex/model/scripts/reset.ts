@@ -1,7 +1,7 @@
-import { internalMutation, type MutationCtx } from "../_generated/server";
+import { internalMutation, type MutationCtx } from "../../_generated/server";
 import { v } from "convex/values";
 import schema from "../schema";
-import { Id } from "../_generated/dataModel";
+import { Id } from "../../_generated/dataModel";
 
 const tableNames = Object.keys(schema.tables) as (keyof typeof schema.tables)[];
 

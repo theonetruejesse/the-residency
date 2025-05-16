@@ -7,7 +7,7 @@ import {
 } from "../_generated/server";
 import { MAX_CONCURRENT_CALLS, MAX_SESSION_DURATION } from "../constants";
 import { Doc } from "../_generated/dataModel";
-import { SESSION_RETURN } from "../schema.types";
+import { SESSION_RETURN } from "../model/schema.types";
 
 // --- Queries ---
 

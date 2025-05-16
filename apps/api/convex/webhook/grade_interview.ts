@@ -1,11 +1,10 @@
-import { v } from "convex/values";
 import { httpAction, internalMutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { ELEVEN_LABS_WEBHOOK_SECRET } from "../constants";
-import { GRADE_ARGS } from "../schema.types";
+import { InterviewGrades } from "../model/sessions";
 
-export const postCall = httpAction(async (ctx, request) => {
-  console.log("postCall webhook received");
+export const gradeInterview = httpAction(async (ctx, request) => {
+  console.log("gradeInterview webhook received");
 
   try {
     // Get the webhook signature from headers
@@ -125,7 +124,7 @@ export const postCall = httpAction(async (ctx, request) => {
         const rc = getField("rationale_communication_quotes");
 
         const gradeArgs = {
-          userIdString,
+          userIdString, // TODO FIX ME!!!
           conversationId,
           ambition_passion_quotes: ap.quote,
           ambition_passion_rationale: ap.rationale,
@@ -138,7 +137,10 @@ export const postCall = httpAction(async (ctx, request) => {
         } as any;
 
         try {
-          await ctx.runMutation(internal.webhook.post_call.setGrade, gradeArgs);
+          await ctx.runMutation(
+            internal.webhook.grade_interview.setGrade,
+            gradeArgs
+          );
           console.log("Grade record inserted for user", userIdString);
         } catch (err) {
           console.error("Failed to insert grade:", err);
@@ -160,36 +162,9 @@ export const postCall = httpAction(async (ctx, request) => {
 
 export const setGrade = internalMutation({
   args: {
-    userIdString: v.id("users"),
-    ...GRADE_ARGS,
+    ...InterviewGrades.withoutSystemFields,
   },
   handler: async (ctx, args) => {
-    const userId = ctx.db.normalizeId("users", args.userIdString);
-    if (!userId) throw new Error("User not found");
-
-    const {
-      conversationId,
-      ambition_passion_rationale,
-      ambition_passion_quotes,
-      track_record_rationale,
-      track_record_quotes,
-      intentionality_decision_rationale,
-      intentionality_decision_quotes,
-      rationale_communication_rationale,
-      rationale_communication_quotes,
-    } = args;
-
-    await ctx.db.insert("grades", {
-      userId,
-      conversationId,
-      ambition_passion_rationale,
-      ambition_passion_quotes,
-      track_record_rationale,
-      track_record_quotes,
-      intentionality_decision_rationale,
-      intentionality_decision_quotes,
-      rationale_communication_rationale,
-      rationale_communication_quotes,
-    });
+    await ctx.db.insert("interviewGrades", args);
   },
 });

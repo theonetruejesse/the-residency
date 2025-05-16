@@ -6,8 +6,8 @@
   "main": "./src/index.ts",
   "scripts": {
     "dev": "convex dev",
-    "seed": "convex dev --run data/init --until-success",
-    "nuke": "convex dev --run data/reset --until-success",
+    "seed": "convex dev --run model/scripts/init --until-success",
+    "nuke": "convex dev --run model/scripts/reset --until-success",
     "convex-deploy": "convex deploy",
     "generate": "convex codegen",
     "build": "tsc",
@@ -21,6 +21,7 @@
     "@residency/eslint-config": "workspace:*",
     "@residency/tsconfig": "workspace:*",
     "convex": "catalog:",
+    "convex-helpers": "^0.1.86",
     "elevenlabs": "^1.57.0",
     "nanoid": "^5.1.5"
   },

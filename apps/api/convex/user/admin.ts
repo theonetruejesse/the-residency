@@ -26,7 +26,7 @@ export const approveIntake = action({
       round: "first_round",
     });
 
-    const { firstQuestion, role, tagline } = await ctx.runAction(
+    const { role, tagline } = await ctx.runAction(
       internal.user.actions.generateContent,
       {
         interest: mission.interest,
@@ -39,7 +39,6 @@ export const approveIntake = action({
       {
         userId: user._id,
         missionId: mission._id,
-        firstQuestion: firstQuestion,
       }
     );
 

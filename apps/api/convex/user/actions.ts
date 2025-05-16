@@ -3,8 +3,8 @@
 import { v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { ELEVEN_LABS_AGENT_ID, elevenClient, geminiClient } from "../constants";
-import { MISSION_ARGS } from "../schema.types";
-import { firstQuestionPrompt, rolePrompt, taglinePrompt } from "../prompts";
+import { MISSION_ARGS } from "../model/schema.types";
+import { rolePrompt, taglinePrompt } from "../prompts";
 
 export const generateSessionUrl = internalAction({
   args: {
@@ -29,7 +29,6 @@ export const generateContent = internalAction({
     ...MISSION_ARGS,
   },
   returns: v.object({
-    firstQuestion: v.string(),
     role: v.string(),
     tagline: v.string(),
   }),
@@ -44,16 +43,15 @@ export const generateContent = internalAction({
       return response.text;
     };
 
-    const [firstQuestion, role, tagline] = await Promise.all([
-      generate(firstQuestionPrompt(interest, accomplishment)),
+    const [role, tagline] = await Promise.all([
       generate(rolePrompt(interest, accomplishment)),
       generate(taglinePrompt(interest, accomplishment)),
     ]);
 
-    if (!firstQuestion || !role || !tagline) {
+    if (!role || !tagline) {
       throw new Error("Failed to generate content");
     }
 
-    return { firstQuestion, role, tagline };
+    return { role, tagline };
   },
 });

@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server.js";
-import { ROUNDS_OPTIONS, STATUSES_OPTIONS } from "../schema.types";
+import { ROUNDS_OPTIONS, STATUSES_OPTIONS } from "../model/schema.types.js";
 
 export const getUser = internalQuery({
   args: { userId: v.id("users") },

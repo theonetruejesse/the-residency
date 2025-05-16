@@ -1,12 +1,18 @@
 import { httpRouter } from "convex/server";
-import { postCall } from "./webhook/post_call";
+import { gradeInterview } from "./webhook/grade_interview";
 
 const http = httpRouter();
 
 http.route({
-  path: "/webhook",
+  path: "/grade_interview",
   method: "POST",
-  handler: postCall,
+  handler: gradeInterview,
 });
+
+// http.route({
+//   path: "/sync_clerk",
+//   method: "POST",
+//   handler: syncClerkUsers,
+// });
 
 export default http;

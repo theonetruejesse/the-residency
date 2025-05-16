@@ -12,7 +12,6 @@ export const createSession = internalMutation({
   args: {
     userId: v.id("users"),
     missionId: v.id("missions"),
-    firstQuestion: v.string(),
   },
   returns: v.id("sessions"),
   handler: async (ctx, args) => {

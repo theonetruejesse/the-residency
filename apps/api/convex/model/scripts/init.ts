@@ -1,9 +1,9 @@
 // seed the database
 
-import { Id } from "../_generated/dataModel";
-import { internalMutation, type MutationCtx } from "../_generated/server";
+import { Id } from "../../_generated/dataModel";
+import { internalMutation, type MutationCtx } from "../../_generated/server";
 import { v } from "convex/values";
-import { internal } from "../_generated/api";
+import { internal } from "../../_generated/api";
 
 const seedUsers = [
   { firstName: "Arya", lastName: "Kumar", round: "intake", status: "pending" },

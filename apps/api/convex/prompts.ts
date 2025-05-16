@@ -1,37 +1,3 @@
-export const firstQuestionPrompt = (
-  interest: string,
-  accomplishment: string
-) => `
-<directions>
-Your goal is to initiate a "smart conversation" by thoughtfully acknowledging the applicant's background and smoothly transitioning to their current interests.
-You are provided with the applicant's key interests and significant accomplishments.
-Craft a short opening that begins with a brief, professional acknowledgment of a notable accomplishment, phrased in a way that conveys genuine, understated respect for its significance. This acknowledgment should subtly connect or transition to a concise, open-ended question designed to explore the applicant's interests and initiate dialogue about their passions, making the entire opening feel like a natural, intellectually linked thought, suitable for an interview context. Maintain a friendly, insightful, and genuinely curious tone that is appropriate for a professional interview setting. 
-</directions>
-
-<guardrails>
-Do not repeat anything by scratch.
-The opening must be a single, short response combining an accomplishment acknowledgment and a question.
-The acknowledgment should be brief, specific to an accomplishment, convey genuine, *understated* respect for its significance (higher EQ), and be professionally phrased. Avoid hyperbole or overly dramatic language.
-The question should be concise, directly related to their stated interests, and invite an expansive response.
-Crucially, the acknowledgment and the question must be intellectually or thematically connected. The acknowledgment should naturally lead into or set the context for the question about their interests.
-Avoid generic phrases; tailor the language to sound insightful, personally engaged, appreciative in a professional manner, and highlight the connection between their past achievements and current interests, while balancing intellectual depth and professionalism.
-If no interests or accomplishments are provided, simply ask: "What are you passionate about?"
-</guardrails>
-
-<example>
-user:
-- Interests: Building Voice AI applications for healthcare
-- Accomplishments: Published paper on cognitive science in Nature Journal
-
-response:
-It's great to see your publication in Nature, that's quite an achievement. Given your focus on complex cognitive science, what aspects of building Voice AI applications for healthcare are currently capturing your intellectual curiosity?
-
-<user>
-- Interests: ${interest}
-- Accomplishments: ${accomplishment}
-</user>
-`;
-
 export const rolePrompt = (interest: string, accomplishment: string) => `
 <directions>
 You are generating a very short, highly unique "Role" (a personal brand name) for a user to be displayed in a waiting room. This role must be 2-3 specific words that uniquely capture a key aspect of their intellectual focus or style, derived directly from their listed interests and accomplishments. Avoid generic terms entirely.
@@ -92,3 +58,38 @@ Published researcher in cognitive science aiming to push the frontier of health 
 - Accomplishments: ${accomplishment}
 </user>
 `;
+
+// // NOT USED AT THE MOMENT
+// export const firstQuestionPrompt = (
+//   interest: string,
+//   accomplishment: string
+// ) => `
+// <directions>
+// Your goal is to initiate a "smart conversation" by thoughtfully acknowledging the applicant's background and smoothly transitioning to their current interests.
+// You are provided with the applicant's key interests and significant accomplishments.
+// Craft a short opening that begins with a brief, professional acknowledgment of a notable accomplishment, phrased in a way that conveys genuine, understated respect for its significance. This acknowledgment should subtly connect or transition to a concise, open-ended question designed to explore the applicant's interests and initiate dialogue about their passions, making the entire opening feel like a natural, intellectually linked thought, suitable for an interview context. Maintain a friendly, insightful, and genuinely curious tone that is appropriate for a professional interview setting.
+// </directions>
+
+// <guardrails>
+// Do not repeat anything by scratch.
+// The opening must be a single, short response combining an accomplishment acknowledgment and a question.
+// The acknowledgment should be brief, specific to an accomplishment, convey genuine, *understated* respect for its significance (higher EQ), and be professionally phrased. Avoid hyperbole or overly dramatic language.
+// The question should be concise, directly related to their stated interests, and invite an expansive response.
+// Crucially, the acknowledgment and the question must be intellectually or thematically connected. The acknowledgment should naturally lead into or set the context for the question about their interests.
+// Avoid generic phrases; tailor the language to sound insightful, personally engaged, appreciative in a professional manner, and highlight the connection between their past achievements and current interests, while balancing intellectual depth and professionalism.
+// If no interests or accomplishments are provided, simply ask: "What are you passionate about?"
+// </guardrails>
+
+// <example>
+// user:
+// - Interests: Building Voice AI applications for healthcare
+// - Accomplishments: Published paper on cognitive science in Nature Journal
+
+// response:
+// It's great to see your publication in Nature, that's quite an achievement. Given your focus on complex cognitive science, what aspects of building Voice AI applications for healthcare are currently capturing your intellectual curiosity?
+
+// <user>
+// - Interests: ${interest}
+// - Accomplishments: ${accomplishment}
+// </user>
+// `;

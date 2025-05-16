@@ -8,7 +8,7 @@ import {
   MISSION_RETURN,
   SESSION_RETURN,
   USER_RETURN,
-} from "../schema.types";
+} from "../model/schema.types";
 
 // client endpoints
 
