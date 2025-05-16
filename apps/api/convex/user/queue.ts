@@ -6,7 +6,7 @@ import {
   internalQuery,
 } from "../_generated/server";
 import { MAX_CONCURRENT_CALLS, MAX_SESSION_DURATION } from "../constants";
-import { Doc, Id } from "../_generated/dataModel";
+import { Doc } from "../_generated/dataModel";
 import { SESSION_RETURN } from "../schema.types";
 
 // --- Queries ---

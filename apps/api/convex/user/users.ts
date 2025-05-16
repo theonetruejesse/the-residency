@@ -1,7 +1,3 @@
-// internal queries and mutations for user data
-// keep these internal to reduce chances of data leakage
-// TODO: simple service-repo pattern
-
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server.js";
 import { ROUNDS_OPTIONS, STATUSES_OPTIONS } from "../schema.types";
