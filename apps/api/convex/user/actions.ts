@@ -3,15 +3,13 @@
 import { v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { ELEVEN_LABS_AGENT_ID, elevenClient, geminiClient } from "../constants";
-import { MISSION_ARGS } from "../model/schema.types";
 import { rolePrompt, taglinePrompt } from "../prompts";
+import { Missions } from "../model/applicants";
 
 export const generateSessionUrl = internalAction({
-  args: {
-    sessionId: v.id("sessions"),
-  },
+  args: {},
   returns: v.string(),
-  handler: async (ctx, args) => {
+  handler: async (_ctx, _args) => {
     try {
       const response = await elevenClient.conversationalAi.getSignedUrl({
         agent_id: ELEVEN_LABS_AGENT_ID as string,
@@ -26,7 +24,7 @@ export const generateSessionUrl = internalAction({
 
 export const generateContent = internalAction({
   args: {
-    ...MISSION_ARGS,
+    ...Missions.withoutSystemFields,
   },
   returns: v.object({
     role: v.string(),
