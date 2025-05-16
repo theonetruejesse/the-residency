@@ -7,13 +7,13 @@ import {
 } from "../_generated/server";
 import { MAX_CONCURRENT_CALLS, MAX_SESSION_DURATION } from "../constants";
 import { Doc } from "../_generated/dataModel";
-import { SESSION_RETURN } from "../model/schema.types";
+import { Sessions } from "../model/sessions";
 
 // --- Queries ---
 
 export const listActiveCalls = internalQuery({
   args: {},
-  returns: v.array(SESSION_RETURN),
+  returns: v.array(Sessions.table.validator),
   handler: async (ctx): Promise<Doc<"sessions">[]> => {
     return await ctx.db
       .query("sessions")
@@ -25,7 +25,7 @@ export const listActiveCalls = internalQuery({
 
 export const listWaitingSessions = internalQuery({
   args: {},
-  returns: v.array(SESSION_RETURN),
+  returns: v.array(Sessions.table.validator),
   handler: async (ctx): Promise<Doc<"sessions">[]> => {
     // Return queued sessions in order of original queue time
     return await ctx.db
