@@ -11,14 +11,18 @@ export const INTERVIEW_STATUS_OPTIONS = v.union(
 );
 
 export const Sessions = Table("sessions", {
-  firstQuestion: v.string(), // first question of the interview; ai generated using the user's mission
   waiting: v.boolean(), // in-queue flag
   inCall: v.boolean(), // in-call flag
   queuedAt: v.optional(v.number()), // timestamp when the session first joined the queue
   sessionUrl: v.optional(v.string()), // expires in 15 minutes; used for denoting which users joined the interview
   scheduledEndTime: v.optional(v.number()), // timestamp when an active session is expected to end
   applicantId: v.id("applicants"),
-  missionId: v.id("missions"),
+  personaId: v.id("personas"), // anonymous session persona
+});
+
+export const Personas = Table("personas", {
+  role: v.string(), // generated role for the persona using the user's mission
+  tagline: v.string(), // generated tagline for the persona using the user's mission
 });
 
 export const InterviewGrades = Table("interviewGrades", {

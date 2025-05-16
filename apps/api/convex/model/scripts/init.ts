@@ -331,7 +331,7 @@ export default internalMutation({
 
       const endCallFnId = await ctx.scheduler.runAt(
         new Date(scheduledEndTime),
-        internal.user.queue.scheduledLeave,
+        internal.application.queue.scheduledLeave,
         { sessionId }
       );
 
