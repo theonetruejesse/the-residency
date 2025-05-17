@@ -19,12 +19,12 @@ export const getSessionWaitTime = internalQuery({
 
     // 2. Fetch current state
     const inCalls: Doc<"sessions">[] = await ctx.runQuery(
-      internal.user.queue.listActiveCalls
+      internal.application.queue.listActiveCalls
     );
     if (inCalls.length < MAX_CONCURRENT_CALLS) return 0; // Slots available
 
     const waiting: Doc<"sessions">[] = await ctx.runQuery(
-      internal.user.queue.listWaitingSessions
+      internal.application.queue.listWaitingSessions
     );
 
     // 3. Initialize heap

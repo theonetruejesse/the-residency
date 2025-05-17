@@ -41,7 +41,7 @@ export const isQueueFull = internalQuery({
   returns: v.boolean(),
   handler: async (ctx): Promise<boolean> => {
     const activeCalls = await ctx.runQuery(
-      internal.user.queue.listActiveCalls,
+      internal.application.queue.listActiveCalls,
       {}
     );
     return activeCalls.length >= MAX_CONCURRENT_CALLS;
@@ -54,23 +54,26 @@ export const handleJoin = internalAction({
   args: { sessionId: v.id("sessions") },
   returns: v.null(),
   handler: async (ctx, { sessionId }) => {
-    const session = await ctx.runQuery(internal.user.session.getSession, {
-      sessionId,
-    });
+    const session = await ctx.runQuery(
+      internal.application.session.getSession,
+      {
+        sessionId,
+      }
+    );
     if (!session) throw new Error("Session not found");
     if (session.sessionUrl || session.inCall) return null; // shouldnt handle queue after interview
 
     const waiting: Doc<"sessions">[] = await ctx.runQuery(
-      internal.user.queue.listWaitingSessions,
+      internal.application.queue.listWaitingSessions,
       {}
     );
 
     if (waiting.length > 0) {
-      await ctx.runMutation(internal.user.queue.joinQueue, {
+      await ctx.runMutation(internal.application.queue.joinQueue, {
         sessionId: session._id,
       });
     } else {
-      await ctx.runAction(internal.user.queue.joinCall, {
+      await ctx.runAction(internal.application.queue.joinCall, {
         sessionId: session._id,
       });
     }
@@ -81,7 +84,7 @@ export const joinQueue = internalMutation({
   args: { sessionId: v.id("sessions") },
   returns: v.null(),
   handler: async (ctx, { sessionId }) => {
-    await ctx.runMutation(internal.user.session.updateSession, {
+    await ctx.runMutation(internal.application.session.updateSession, {
       sessionId,
       waiting: true,
       inCall: false,
@@ -100,17 +103,17 @@ export const joinCall = internalAction({
       const scheduledEndTime = Date.now() + MAX_SESSION_DURATION;
       const endCallFnId = await ctx.scheduler.runAt(
         new Date(scheduledEndTime),
-        internal.user.queue.scheduledLeave,
+        internal.application.queue.scheduledLeave,
         { sessionId }
       );
 
       const sessionUrl = await ctx.runAction(
-        internal.user.actions.generateSessionUrl,
-        { sessionId }
+        internal.application.action.generateSessionUrl,
+        {}
       );
 
       // Mark the session as an active call
-      await ctx.runMutation(internal.user.session.updateSession, {
+      await ctx.runMutation(internal.application.session.updateSession, {
         sessionId,
         waiting: false,
         inCall: true,
@@ -132,11 +135,11 @@ export const startNextCall = internalAction({
   returns: v.null(),
   handler: async (ctx) => {
     const waiting: Doc<"sessions">[] = await ctx.runQuery(
-      internal.user.queue.listWaitingSessions,
+      internal.application.queue.listWaitingSessions,
       {}
     );
     if (waiting.length > 0) {
-      await ctx.runAction(internal.user.queue.joinCall, {
+      await ctx.runAction(internal.application.queue.joinCall, {
         sessionId: waiting[0]!._id,
       });
     }
@@ -152,10 +155,10 @@ export const scheduledLeave = internalAction({
   handler: async (ctx, { sessionId }) => {
     console.log(`scheduledLeave invoked for session ${sessionId}`);
 
-    await ctx.runMutation(internal.user.queue.leaveQueue, {
+    await ctx.runMutation(internal.application.queue.leaveQueue, {
       sessionId,
     });
-    await ctx.runAction(internal.user.queue.startNextCall, {});
+    await ctx.runAction(internal.application.queue.startNextCall, {});
     return null;
   },
 });
@@ -168,9 +171,10 @@ export const handleLeave = internalAction({
   handler: async (ctx, { sessionId }) => {
     console.log(`handleLeave (manual) invoked for session ${sessionId}`);
 
-    const session = await ctx.runQuery(internal.user.session.getSession, {
-      sessionId,
-    });
+    const session = await ctx.runQuery(
+      internal.application.session.getSession,
+      { sessionId }
+    );
     if (!session) throw new Error("Session not found");
 
     // If the session was in a call and had a scheduled end function, cancel it
@@ -179,12 +183,12 @@ export const handleLeave = internalAction({
     }
 
     // Update session to reflect leaving fully
-    await ctx.runMutation(internal.user.queue.leaveQueue, {
+    await ctx.runMutation(internal.application.queue.leaveQueue, {
       sessionId,
     });
 
     // Trigger queue processing to potentially start the next call
-    await ctx.runAction(internal.user.queue.startNextCall, {});
+    await ctx.runAction(internal.application.queue.startNextCall, {});
     return null;
   },
 });
@@ -193,7 +197,7 @@ export const leaveQueue = internalMutation({
   args: { sessionId: v.id("sessions") },
   returns: v.null(),
   handler: async (ctx, { sessionId }) => {
-    await ctx.runMutation(internal.user.session.updateSession, {
+    await ctx.runMutation(internal.application.session.updateSession, {
       sessionId,
       waiting: false,
       inCall: false,

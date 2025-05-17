@@ -1,7 +1,7 @@
 import { Table } from "convex-helpers/server";
 import { v } from "convex/values";
 
-export const STATUSES_OPTIONS = v.union(
+export const STATUS_OPTIONS = v.union(
   v.literal("pending"),
   v.literal("waitlisted"),
   v.literal("accepted"),
@@ -16,6 +16,12 @@ export const RANKING_OPTIONS = v.union(
   v.literal("likely_accept")
 );
 
+export const ROUND_OPTIONS = v.union(
+  v.literal("intake"),
+  v.literal("first_round"),
+  v.literal("second_round")
+); // current round the user is in
+
 // todo: update here later
 export const COHORT_OPTIONS = v.union(
   v.literal("SUMMER_2025"),
@@ -23,7 +29,8 @@ export const COHORT_OPTIONS = v.union(
 );
 
 export const Applicants = Table("applicants", {
-  status: STATUSES_OPTIONS,
+  status: STATUS_OPTIONS,
+  round: ROUND_OPTIONS,
   ranking: RANKING_OPTIONS,
   cohort: COHORT_OPTIONS,
   basicInfoId: v.id("basicInfo"),

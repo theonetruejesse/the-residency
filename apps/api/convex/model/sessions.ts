@@ -16,11 +16,15 @@ export const Sessions = Table("sessions", {
   queuedAt: v.optional(v.number()), // timestamp when the session first joined the queue
   sessionUrl: v.optional(v.string()), // expires in 15 minutes; used for denoting which users joined the interview
   scheduledEndTime: v.optional(v.number()), // timestamp when an active session is expected to end
+  // scheduled function id for ending call; used for kicking out users after a certain time
+  // we use this to implement a queue system for the first round interview
+  endCallFnId: v.optional(v.id("_scheduled_functions")),
   applicantId: v.id("applicants"),
-  personaId: v.id("personas"), // anonymous session persona
+  missionId: v.id("missions"),
 });
 
 export const Personas = Table("personas", {
+  sessionId: v.id("sessions"),
   role: v.string(), // generated role for the persona using the user's mission
   tagline: v.string(), // generated tagline for the persona using the user's mission
 });

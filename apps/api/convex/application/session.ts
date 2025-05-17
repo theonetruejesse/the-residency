@@ -10,7 +10,7 @@ export const getSession = internalQuery({
 
 export const createSession = internalMutation({
   args: {
-    userId: v.id("users"),
+    applicantId: v.id("applicants"),
     missionId: v.id("missions"),
   },
   returns: v.id("sessions"),
@@ -60,14 +60,15 @@ export const updateSession = internalMutation({
   },
 });
 
+// PERSONA STUFF
+
 export const getSessionPersona = internalQuery({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    const persona = await ctx.db
+    return await ctx.db
       .query("personas")
-      .withIndex("by_session_id", (q) => q.eq("sessionId", args.sessionId))
+      .withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId))
       .unique();
-    return persona;
   },
 });
 

@@ -2,9 +2,15 @@
 
 import { v } from "convex/values";
 import { internalAction } from "../_generated/server";
-import { ELEVEN_LABS_AGENT_ID, elevenClient, geminiClient } from "../constants";
+import {
+  clerkClient,
+  ELEVEN_LABS_AGENT_ID,
+  elevenClient,
+  geminiClient,
+} from "../constants";
 import { rolePrompt, taglinePrompt } from "../prompts";
 import { Missions } from "../model/applicants";
+import { internal } from "../_generated/api";
 
 export const generateSessionUrl = internalAction({
   args: {},
@@ -51,5 +57,28 @@ export const generateContent = internalAction({
     }
 
     return { role, tagline };
+  },
+});
+
+export const inviteUser = internalAction({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const basicInfo = await ctx.runQuery(
+      internal.application.user.getUserBasicInfo,
+      {
+        userId: args.userId,
+      }
+    );
+    if (!basicInfo) throw new Error("Basic info not found");
+
+    const response = await clerkClient.invitations.createInvitation({
+      emailAddress: basicInfo.email,
+      redirectUrl: "https://www.example.com/my-sign-up", // todo, change this
+      publicMetadata: {
+        convexUserId: args.userId,
+      },
+    });
   },
 });

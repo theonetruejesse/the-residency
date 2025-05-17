@@ -9,7 +9,7 @@ export const ROLE_OPTIONS = v.union(
 
 export const Users = Table("users", {
   role: ROLE_OPTIONS,
-  clerkId: v.string(),
+  clerkId: v.optional(v.string()), // updated by clerk webhook
   basicInfoId: v.id("basicInfo"),
   missionId: v.id("missions"),
   backgroundId: v.id("backgrounds"),
