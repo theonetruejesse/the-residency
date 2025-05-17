@@ -75,7 +75,7 @@ export const inviteUser = internalAction({
 
     const response = await clerkClient.invitations.createInvitation({
       emailAddress: basicInfo.email,
-      redirectUrl: "https://www.example.com/my-sign-up", // todo, change this
+      // redirectUrl: "https://www.example.com/my-sign-up", // todo, set this if necessary
       publicMetadata: {
         convexUserId: args.userId,
       },
