@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { ResidencyForm } from "./_components/intake-form";
 import { getIntakeData, getOrCreateIntake } from "./_store/redis-intake";
 
-// when the user refreshes the page, the ?s=intakeId saves session data
+// when the user refreshes the page, the ?s=intakeId saves form data
 interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }

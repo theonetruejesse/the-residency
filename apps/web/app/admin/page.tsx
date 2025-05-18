@@ -1,3 +1,7 @@
 export default function AdminPage() {
-  return <div>Admin</div>;
+  return (
+    <div className="flex justify-center items-center h-screen">
+      <div>Admin</div>
+    </div>
+  );
 }

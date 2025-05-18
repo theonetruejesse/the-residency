@@ -17,6 +17,7 @@
     "@clerk/nextjs": "^6.19.1",
     "@residency/api": "workspace:*",
     "@residency/ui": "workspace:*",
+    "@tanstack/react-table": "^8.21.3",
     "@upstash/redis": "^1.34.9",
     "babel-plugin-react-compiler": "19.1.0-rc.1",
     "convex": "catalog:",
