@@ -33,3 +33,7 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+
+# my bs
+prompts
+run

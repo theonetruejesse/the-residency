@@ -120,6 +120,14 @@ export const SelectField = memo(
       setOpen(open);
     }, []);
 
+    const selectedValue = formData[fieldName as keyof FormData] as string;
+    const selectedLabel = useMemo(() => {
+      const selectedOption = options.find(
+        (option) => option.value === selectedValue
+      );
+      return selectedOption?.label || "";
+    }, [options, selectedValue]);
+
     return (
       <div className="space-y-2">
         <Label htmlFor={fieldName} className="text-gray-700">
@@ -127,7 +135,7 @@ export const SelectField = memo(
           <RequiredIndicator />
         </Label>
         <Select
-          value={formData[fieldName as keyof FormData] as string}
+          value={selectedValue}
           onValueChange={(value) => onValueChange(fieldName, value)}
           onOpenChange={handleOpenChange}
           open={open}
@@ -136,18 +144,14 @@ export const SelectField = memo(
             id={fieldName}
             className={`bg-white/50 border-gray-200 w-full ${errors[fieldName] ? "border-red-500" : ""}`}
           >
-            <SelectValue placeholder="" />
+            <SelectValue>{selectedLabel}</SelectValue>
           </SelectTrigger>
           <SelectContent className="max-h-[200px]">
-            {open && (
-              <div className="py-1">
-                {options.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </div>
-            )}
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

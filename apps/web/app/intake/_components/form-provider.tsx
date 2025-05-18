@@ -1,38 +1,20 @@
 "use client";
 
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
 import { useMutation } from "convex/react";
 import { api } from "@residency/api";
 import { FormData, FormErrors } from "./form-types";
-
-const INITIAL_FORM_DATA: FormData = {
-  // Basic Info
-  firstName: "",
-  lastName: "",
-  email: "",
-  phoneNumber: "",
-
-  // Backgrounds
-  gender: "",
-  country: "",
-  college: "",
-  referrals: "",
-
-  // Links
-  twitter: "",
-  linkedin: "",
-  github: "",
-  website: "",
-
-  // Missions
-  interest: "",
-  accomplishment: "",
-};
+import { IntakeData, saveIntakeData } from "../_store/redis-intake";
 
 // Extended FormErrors type that includes a form-level error
 type ExtendedFormErrors = FormErrors & { form?: string };
 
-// Context interface
 interface FormContextType {
   formData: FormData;
   errors: ExtendedFormErrors;
@@ -49,20 +31,30 @@ interface FormContextType {
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 // Provider component
-export function FormProvider({ children }: { children: ReactNode }) {
-  // Form data state
-  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
-
-  // Form validation state
+interface FormProviderProps {
+  children: ReactNode;
+  intakeId: string;
+  initialData: IntakeData;
+}
+export function FormProvider({
+  children,
+  intakeId,
+  initialData,
+}: FormProviderProps) {
+  const [formData, setFormData] = useState<FormData>(initialData.formData);
   const [errors, setErrors] = useState<ExtendedFormErrors>({});
-
-  // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Mutation for submitting the form
   const submitIntake = useMutation(api.application.index.submitIntake);
 
-  // Handle form input changes
+  useEffect(() => {
+    const saveData = async () => {
+      await saveIntakeData(intakeId, formData);
+    };
+
+    const debounceTimer = setTimeout(saveData, 5000); // 5 seconds
+    return () => clearTimeout(debounceTimer);
+  }, [formData, intakeId]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -73,7 +65,6 @@ export function FormProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  // Handle select input changes
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -81,11 +72,9 @@ export function FormProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  // Validate form fields
   const validateForm = () => {
     const newErrors: ExtendedFormErrors = {};
 
-    // Basic required fields
     if (!formData.firstName) newErrors.firstName = "First name is required";
     if (!formData.lastName) newErrors.lastName = "Last name is required";
     if (!formData.email) newErrors.email = "Email is required";
@@ -94,25 +83,20 @@ export function FormProvider({ children }: { children: ReactNode }) {
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.country) newErrors.country = "Country is required";
 
-    // Mission fields
     if (!formData.interest) newErrors.interest = "This field is required";
     if (!formData.accomplishment)
       newErrors.accomplishment = "This field is required";
 
-    // Update errors state
     setErrors(newErrors);
 
-    // Return true if no errors
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let isSuccess = false;
 
-    // Validate form
     if (!validateForm()) {
       return false;
     }
@@ -120,7 +104,6 @@ export function FormProvider({ children }: { children: ReactNode }) {
     try {
       setIsSubmitting(true);
 
-      // Transform formData to the expected structure
       const transformedData = {
         basicInfo: {
           firstName: formData.firstName,
@@ -161,7 +144,6 @@ export function FormProvider({ children }: { children: ReactNode }) {
     return isSuccess;
   };
 
-  // Context value
   const value = {
     formData,
     errors,
@@ -175,7 +157,6 @@ export function FormProvider({ children }: { children: ReactNode }) {
   return <FormContext.Provider value={value}>{children}</FormContext.Provider>;
 }
 
-// Custom hook to use the form context
 export function useForm() {
   const context = useContext(FormContext);
 
