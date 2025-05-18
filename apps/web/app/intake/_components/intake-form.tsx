@@ -2,9 +2,11 @@
 
 import type React from "react";
 import { ActionButton } from "@/components/action-button";
+import { memo, useMemo } from "react";
 
 import {
-  COUNTRIES_SELECT_OPTIONS,
+  COMMON_COUNTRIES,
+  ALL_COUNTRIES,
   GENDER_SELECT_OPTIONS,
   LINK_FIELDS,
 } from "@/app/intake/_components/field-options";
@@ -13,16 +15,16 @@ import {
   SelectField,
   TextareaField,
   LinkField,
+  CountrySelectField,
 } from "./form-helpers";
 import {
   SectionDivider,
-  SectionProvider,
   NextSectionButton,
   useSectionVisibility,
 } from "./section-provider";
-import { FormProvider, useForm } from "./form-provider";
+import { useForm } from "./form-provider";
 
-export const FormSectionController = () => {
+export const FormSectionController = memo(() => {
   const { visibleSections } = useSectionVisibility();
 
   return (
@@ -43,20 +45,20 @@ export const FormSectionController = () => {
       {visibleSections.questions && <QuestionsSection />}
     </>
   );
-};
+});
+FormSectionController.displayName = "FormSectionController";
 
-export const BasicInfoSection = () => {
+export const BasicInfoSection = memo(() => {
   const { formData, errors, handleChange, handleSelectChange } = useForm();
 
-  const genderOptions = GENDER_SELECT_OPTIONS.map((gender) => ({
-    value: gender.value,
-    label: gender.label,
-  }));
+  // Memoize the options to prevent recreating them on every render
+  const genderOptions = useMemo(() => GENDER_SELECT_OPTIONS, []);
 
-  const countryOptions = COUNTRIES_SELECT_OPTIONS.map((country) => ({
-    value: country.value,
-    label: country.label,
-  }));
+  // Use pre-structured data for better performance - no separator
+  const countryOptions = useMemo(() => {
+    // Just combine the arrays without a separator
+    return [...COMMON_COUNTRIES, ...ALL_COUNTRIES];
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -107,7 +109,7 @@ export const BasicInfoSection = () => {
           options={genderOptions}
           errors={errors}
         />
-        <SelectField
+        <CountrySelectField
           labelName="country of citizenship"
           fieldName="country"
           formData={formData}
@@ -132,9 +134,10 @@ export const BasicInfoSection = () => {
       />
     </div>
   );
-};
+});
+BasicInfoSection.displayName = "BasicInfoSection";
 
-const LinksSection = () => {
+const LinksSection = memo(() => {
   const { formData, handleChange } = useForm();
 
   return (
@@ -154,9 +157,10 @@ const LinksSection = () => {
       </div>
     </>
   );
-};
+});
+LinksSection.displayName = "LinksSection";
 
-const QuestionsSection = () => {
+const QuestionsSection = memo(() => {
   const { formData, errors, handleChange, handleSubmit, isSubmitting } =
     useForm();
 
@@ -197,4 +201,5 @@ const QuestionsSection = () => {
       </div>
     </>
   );
-};
+});
+QuestionsSection.displayName = "QuestionsSection";

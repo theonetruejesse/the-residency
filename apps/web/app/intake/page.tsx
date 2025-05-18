@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { FormProvider, useForm } from "./_components/form-provider";
 import { SectionProvider } from "./_components/section-provider";
 import { FormSectionController } from "./_components/intake-form";
@@ -24,7 +24,7 @@ interface ResidencyFormProps {
   setIsSubmitted: (isSubmitted: boolean) => void;
 }
 
-const ResidencyForm = ({ setIsSubmitted }: ResidencyFormProps) => {
+const ResidencyForm = memo(({ setIsSubmitted }: ResidencyFormProps) => {
   return (
     <FormProvider>
       <SectionProvider>
@@ -32,9 +32,10 @@ const ResidencyForm = ({ setIsSubmitted }: ResidencyFormProps) => {
       </SectionProvider>
     </FormProvider>
   );
-};
+});
+ResidencyForm.displayName = "ResidencyForm";
 
-const FormContent = ({ setIsSubmitted }: ResidencyFormProps) => {
+const FormContent = memo(({ setIsSubmitted }: ResidencyFormProps) => {
   const { handleSubmit } = useForm();
 
   return (
@@ -56,9 +57,10 @@ const FormContent = ({ setIsSubmitted }: ResidencyFormProps) => {
       </form>
     </div>
   );
-};
+});
+FormContent.displayName = "FormContent";
 
-const Submission = () => {
+const Submission = memo(() => {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="text-center glass h-[280px] flex flex-col px-16 items-center justify-center">
@@ -71,4 +73,5 @@ const Submission = () => {
       </div>
     </div>
   );
-};
+});
+Submission.displayName = "Submission";

@@ -1,10 +1,6 @@
 import type { Id } from "@residency/api";
 import type React from "react";
 
-export interface ResidencyFormProps {
-  setUserId: (userId: Id<"users">) => void;
-}
-
 export type FormData = {
   // Basic Info
   firstName: string;

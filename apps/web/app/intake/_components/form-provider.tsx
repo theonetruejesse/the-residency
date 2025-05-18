@@ -4,7 +4,30 @@ import React, { createContext, useState, useContext, ReactNode } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@residency/api";
 import { FormData, FormErrors } from "./form-types";
-import { INITIAL_FORM_DATA } from "./form-helpers";
+
+const INITIAL_FORM_DATA: FormData = {
+  // Basic Info
+  firstName: "",
+  lastName: "",
+  email: "",
+  phoneNumber: "",
+
+  // Backgrounds
+  gender: "",
+  country: "",
+  college: "",
+  referrals: "",
+
+  // Links
+  twitter: "",
+  linkedin: "",
+  github: "",
+  website: "",
+
+  // Missions
+  interest: "",
+  accomplishment: "",
+};
 
 // Extended FormErrors type that includes a form-level error
 type ExtendedFormErrors = FormErrors & { form?: string };
