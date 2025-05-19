@@ -20,7 +20,7 @@ import { adminAction, adminQuery } from "../utils/wrappers";
 // 2. create session + persona
 // 3. create user + clerk invite + link userId to applicant
 
-export const approveIntake = action({
+export const approveIntake = adminAction({
   args: {
     applicantId: v.id("applicants"),
   },
@@ -31,50 +31,47 @@ export const approveIntake = action({
       round: "first_round",
     });
 
-    // 2. create session + persona
+    // 2. fetch mission context
     const mission = await ctx.runQuery(
       internal.application.applicant.getApplicantMission,
       { applicantId: args.applicantId }
     );
     if (!mission) throw new Error("Mission not found");
 
-    const sessionId = await ctx.runMutation(
-      internal.application.session.createSession,
-      {
+    // 3. create session and generate content in parallel
+    const [sessionId, { role, tagline }] = await Promise.all([
+      ctx.runMutation(internal.application.session.createSession, {
         applicantId: args.applicantId,
         missionId: mission._id,
-      }
-    );
-    const { role, tagline } = await ctx.runAction(
-      internal.application.action.generateContent,
-      {
+      }),
+      ctx.runAction(internal.application.action.generateContent, {
         interest: mission.interest,
         accomplishment: mission.accomplishment,
-      }
-    );
+      }),
+    ]);
 
-    await ctx.runMutation(internal.application.session.createSessionPersona, {
-      sessionId,
-      role,
-      tagline,
-    });
-
-    // 3. create user + clerk invite + link userId to applicant
-    const userId = await ctx.runMutation(
-      internal.application.user.createApplicantUser,
-      {
+    // 4. create session persona and applicant user in parallel
+    const [_, userId] = await Promise.all([
+      ctx.runMutation(internal.application.session.createSessionPersona, {
+        sessionId,
+        role,
+        tagline,
+      }),
+      ctx.runMutation(internal.application.user.createApplicantUser, {
         applicantId: args.applicantId,
-      }
-    );
+      }),
+    ]);
 
-    await ctx.runAction(internal.application.action.inviteApplicantUser, {
-      userId,
-    });
-
-    await ctx.runMutation(internal.application.applicant.setApplicantUserId, {
-      applicantId: args.applicantId,
-      userId,
-    });
+    // 5. invite applicant user and set applicant user id in parallel
+    await Promise.all([
+      ctx.runAction(internal.application.action.inviteApplicantUser, {
+        userId,
+      }),
+      ctx.runMutation(internal.application.applicant.setApplicantUserId, {
+        applicantId: args.applicantId,
+        userId,
+      }),
+    ]);
 
     return sessionId;
   },
