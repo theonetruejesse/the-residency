@@ -21,7 +21,8 @@ export default defineSchema({
   links: Links.table,
   users: Users.table
     .index("by_role", ["role"])
-    .index("by_basicInfoId", ["basicInfoId"]),
+    .index("by_basicInfoId", ["basicInfoId"])
+    .index("by_clerkId", ["clerkId"]),
   sessions: Sessions.table
     .index("by_applicantId", ["applicantId"])
     .index("by_waiting_queuedAt", ["waiting", "queuedAt"])

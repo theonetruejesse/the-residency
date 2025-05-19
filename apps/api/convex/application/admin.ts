@@ -10,6 +10,7 @@ import {
 } from "../_generated/server";
 import { Id } from "../_generated/dataModel";
 import { BasicInfo } from "../model/applicants";
+import { adminAction, adminQuery } from "../utils/wrappers";
 
 // approving applicant for the first round; todo, update later to handle rejections
 // todo, auth admin and client endpoints using clerk
@@ -79,33 +80,19 @@ export const approveIntake = action({
   },
 });
 
-// helpers for demo
-
-export const kickSession = internalAction({
-  args: {
-    sessionId: v.id("sessions"),
-  },
+export const listApplicants = adminQuery({
+  args: {},
   handler: async (ctx, args) => {
-    await ctx.runAction(internal.application.queue.handleLeave, {
-      sessionId: args.sessionId,
-    });
+    return await ctx.db.query("applicants").collect();
   },
 });
 
-// export const listApplicants = internalQuery({
-//   args: {},
-//   handler: async (ctx, args) => {
-//     return await ctx.db.query("applicants").collect();
-//   },
-// });
-
-export const inviteAdmin = action({
-  args: {
+export const inviteAdmin = adminAction({
+  args: v.object({
     basicInfo: BasicInfo.table.validator,
-  },
+  }),
   handler: async (ctx, args) => {
     const { basicInfo } = args;
-
     const userId = await ctx.runMutation(
       internal.application.user.createAdminUser,
       { basicInfo }

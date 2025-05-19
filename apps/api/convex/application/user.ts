@@ -1,6 +1,8 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { BasicInfo } from "../model/applicants";
+import { Users } from "../model/users";
+import type { Doc } from "../_generated/dataModel";
 
 export const createApplicantUser = internalMutation({
   args: {
@@ -37,6 +39,20 @@ export const createAdminUser = internalMutation({
     });
 
     return userId;
+  },
+});
+
+export const getUserByClerkId = internalQuery({
+  args: {
+    clerkId: v.string(),
+  },
+  returns: v.union(Users.table.validator, v.null()),
+  handler: async (ctx, args) => {
+    const user: Doc<"users"> | null = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+    return user;
   },
 });
 
