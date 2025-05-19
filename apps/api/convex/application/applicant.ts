@@ -69,3 +69,15 @@ export const getApplicantSession = internalQuery({
       .unique();
   },
 });
+
+export const setApplicantUserId = internalMutation({
+  args: {
+    applicantId: v.id("applicants"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.patch(args.applicantId, {
+      userId: args.userId,
+    });
+  },
+});

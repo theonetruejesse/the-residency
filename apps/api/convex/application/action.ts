@@ -8,7 +8,7 @@ import {
   elevenClient,
   geminiClient,
 } from "../constants";
-import { rolePrompt, taglinePrompt } from "../prompts";
+import { rolePrompt, taglinePrompt } from "../utils/prompts";
 import { Missions } from "../model/applicants";
 import { internal } from "../_generated/api";
 

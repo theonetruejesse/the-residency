@@ -2,7 +2,7 @@
 
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { action, internalAction } from "../_generated/server";
+import { action, internalAction, internalQuery } from "../_generated/server";
 import { Id } from "../_generated/dataModel";
 
 // approving applicant for the first round; todo, update later to handle rejections
@@ -11,7 +11,7 @@ import { Id } from "../_generated/dataModel";
 // approve applicant:
 // 1. update applicant round
 // 2. create session + persona
-// 3. create user + clerk invite
+// 3. create user + clerk invite + link userId to applicant
 
 export const approveIntake = action({
   args: {
@@ -52,12 +52,17 @@ export const approveIntake = action({
       tagline,
     });
 
-    // 3. create user + clerk invite
+    // 3. create user + clerk invite + link userId to applicant
     const userId = await ctx.runMutation(internal.application.user.createUser, {
       applicantId: args.applicantId,
     });
 
     await ctx.runAction(internal.application.action.inviteUser, {
+      userId,
+    });
+
+    await ctx.runMutation(internal.application.applicant.setApplicantUserId, {
+      applicantId: args.applicantId,
       userId,
     });
 
@@ -75,5 +80,12 @@ export const kickSession = internalAction({
     await ctx.runAction(internal.application.queue.handleLeave, {
       sessionId: args.sessionId,
     });
+  },
+});
+
+export const listApplicants = internalQuery({
+  args: {},
+  handler: async (ctx, args) => {
+    return await ctx.db.query("applicants").collect();
   },
 });

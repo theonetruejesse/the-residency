@@ -4,6 +4,7 @@ import { ElevenLabsClient } from "elevenlabs";
 
 // SETTINGS
 export const MAX_CONCURRENT_CALLS = 5;
+// todo, change this to 15 minutes total
 // 5 minutes to start, 15 minutes for the call itself; user gets kicked out after this time
 export const MAX_SESSION_DURATION = 20 * 60 * 1000; // 20 minutes in milliseconds
 
