@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { BasicInfo } from "../model/applicants";
 
-export const createUser = internalMutation({
+export const createApplicantUser = internalMutation({
   args: {
     applicantId: v.id("applicants"),
   },
@@ -16,8 +16,27 @@ export const createUser = internalMutation({
       missionId: applicant.missionId,
       backgroundId: applicant.backgroundId,
       linkId: applicant.linkId,
-      role: "resident",
+      role: "applicant",
     });
+  },
+});
+
+export const createAdminUser = internalMutation({
+  args: {
+    basicInfo: BasicInfo.table.validator,
+  },
+  returns: v.id("users"),
+  handler: async (ctx, args) => {
+    const basicInfoId = await ctx.db.insert("basicInfo", {
+      ...args.basicInfo,
+    });
+
+    const userId = await ctx.db.insert("users", {
+      role: "admin",
+      basicInfoId,
+    });
+
+    return userId;
   },
 });
 

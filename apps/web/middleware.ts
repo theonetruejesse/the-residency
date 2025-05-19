@@ -2,28 +2,24 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
-// const isProtectedRoute = createRouteMatcher(["/interview(.*)"]);
+const isProtectedRoute = createRouteMatcher(["/interview(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionId } = await auth();
+  const session = await auth();
+  const { userId, sessionId } = session;
   const isSignedIn = userId !== null && sessionId !== null;
 
+  if ((isProtectedRoute(req) || isAdminRoute(req)) && !isSignedIn) {
+    const returnUrl = new URL("/login", req.url);
+    returnUrl.searchParams.set("redirect_url", req.url);
+    return NextResponse.redirect(returnUrl);
+  }
+
   if (isAdminRoute(req)) {
-    if (!isSignedIn) {
-      const returnUrl = new URL("/login", req.url);
-      returnUrl.searchParams.set("redirect_url", req.url);
-      return NextResponse.redirect(returnUrl);
-    }
-
-    // Check if user has admin role
-    const session = await auth();
     const userRole = session.sessionClaims?.metadata?.role;
-    if (userRole !== "admin") {
-      // User is signed in but not an admin, redirect to home
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-
-    return NextResponse.next();
+    return userRole === "admin"
+      ? NextResponse.next()
+      : NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();

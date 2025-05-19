@@ -60,7 +60,7 @@ export const generateContent = internalAction({
   },
 });
 
-export const inviteUser = internalAction({
+export const inviteApplicantUser = internalAction({
   args: {
     userId: v.id("users"),
   },
@@ -77,6 +77,22 @@ export const inviteUser = internalAction({
       emailAddress: basicInfo.email,
       // redirectUrl: "https://www.example.com/my-sign-up", // todo, set this if necessary
       publicMetadata: {
+        convexUserId: args.userId,
+      },
+    });
+  },
+});
+
+export const inviteAdmin = internalAction({
+  args: {
+    userId: v.id("users"),
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const response = await clerkClient.invitations.createInvitation({
+      emailAddress: args.email,
+      publicMetadata: {
+        role: "admin",
         convexUserId: args.userId,
       },
     });

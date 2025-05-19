@@ -147,11 +147,11 @@ export function FormProvider({
   const value = {
     formData,
     errors,
+    isSubmitting,
     handleChange,
     handleSelectChange,
     validateForm,
     handleSubmit,
-    isSubmitting,
   };
 
   return <FormContext.Provider value={value}>{children}</FormContext.Provider>;

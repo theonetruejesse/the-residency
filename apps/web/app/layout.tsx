@@ -4,6 +4,7 @@ import "@residency/ui/globals.css";
 import { Providers } from "@/components/providers";
 import backgroundTexture from "@/public/background.png";
 import { ReactScan } from "@/components/react-scan";
+import { Toaster } from "@residency/ui/components/sonner";
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
         }}
       >
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   );

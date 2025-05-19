@@ -2,8 +2,14 @@
 
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { action, internalAction, internalQuery } from "../_generated/server";
+import {
+  action,
+  internalAction,
+  internalMutation,
+  internalQuery,
+} from "../_generated/server";
 import { Id } from "../_generated/dataModel";
+import { BasicInfo } from "../model/applicants";
 
 // approving applicant for the first round; todo, update later to handle rejections
 // todo, auth admin and client endpoints using clerk
@@ -53,11 +59,14 @@ export const approveIntake = action({
     });
 
     // 3. create user + clerk invite + link userId to applicant
-    const userId = await ctx.runMutation(internal.application.user.createUser, {
-      applicantId: args.applicantId,
-    });
+    const userId = await ctx.runMutation(
+      internal.application.user.createApplicantUser,
+      {
+        applicantId: args.applicantId,
+      }
+    );
 
-    await ctx.runAction(internal.application.action.inviteUser, {
+    await ctx.runAction(internal.application.action.inviteApplicantUser, {
       userId,
     });
 
@@ -83,9 +92,28 @@ export const kickSession = internalAction({
   },
 });
 
-export const listApplicants = internalQuery({
-  args: {},
+// export const listApplicants = internalQuery({
+//   args: {},
+//   handler: async (ctx, args) => {
+//     return await ctx.db.query("applicants").collect();
+//   },
+// });
+
+export const inviteAdmin = action({
+  args: {
+    basicInfo: BasicInfo.table.validator,
+  },
   handler: async (ctx, args) => {
-    return await ctx.db.query("applicants").collect();
+    const { basicInfo } = args;
+
+    const userId = await ctx.runMutation(
+      internal.application.user.createAdminUser,
+      { basicInfo }
+    );
+
+    await ctx.runAction(internal.application.action.inviteAdmin, {
+      userId,
+      email: basicInfo.email,
+    });
   },
 });

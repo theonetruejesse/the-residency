@@ -1,10 +1,4 @@
 import type { FormData } from "./form-types";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@residency/ui/components/tooltip";
 import { Input } from "@residency/ui/components/input";
 import { Label } from "@residency/ui/components/label";
 import { Textarea } from "@residency/ui/components/textarea";
@@ -32,22 +26,7 @@ import {
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@residency/ui/lib/utils";
 import { Button } from "@residency/ui/components/button";
-
-// Required field indicator with tooltip
-const RequiredIndicator = () => {
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="text-red-500 ml-[-3px]">*</span>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>This field is required</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-};
+import { RequiredIndicator } from "@/components/required-indicator";
 
 // Reusable TextField component
 interface TextFieldProps {
