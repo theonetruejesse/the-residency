@@ -91,6 +91,7 @@ export const inviteAdmin = internalAction({
   handler: async (ctx, args) => {
     const response = await clerkClient.invitations.createInvitation({
       emailAddress: args.email,
+      // redirectUrl: "https://www.example.com/my-sign-up", // todo, fix this to handle admin redirects
       publicMetadata: {
         role: "admin",
         convexUserId: args.userId,

@@ -23,7 +23,8 @@
     "convex": "catalog:",
     "convex-helpers": "^0.1.86",
     "elevenlabs": "^1.57.0",
-    "nanoid": "^5.1.5"
+    "nanoid": "^5.1.5",
+    "svix": "^1.65.0"
   },
   "devDependencies": {
     "@residency/tsconfig": "workspace:*",

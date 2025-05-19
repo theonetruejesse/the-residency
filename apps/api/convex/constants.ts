@@ -17,12 +17,16 @@ export const ELEVEN_LABS_WEBHOOK_SECRET =
 const ELEVEN_LABS_API_KEY = process.env.ELEVEN_LABS_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
+export const CLERK_WEBHOOK_SIGNING_SECRET =
+  process.env.CLERK_WEBHOOK_SIGNING_SECRET;
+
 if (
   !ELEVEN_LABS_AGENT_ID ||
   !ELEVEN_LABS_API_KEY ||
   !GEMINI_API_KEY ||
   !ELEVEN_LABS_WEBHOOK_SECRET ||
-  !CLERK_SECRET_KEY
+  !CLERK_SECRET_KEY ||
+  !CLERK_WEBHOOK_SIGNING_SECRET
 ) {
   throw new Error("Environment variables not configured");
 }
