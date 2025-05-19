@@ -3,6 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 import { ElevenLabsClient } from "elevenlabs";
 
 // SETTINGS
+export const CURRENT_COHORT = "SUMMER_2025";
 export const MAX_CONCURRENT_CALLS = 5;
 // todo, change this to 15 minutes total
 // 5 minutes to start, 15 minutes for the call itself; user gets kicked out after this time

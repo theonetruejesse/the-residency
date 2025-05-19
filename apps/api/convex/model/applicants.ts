@@ -29,15 +29,15 @@ export const COHORT_OPTIONS = v.union(
 );
 
 export const Applicants = Table("applicants", {
+  cohort: COHORT_OPTIONS,
   status: STATUS_OPTIONS,
   round: ROUND_OPTIONS,
   ranking: RANKING_OPTIONS,
-  cohort: COHORT_OPTIONS,
   basicInfoId: v.id("basicInfo"),
   missionId: v.id("missions"),
   backgroundId: v.id("backgrounds"),
   linkId: v.id("links"),
-  userId: v.optional(v.id("users")), // only after they pass the intake round
+  userId: v.optional(v.id("users")), // only set after they pass the intake round
 });
 
 export const BasicInfo = Table("basicInfo", {

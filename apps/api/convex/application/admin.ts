@@ -2,24 +2,13 @@
 
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import {
-  action,
-  internalAction,
-  internalMutation,
-  internalQuery,
-} from "../_generated/server";
 import { Id } from "../_generated/dataModel";
 import { BasicInfo } from "../model/applicants";
 import { adminAction, adminQuery } from "../utils/wrappers";
+import { paginationOptsValidator } from "convex/server";
+import { CURRENT_COHORT } from "../constants";
 
-// approving applicant for the first round; todo, update later to handle rejections
-// todo, auth admin and client endpoints using clerk
-
-// approve applicant:
-// 1. update applicant round
-// 2. create session + persona
-// 3. create user + clerk invite + link userId to applicant
-
+// todo, send emails with resend
 export const approveIntake = adminAction({
   args: {
     applicantId: v.id("applicants"),
@@ -78,9 +67,79 @@ export const approveIntake = adminAction({
 });
 
 export const listApplicants = adminQuery({
-  args: {},
+  args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    return await ctx.db.query("applicants").collect();
+    const result = await ctx.db
+      .query("applicants")
+      .withIndex("by_cohort", (q) => q.eq("cohort", CURRENT_COHORT))
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    const fullApplicants = await Promise.all(
+      result.page.map(async (applicant) => {
+        const {
+          _id,
+          _creationTime,
+          basicInfoId,
+          missionId,
+          backgroundId,
+          linkId,
+          ...applicantData
+        } = applicant;
+
+        const basicInfoDoc = await ctx.db.get(basicInfoId);
+        if (!basicInfoDoc)
+          throw new Error(`BasicInfo not found for applicant ${_id}`);
+        const {
+          _id: biId,
+          _creationTime: biCreationTime,
+          ...basicInfo
+        } = basicInfoDoc;
+
+        const missionDoc = await ctx.db.get(missionId);
+        if (!missionDoc)
+          throw new Error(`Mission not found for applicant ${_id}`);
+        const {
+          _id: mId,
+          _creationTime: mCreationTime,
+          ...mission
+        } = missionDoc;
+
+        const backgroundDoc = await ctx.db.get(backgroundId);
+        if (!backgroundDoc)
+          throw new Error(`Background not found for applicant ${_id}`);
+        const {
+          _id: bgId,
+          _creationTime: bgCreationTime,
+          ...background
+        } = backgroundDoc;
+
+        const linksDoc = await ctx.db.get(linkId);
+        if (!linksDoc) throw new Error(`Links not found for applicant ${_id}`);
+        const { _id: lId, _creationTime: lCreationTime, ...links } = linksDoc;
+
+        const decision = {
+          status: applicantData.status,
+          round: applicantData.round,
+          ranking: applicantData.ranking,
+        };
+
+        return {
+          id: _id,
+          decision,
+          basicInfo,
+          mission,
+          background,
+          links,
+        };
+      })
+    );
+
+    return {
+      page: fullApplicants,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   },
 });
 
@@ -99,5 +158,36 @@ export const inviteAdmin = adminAction({
       userId,
       email: basicInfo.email,
     });
+  },
+});
+
+// todo, send emails with resend
+export const rejectApplicant = adminAction({
+  args: {
+    applicantId: v.id("applicants"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(
+      internal.application.applicant.updateApplicantStatus,
+      {
+        applicantId: args.applicantId,
+        status: "rejected",
+      }
+    );
+  },
+});
+
+export const waitlistApplicant = adminAction({
+  args: {
+    applicantId: v.id("applicants"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(
+      internal.application.applicant.updateApplicantStatus,
+      {
+        applicantId: args.applicantId,
+        status: "waitlisted",
+      }
+    );
   },
 });

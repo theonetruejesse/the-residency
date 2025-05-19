@@ -1,8 +1,7 @@
 import { v } from "convex/values";
 import { internalQuery, internalMutation } from "../_generated/server";
-import { BasicInfo, ROUND_OPTIONS } from "../model/applicants";
-
-const CURRENT_COHORT = "SUMMER_2025";
+import { BasicInfo, ROUND_OPTIONS, STATUS_OPTIONS } from "../model/applicants";
+import { CURRENT_COHORT } from "../constants";
 
 export const createApplicant = internalMutation({
   args: v.object({
@@ -31,6 +30,18 @@ export const updateApplicantRound = internalMutation({
   handler: async (ctx, args) => {
     return await ctx.db.patch(args.applicantId, {
       round: args.round,
+    });
+  },
+});
+
+export const updateApplicantStatus = internalMutation({
+  args: {
+    applicantId: v.id("applicants"),
+    status: STATUS_OPTIONS,
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.patch(args.applicantId, {
+      status: args.status,
     });
   },
 });
