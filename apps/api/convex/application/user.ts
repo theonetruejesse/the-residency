@@ -48,11 +48,14 @@ export const getUserByClerkId = internalQuery({
   },
   returns: v.union(Users.table.validator, v.null()),
   handler: async (ctx, args) => {
-    const user: Doc<"users"> | null = await ctx.db
+    const doc = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .unique();
-    return user;
+    if (!doc) return null;
+    // Strip system fields (_id, _creationTime) before returning
+    const { _id, _creationTime, ...userData } = doc;
+    return userData;
   },
 });
 
