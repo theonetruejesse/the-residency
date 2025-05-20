@@ -115,7 +115,7 @@ export const ApplicantList = () => {
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-4">
-            {results?.page?.map((applicant: any) => (
+            {results.map((applicant: any) => (
               <ApplicantCard key={applicant.id} applicant={applicant} />
             ))}
             {status !== "Exhausted" && (
