@@ -5,6 +5,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ConvexReactClient } from "convex/react";
 import { ClerkProvider, useAuth } from "@clerk/nextjs";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
+import { TooltipProvider } from "@residency/ui/components/tooltip";
 
 const convex = new ConvexReactClient(
   process.env.NEXT_PUBLIC_CONVEX_URL as string
@@ -22,9 +23,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
       enableColorScheme
     >
-      <ClerkProvider publishableKey={NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+      <ClerkProvider
+        publishableKey={NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+        afterSignOutUrl="/"
+      >
         <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
         </ConvexProviderWithClerk>
       </ClerkProvider>
     </NextThemesProvider>

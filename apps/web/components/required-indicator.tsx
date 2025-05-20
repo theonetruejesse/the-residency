@@ -1,5 +1,4 @@
 import {
-  TooltipProvider,
   Tooltip,
   TooltipTrigger,
   TooltipContent,
@@ -8,15 +7,13 @@ import {
 // Required field indicator with tooltip
 export const RequiredIndicator = () => {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="text-red-500 ml-[-3px]">*</span>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>this field is required</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="text-red-500 ml-[-3px]">*</span>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>this field is required</p>
+      </TooltipContent>
+    </Tooltip>
   );
 };

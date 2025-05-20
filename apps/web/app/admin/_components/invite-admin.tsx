@@ -20,13 +20,13 @@ export const InviteAdminForm = () => {
     useInviteForm();
 
   return (
-    <Accordion type="single" collapsible className="w-full max-w-md">
+    <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="invite-admin">
         <AccordionTrigger className="text-lg font-medium">
           invite admin
         </AccordionTrigger>
         <AccordionContent>
-          <div className="rounded-lg shadow-md bg-white/80 backdrop-blur-sm mx-2 w-full">
+          <div className="rounded-lg shadow-md bg-white/80 backdrop-blur-sm mx-2 w-full max-w-lg">
             <form
               className="space-y-4 p-8 space-y-6"
               onSubmit={async (e) => {
