@@ -33,7 +33,7 @@ export const Interviews = Table("interviews", {
   applicantId: v.id("applicants"),
   conversationId: v.string(), // elevenlabs conversation id
   audioUrl: v.string(), // url to the audio file, stored in uploadthing
-  grade: v.number(), // final grade for the interview
+  score: v.number(), // final score for the interview
 });
 
 export const CRITERIA_OPTIONS = v.union(
@@ -44,10 +44,17 @@ export const CRITERIA_OPTIONS = v.union(
   v.literal("determination")
 );
 
+export const GRADE_OPTIONS = v.union(
+  v.literal("high"),
+  v.literal("medium"),
+  v.literal("low"),
+  v.literal("unclear")
+);
+
 export const Grades = Table("grades", {
   interviewId: v.id("interviews"),
   criteria: CRITERIA_OPTIONS,
-  score: v.number(),
+  grade: GRADE_OPTIONS,
   quote: v.string(),
   rationale: v.string(),
 });
