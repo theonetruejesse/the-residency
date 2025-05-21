@@ -1,6 +1,6 @@
-import { Id, Doc } from "../../_generated/dataModel";
-
 // todo, resolve the type issues later
+
+import { Id, Doc } from "../_generated/dataModel";
 
 export type FullApplicantType = {
   id: Id<"applicants">;

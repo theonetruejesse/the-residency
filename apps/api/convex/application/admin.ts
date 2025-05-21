@@ -17,7 +17,7 @@ import { adminAction, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
 import { internalQuery } from "../_generated/server";
-import { FullApplicantType } from "../model/types/application.types";
+import { FullApplicantType } from "../types/application.types";
 
 // todo, send emails with resend
 export const approveIntake = adminAction({

@@ -55,6 +55,6 @@ export const Grades = Table("grades", {
   interviewId: v.id("interviews"),
   criteria: CRITERIA_OPTIONS,
   grade: GRADE_OPTIONS,
-  quote: v.string(),
-  rationale: v.string(),
+  rationale: v.string(), // why this grade?
+  quote: v.string(), // quote from the interview
 });
