@@ -2,7 +2,7 @@ import { Table } from "convex-helpers/server";
 import { v } from "convex/values";
 
 // abstraction; processed based on session state
-export const INTERVIEW_STATUS_OPTIONS = v.union(
+export const SESSION_STATUS_OPTIONS = v.union(
   v.literal("active_call"),
   v.literal("in_queue"),
   v.literal("post_interview"),
@@ -29,17 +29,25 @@ export const Personas = Table("personas", {
   tagline: v.string(), // generated tagline for the persona using the user's mission
 });
 
-export const InterviewGrades = Table("interviewGrades", {
+export const Interviews = Table("interviews", {
   applicantId: v.id("applicants"),
   conversationId: v.string(), // elevenlabs conversation id
-  //   grade: v.number(), // TODO, add later
-  // interview notes
-  ambition_passion_quotes: v.string(),
-  ambition_passion_rationale: v.string(),
-  track_record_quotes: v.string(),
-  track_record_rationale: v.string(),
-  intentionality_decision_quotes: v.string(),
-  intentionality_decision_rationale: v.string(),
-  rationale_communication_quotes: v.string(),
-  rationale_communication_rationale: v.string(),
+  audioUrl: v.string(), // url to the audio file, stored in uploadthing
+  grade: v.number(), // final grade for the interview
+});
+
+export const CRITERIA_OPTIONS = v.union(
+  v.literal("mission"),
+  v.literal("intelligence"),
+  v.literal("vision"),
+  v.literal("traction"),
+  v.literal("determination")
+);
+
+export const Grades = Table("grades", {
+  interviewId: v.id("interviews"),
+  criteria: CRITERIA_OPTIONS,
+  score: v.number(),
+  quote: v.string(),
+  rationale: v.string(),
 });

@@ -9,7 +9,7 @@ import {
   Links,
   Missions,
 } from "../model/applicants";
-import { INTERVIEW_STATUS_OPTIONS, Sessions } from "../model/sessions";
+import { SESSION_STATUS_OPTIONS, Sessions } from "../model/sessions";
 
 export const submitIntake = mutation({
   args: {
@@ -129,7 +129,7 @@ export const getInterviewStatus = query({
   args: {
     applicantId: v.id("applicants"),
   },
-  returns: INTERVIEW_STATUS_OPTIONS,
+  returns: SESSION_STATUS_OPTIONS,
   handler: async (
     ctx,
     args

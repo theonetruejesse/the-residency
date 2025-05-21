@@ -7,7 +7,7 @@ import {
   Missions,
 } from "./model/applicants";
 import { Users } from "./model/users";
-import { InterviewGrades, Personas, Sessions } from "./model/sessions";
+import { Grades, Interviews, Personas, Sessions } from "./model/sessions";
 
 export default defineSchema({
   applicants: Applicants.table
@@ -29,7 +29,9 @@ export default defineSchema({
     .index("by_waiting_queuedAt", ["waiting", "queuedAt"])
     .index("by_inCall_scheduledEndTime", ["inCall", "scheduledEndTime"]),
   personas: Personas.table.index("by_sessionId", ["sessionId"]),
-  interviewGrades: InterviewGrades.table.index("by_applicantId", [
-    "applicantId",
-  ]),
+  // interviewGrades: InterviewGrades.table.index("by_applicantId", [
+  //   "applicantId",
+  // ]),
+  interviews: Interviews.table.index("by_applicantId", ["applicantId"]),
+  grades: Grades.table.index("by_interviewId", ["interviewId"]),
 });

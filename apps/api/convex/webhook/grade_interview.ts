@@ -1,7 +1,9 @@
 import { httpAction, internalMutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { ELEVEN_LABS_WEBHOOK_SECRET } from "../constants";
-import { InterviewGrades } from "../model/sessions";
+// import { InterviewGrades } from "../model/sessions";
+
+// TODO, fix me later
 
 export const gradeInterview = httpAction(async (ctx, request) => {
   console.log("gradeInterview webhook received");
@@ -78,79 +80,79 @@ export const gradeInterview = httpAction(async (ctx, request) => {
     }
 
     // Parse and log the webhook data
-    try {
-      const data = JSON.parse(body);
-      // --------------------
-      // Extract necessary fields to create a grade record
-      // --------------------
-      const conversationId: string | undefined = data?.data?.conversation_id;
-      const dynamicVars =
-        data?.data?.conversation_initiation_client_data?.dynamic_variables ??
-        {};
-      const userIdString: string | undefined = dynamicVars?.user_id;
+    // try {
+    //   const data = JSON.parse(body);
+    //   // --------------------
+    //   // Extract necessary fields to create a grade record
+    //   // --------------------
+    //   const conversationId: string | undefined = data?.data?.conversation_id;
+    //   const dynamicVars =
+    //     data?.data?.conversation_initiation_client_data?.dynamic_variables ??
+    //     {};
+    //   const userIdString: string | undefined = dynamicVars?.user_id;
 
-      if (!conversationId || !userIdString) {
-        console.error("Missing conversationId or userId in webhook payload");
-      } else {
-        // Helper to safely pull quote + rationale from data_collection_results
-        const dcr =
-          data?.data?.analysis?.data_collection_results ??
-          ({} as Record<string, any>);
+    //   if (!conversationId || !userIdString) {
+    //     console.error("Missing conversationId or userId in webhook payload");
+    //   } else {
+    //     // Helper to safely pull quote + rationale from data_collection_results
+    //     const dcr =
+    //       data?.data?.analysis?.data_collection_results ??
+    //       ({} as Record<string, any>);
 
-        const getField = (
-          key: string
-        ): { quote: string; rationale: string } => {
-          const obj = dcr[key] ?? {};
-          let value = obj.value ?? "None";
+    //     const getField = (
+    //       key: string
+    //     ): { quote: string; rationale: string } => {
+    //       const obj = dcr[key] ?? {};
+    //       let value = obj.value ?? "None";
 
-          // Handle values with surrounding quotes (e.g., "\"quoted string\"")
-          if (
-            value.startsWith('"') &&
-            value.endsWith('"') &&
-            value.length > 2
-          ) {
-            value = value.substring(1, value.length - 1);
-          }
+    //       // Handle values with surrounding quotes (e.g., "\"quoted string\"")
+    //       if (
+    //         value.startsWith('"') &&
+    //         value.endsWith('"') &&
+    //         value.length > 2
+    //       ) {
+    //         value = value.substring(1, value.length - 1);
+    //       }
 
-          return {
-            quote: value,
-            rationale: obj.rationale ?? "",
-          };
-        };
+    //       return {
+    //         quote: value,
+    //         rationale: obj.rationale ?? "",
+    //       };
+    //     };
 
-        const ap = getField("ambition_passion_quotes");
-        const tr = getField("track_record_quotes");
-        const id = getField("intentionality_decision_quotes");
-        const rc = getField("rationale_communication_quotes");
+    //     const ap = getField("ambition_passion_quotes");
+    //     const tr = getField("track_record_quotes");
+    //     const id = getField("intentionality_decision_quotes");
+    //     const rc = getField("rationale_communication_quotes");
 
-        const gradeArgs = {
-          userIdString, // TODO FIX ME!!!
-          conversationId,
-          ambition_passion_quotes: ap.quote,
-          ambition_passion_rationale: ap.rationale,
-          track_record_quotes: tr.quote,
-          track_record_rationale: tr.rationale,
-          intentionality_decision_quotes: id.quote,
-          intentionality_decision_rationale: id.rationale,
-          rationale_communication_quotes: rc.quote,
-          rationale_communication_rationale: rc.rationale,
-        } as any;
+    //     const gradeArgs = {
+    //       userIdString, // TODO FIX ME!!!
+    //       conversationId,
+    //       ambition_passion_quotes: ap.quote,
+    //       ambition_passion_rationale: ap.rationale,
+    //       track_record_quotes: tr.quote,
+    //       track_record_rationale: tr.rationale,
+    //       intentionality_decision_quotes: id.quote,
+    //       intentionality_decision_rationale: id.rationale,
+    //       rationale_communication_quotes: rc.quote,
+    //       rationale_communication_rationale: rc.rationale,
+    //     } as any;
 
-        try {
-          await ctx.runMutation(
-            internal.webhook.grade_interview.setGrade,
-            gradeArgs
-          );
-          console.log("Grade record inserted for user", userIdString);
-        } catch (err) {
-          console.error("Failed to insert grade:", err);
-        }
-      }
+    //     try {
+    //       await ctx.runMutation(
+    //         internal.webhook.grade_interview.setGrade,
+    //         gradeArgs
+    //       );
+    //       console.log("Grade record inserted for user", userIdString);
+    //     } catch (err) {
+    //       console.error("Failed to insert grade:", err);
+    //     }
+    //   }
 
-      // --------------------
-    } catch (error) {
-      console.error("Failed to parse webhook payload:", error);
-    }
+    //   // --------------------
+    // } catch (error) {
+    //   console.error("Failed to parse webhook payload:", error);
+    // }
 
     // Return 200 OK to acknowledge receipt (similar to res.status(200).send())
     return new Response("", { status: 200 });
@@ -160,11 +162,11 @@ export const gradeInterview = httpAction(async (ctx, request) => {
   }
 });
 
-export const setGrade = internalMutation({
-  args: {
-    ...InterviewGrades.withoutSystemFields,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("interviewGrades", args);
-  },
-});
+// export const setGrade = internalMutation({
+//   args: {
+//     ...InterviewGrades.withoutSystemFields,
+//   },
+//   handler: async (ctx, args) => {
+//     await ctx.db.insert("interviewGrades", args);
+//   },
+// });
