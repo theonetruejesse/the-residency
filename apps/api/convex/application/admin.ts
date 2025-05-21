@@ -17,7 +17,10 @@ import { adminAction, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
 import { internalQuery } from "../_generated/server";
-import { FullApplicantType } from "../types/application.types";
+import {
+  FirstRoundApplicantType,
+  FullApplicantType,
+} from "../types/application.types";
 
 // todo, send emails with resend
 export const approveIntake = adminAction({
@@ -152,6 +155,47 @@ export const intakeApplicants = adminQuery({
 
     return {
       page: fullApplicants,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
+  },
+});
+
+export const firstRoundApplicants = adminQuery({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
+      .query("applicants")
+      .withIndex("by_cycle", (q) =>
+        q
+          .eq("cohort", CURRENT_COHORT)
+          .eq("round", "first_round")
+          .eq("status", "pending")
+      )
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    const page: FirstRoundApplicantType[] = await Promise.all(
+      result.page.map(async (applicant) => {
+        const applicantData = await ctx.runQuery(
+          internal.application.admin.getFullApplicant,
+          { applicant }
+        );
+
+        const interview = await ctx.runQuery(
+          internal.application.session.getInterview,
+          { applicantId: applicant._id }
+        );
+
+        return {
+          applicant: applicantData,
+          interview,
+        };
+      })
+    );
+
+    return {
+      page,
       isDone: result.isDone,
       continueCursor: result.continueCursor,
     };

@@ -19,3 +19,13 @@ export type FullApplicantType = {
   links: Doc<"links">;
   mission: Doc<"missions">;
 };
+
+type InterviewGrade = {
+  interview: Doc<"interviews">;
+  grades: Doc<"grades">[];
+};
+
+export type FirstRoundApplicantType = {
+  applicant: FullApplicantType;
+  interview: InterviewGrade | null;
+};
