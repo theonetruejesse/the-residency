@@ -2,7 +2,6 @@ import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { BasicInfo } from "../model/applicants";
 import { Users } from "../model/users";
-import type { Doc } from "../_generated/dataModel";
 
 export const createApplicantUser = internalMutation({
   args: {
@@ -46,22 +45,16 @@ export const getUserByClerkId = internalQuery({
   args: {
     clerkId: v.string(),
   },
-  returns: v.union(Users.table.validator, v.null()),
   handler: async (ctx, args) => {
-    const doc = await ctx.db
+    return await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .unique();
-    if (!doc) return null;
-    // Strip system fields (_id, _creationTime) before returning
-    const { _id, _creationTime, ...userData } = doc;
-    return userData;
   },
 });
 
 export const getUserBasicInfo = internalQuery({
   args: { userId: v.id("users") },
-  returns: BasicInfo.table.validator,
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
     if (!user) throw new Error("User not found");

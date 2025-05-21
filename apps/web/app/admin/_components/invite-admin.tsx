@@ -26,7 +26,7 @@ export const InviteAdminForm = () => {
           invite admin
         </AccordionTrigger>
         <AccordionContent>
-          <div className="rounded-lg shadow-md bg-white/80 backdrop-blur-sm mx-2 w-full max-w-lg">
+          <div className="rounded-lg shadow-md bg-white/80 backdrop-blur-sm mx-2 w-full max-w-xl">
             <form
               className="space-y-4 p-8 space-y-6"
               onSubmit={async (e) => {

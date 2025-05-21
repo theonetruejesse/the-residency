@@ -3,10 +3,21 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
-import { BasicInfo } from "../model/applicants";
+import {
+  Backgrounds,
+  Applicants,
+  BasicInfo,
+  RANKING_OPTIONS,
+  ROUND_OPTIONS,
+  STATUS_OPTIONS,
+  Missions,
+  Links,
+} from "../model/applicants";
 import { adminAction, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
+import { internalQuery } from "../_generated/server";
+import { FullApplicantType } from "../model/types/application.types";
 
 // todo, send emails with resend
 export const approveIntake = adminAction({
@@ -66,83 +77,6 @@ export const approveIntake = adminAction({
   },
 });
 
-export const listApplicants = adminQuery({
-  args: { paginationOpts: paginationOptsValidator },
-  handler: async (ctx, args) => {
-    const result = await ctx.db
-      .query("applicants")
-      .withIndex("by_cohort", (q) => q.eq("cohort", CURRENT_COHORT))
-      .order("desc")
-      .paginate(args.paginationOpts);
-
-    const fullApplicants = await Promise.all(
-      result.page.map(async (applicant) => {
-        const {
-          _id,
-          _creationTime,
-          basicInfoId,
-          missionId,
-          backgroundId,
-          linkId,
-          ...applicantData
-        } = applicant;
-
-        const basicInfoDoc = await ctx.db.get(basicInfoId);
-        if (!basicInfoDoc)
-          throw new Error(`BasicInfo not found for applicant ${_id}`);
-        const {
-          _id: biId,
-          _creationTime: biCreationTime,
-          ...basicInfo
-        } = basicInfoDoc;
-
-        const missionDoc = await ctx.db.get(missionId);
-        if (!missionDoc)
-          throw new Error(`Mission not found for applicant ${_id}`);
-        const {
-          _id: mId,
-          _creationTime: mCreationTime,
-          ...mission
-        } = missionDoc;
-
-        const backgroundDoc = await ctx.db.get(backgroundId);
-        if (!backgroundDoc)
-          throw new Error(`Background not found for applicant ${_id}`);
-        const {
-          _id: bgId,
-          _creationTime: bgCreationTime,
-          ...background
-        } = backgroundDoc;
-
-        const linksDoc = await ctx.db.get(linkId);
-        if (!linksDoc) throw new Error(`Links not found for applicant ${_id}`);
-        const { _id: lId, _creationTime: lCreationTime, ...links } = linksDoc;
-
-        const decision = {
-          status: applicantData.status,
-          round: applicantData.round,
-          ranking: applicantData.ranking,
-        };
-
-        return {
-          id: _id,
-          decision,
-          basicInfo,
-          mission,
-          background,
-          links,
-        };
-      })
-    );
-
-    return {
-      page: fullApplicants,
-      isDone: result.isDone,
-      continueCursor: result.continueCursor,
-    };
-  },
-});
-
 export const inviteAdmin = adminAction({
   args: v.object({
     basicInfo: BasicInfo.table.validator,
@@ -189,5 +123,105 @@ export const waitlistApplicant = adminAction({
         status: "waitlisted",
       }
     );
+  },
+});
+
+// QUERIES
+
+export const intakeApplicants = adminQuery({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
+      .query("applicants")
+      .withIndex("by_cycle", (q) =>
+        q
+          .eq("cohort", CURRENT_COHORT)
+          .eq("round", "intake")
+          .eq("status", "pending")
+      )
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    const fullApplicants: FullApplicantType[] = await Promise.all(
+      result.page.map(async (applicant) => {
+        return await ctx.runQuery(internal.application.admin.getFullApplicant, {
+          applicant,
+        });
+      })
+    );
+
+    return {
+      page: fullApplicants,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
+  },
+});
+
+export const getFullApplicant = internalQuery({
+  args: {
+    applicant: v.object({
+      ...Applicants.withSystemFields,
+    }),
+  },
+  returns: {
+    id: v.id("applicants"),
+    decision: v.object({
+      status: STATUS_OPTIONS,
+      round: ROUND_OPTIONS,
+      ranking: RANKING_OPTIONS,
+    }),
+    basicInfo: v.object({
+      ...BasicInfo.withSystemFields,
+    }),
+    background: v.object({
+      ...Backgrounds.withSystemFields,
+    }),
+    links: v.object({
+      ...Links.withSystemFields,
+    }),
+    mission: v.object({
+      ...Missions.withSystemFields,
+    }),
+  },
+  handler: async (ctx, args) => {
+    const {
+      basicInfoId,
+      missionId,
+      backgroundId,
+      linkId,
+      status,
+      round,
+      ranking,
+    } = args.applicant;
+    const basicInfo = await ctx.db.get(basicInfoId);
+    if (!basicInfo)
+      throw new Error(`BasicInfo not found for applicant ${basicInfoId}`);
+
+    const mission = await ctx.db.get(missionId);
+    if (!mission)
+      throw new Error(`Mission not found for applicant ${missionId}`);
+
+    const background = await ctx.db.get(backgroundId);
+    if (!background)
+      throw new Error(`Background not found for applicant ${backgroundId}`);
+
+    const links = await ctx.db.get(linkId);
+    if (!links) throw new Error(`Links not found for applicant ${linkId}`);
+
+    const decision = {
+      status,
+      round,
+      ranking,
+    };
+
+    return {
+      id: args.applicant._id,
+      decision,
+      basicInfo,
+      background,
+      links,
+      mission,
+    };
   },
 });

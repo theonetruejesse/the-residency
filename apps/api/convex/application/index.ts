@@ -179,7 +179,7 @@ export const getWaitingList = query({
     );
 
     return await Promise.all(
-      sessions.map(async (session) => {
+      sessions.map(async (session: Doc<"sessions">) => {
         const persona = await ctx.runQuery(
           internal.application.session.getSessionPersona,
           { sessionId: session._id }

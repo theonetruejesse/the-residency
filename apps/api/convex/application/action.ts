@@ -65,11 +65,11 @@ export const inviteApplicantUser = internalAction({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    const { userId } = args;
+
     const basicInfo = await ctx.runQuery(
       internal.application.user.getUserBasicInfo,
-      {
-        userId: args.userId,
-      }
+      { userId }
     );
     if (!basicInfo) throw new Error("Basic info not found");
 
