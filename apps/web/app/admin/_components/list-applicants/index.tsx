@@ -8,7 +8,7 @@ import {
 } from "@residency/ui/components/accordion";
 import { Separator } from "@residency/ui/components/separator";
 import { IntakeApplicants } from "./intake-applicants";
-
+import { FirstRoundApplicants } from "./first-round-applicants";
 export const ApplicantList = () => {
   return (
     <Accordion type="single" collapsible className="w-full">
@@ -20,6 +20,7 @@ export const ApplicantList = () => {
           <Separator className="mb-8" />
           <div className="flex flex-row gap-4">
             <IntakeApplicants />
+            <FirstRoundApplicants />
           </div>
         </AccordionContent>
       </AccordionItem>

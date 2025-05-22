@@ -96,7 +96,7 @@ interface ApplicantCardProps {
 
 export const ApplicantCard = ({ applicant }: ApplicantCardProps) => {
   return (
-    <Card className="w-full max-w-xl">
+    <Card className="w-lg">
       <CardContent className="px-6">
         <div className="flex flex-col space-y-4">
           <div className="flex items-center justify-between">
