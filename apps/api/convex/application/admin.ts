@@ -1,5 +1,3 @@
-// todo, auth admin and client endpoints using clerk
-
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
@@ -16,14 +14,79 @@ import {
 import { adminAction, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
-import { internalQuery } from "../_generated/server";
+import { internalAction, internalQuery } from "../_generated/server";
 import {
   FirstRoundApplicantType,
   FullApplicantType,
 } from "../types/application.types";
 
 // todo, send emails with resend
-export const approveIntake = adminAction({
+export const rejectApplicant = adminAction({
+  args: {
+    applicantId: v.id("applicants"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(
+      internal.application.applicant.updateApplicantStatus,
+      {
+        applicantId: args.applicantId,
+        status: "rejected",
+      }
+    );
+  },
+});
+
+export const waitlistApplicant = adminAction({
+  args: {
+    applicantId: v.id("applicants"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(
+      internal.application.applicant.updateApplicantStatus,
+      {
+        applicantId: args.applicantId,
+        status: "waitlisted",
+      }
+    );
+  },
+});
+
+export const approveRound = adminAction({
+  args: {
+    applicantId: v.id("applicants"),
+  },
+  handler: async (ctx, args) => {
+    const { applicantId } = args;
+    const applicant = await ctx.runQuery(
+      internal.application.applicant.getApplicant,
+      { applicantId }
+    );
+    if (!applicant) throw new Error("Applicant not found");
+
+    const { round } = applicant;
+
+    switch (round) {
+      case "intake":
+        await ctx.runAction(internal.application.admin.approveIntake, {
+          applicantId: args.applicantId,
+        });
+        break;
+      case "first_round":
+        await ctx.runAction(internal.application.admin.approveFirstRound, {
+          applicantId: args.applicantId,
+        });
+        break;
+      case "second_round":
+        await ctx.runAction(internal.application.admin.approveSecondRound, {
+          applicantId: args.applicantId,
+        });
+        break;
+    }
+  },
+});
+
+// todo, send emails with resend
+export const approveIntake = internalAction({
   args: {
     applicantId: v.id("applicants"),
   },
@@ -80,6 +143,35 @@ export const approveIntake = adminAction({
   },
 });
 
+// todo, send emails with resend
+export const approveFirstRound = internalAction({
+  args: {
+    applicantId: v.id("applicants"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(internal.application.applicant.updateApplicantRound, {
+      applicantId: args.applicantId,
+      round: "second_round",
+    });
+  },
+});
+
+// TODO send email
+export const approveSecondRound = internalAction({
+  args: {
+    applicantId: v.id("applicants"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(
+      internal.application.applicant.updateApplicantStatus,
+      {
+        applicantId: args.applicantId,
+        status: "accepted",
+      }
+    );
+  },
+});
+
 export const inviteAdmin = adminAction({
   args: v.object({
     basicInfo: BasicInfo.table.validator,
@@ -95,37 +187,6 @@ export const inviteAdmin = adminAction({
       userId,
       email: basicInfo.email,
     });
-  },
-});
-
-// todo, send emails with resend
-export const rejectApplicant = adminAction({
-  args: {
-    applicantId: v.id("applicants"),
-  },
-  handler: async (ctx, args) => {
-    await ctx.runMutation(
-      internal.application.applicant.updateApplicantStatus,
-      {
-        applicantId: args.applicantId,
-        status: "rejected",
-      }
-    );
-  },
-});
-
-export const waitlistApplicant = adminAction({
-  args: {
-    applicantId: v.id("applicants"),
-  },
-  handler: async (ctx, args) => {
-    await ctx.runMutation(
-      internal.application.applicant.updateApplicantStatus,
-      {
-        applicantId: args.applicantId,
-        status: "waitlisted",
-      }
-    );
   },
 });
 

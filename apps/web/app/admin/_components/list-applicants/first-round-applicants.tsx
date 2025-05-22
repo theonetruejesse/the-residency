@@ -21,7 +21,7 @@ import { Alert, AlertDescription } from "@residency/ui/components/alert";
 import { Badge } from "@residency/ui/components/badge";
 import { api } from "@residency/api";
 import { useAction, usePaginatedQuery } from "convex/react";
-import { ListSkeleton } from "./list-skeleton";
+// import { ListSkeleton } from "./list-skeleton";
 import { Id } from "@residency/api/convex/_generated/dataModel";
 import { Separator } from "@residency/ui/components/separator";
 import {
@@ -83,7 +83,8 @@ export const FirstRoundApplicants = () => {
 
   const content =
     applicantsQuery.status === "LoadingFirstPage" ? (
-      <ListSkeleton />
+      // <ListSkeleton />
+      <div>hello</div>
     ) : (
       <ListContent applicantsQuery={applicantsQuery} />
     );

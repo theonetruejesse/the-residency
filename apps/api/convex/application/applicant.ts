@@ -46,6 +46,13 @@ export const updateApplicantStatus = internalMutation({
   },
 });
 
+export const getApplicant = internalQuery({
+  args: { applicantId: v.id("applicants") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.applicantId);
+  },
+});
+
 export const getApplicantBasicInfo = internalQuery({
   args: { applicantId: v.id("applicants") },
   returns: BasicInfo.table.validator,
