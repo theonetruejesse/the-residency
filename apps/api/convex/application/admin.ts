@@ -15,10 +15,11 @@ import { adminAction, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
 import { internalAction, internalQuery } from "../_generated/server";
-import {
-  FirstRoundApplicantType,
+import type {
   FullApplicantType,
+  InterviewGrade,
 } from "../types/application.types";
+import { Grades, Interviews } from "../model/sessions";
 
 // todo, send emails with resend
 export const rejectApplicant = adminAction({
@@ -206,16 +207,20 @@ export const intakeApplicants = adminQuery({
       .order("desc")
       .paginate(args.paginationOpts);
 
-    const fullApplicants: FullApplicantType[] = await Promise.all(
+    const page: FullApplicantType[] = await Promise.all(
       result.page.map(async (applicant) => {
-        return await ctx.runQuery(internal.application.admin.getFullApplicant, {
-          applicant,
-        });
+        return await ctx.runQuery(
+          internal.application.applicant.getFullApplicant,
+          {
+            applicant,
+            includeInterview: false,
+          }
+        );
       })
     );
 
     return {
-      page: fullApplicants,
+      page,
       isDone: result.isDone,
       continueCursor: result.continueCursor,
     };
@@ -236,22 +241,15 @@ export const firstRoundApplicants = adminQuery({
       .order("desc")
       .paginate(args.paginationOpts);
 
-    const page: FirstRoundApplicantType[] = await Promise.all(
+    const page: FullApplicantType[] = await Promise.all(
       result.page.map(async (applicant) => {
-        const applicantData = await ctx.runQuery(
-          internal.application.admin.getFullApplicant,
-          { applicant }
+        return await ctx.runQuery(
+          internal.application.applicant.getFullApplicant,
+          {
+            includeInterview: true,
+            applicant,
+          }
         );
-
-        const interview = await ctx.runQuery(
-          internal.application.session.getInterview,
-          { applicantId: applicant._id }
-        );
-
-        return {
-          applicant: applicantData,
-          interview,
-        };
       })
     );
 
@@ -263,70 +261,36 @@ export const firstRoundApplicants = adminQuery({
   },
 });
 
-export const getFullApplicant = internalQuery({
-  args: {
-    applicant: v.object({
-      ...Applicants.withSystemFields,
-    }),
-  },
-  returns: {
-    id: v.id("applicants"),
-    decision: v.object({
-      status: STATUS_OPTIONS,
-      round: ROUND_OPTIONS,
-      ranking: RANKING_OPTIONS,
-    }),
-    basicInfo: v.object({
-      ...BasicInfo.withSystemFields,
-    }),
-    background: v.object({
-      ...Backgrounds.withSystemFields,
-    }),
-    links: v.object({
-      ...Links.withSystemFields,
-    }),
-    mission: v.object({
-      ...Missions.withSystemFields,
-    }),
-  },
+export const secondRoundApplicants = adminQuery({
+  args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
-    const {
-      basicInfoId,
-      missionId,
-      backgroundId,
-      linkId,
-      status,
-      round,
-      ranking,
-    } = args.applicant;
-    const basicInfo = await ctx.db.get(basicInfoId);
-    if (!basicInfo)
-      throw new Error(`BasicInfo not found for applicant ${basicInfoId}`);
+    const result = await ctx.db
+      .query("applicants")
+      .withIndex("by_cycle", (q) =>
+        q
+          .eq("cohort", CURRENT_COHORT)
+          .eq("round", "second_round")
+          .eq("status", "pending")
+      )
+      .order("desc")
+      .paginate(args.paginationOpts);
 
-    const mission = await ctx.db.get(missionId);
-    if (!mission)
-      throw new Error(`Mission not found for applicant ${missionId}`);
-
-    const background = await ctx.db.get(backgroundId);
-    if (!background)
-      throw new Error(`Background not found for applicant ${backgroundId}`);
-
-    const links = await ctx.db.get(linkId);
-    if (!links) throw new Error(`Links not found for applicant ${linkId}`);
-
-    const decision = {
-      status,
-      round,
-      ranking,
-    };
+    const page: FullApplicantType[] = await Promise.all(
+      result.page.map(async (applicant) => {
+        return await ctx.runQuery(
+          internal.application.applicant.getFullApplicant,
+          {
+            applicant,
+            includeInterview: true,
+          }
+        );
+      })
+    );
 
     return {
-      id: args.applicant._id,
-      decision,
-      basicInfo,
-      background,
-      links,
-      mission,
+      page,
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
     };
   },
 });

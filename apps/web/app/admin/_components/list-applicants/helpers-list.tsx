@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  api,
-  FirstRoundApplicantType,
-  FullApplicantType,
-} from "@residency/api";
+import { api, FullApplicantType, InterviewGrade } from "@residency/api";
 import { Button } from "@residency/ui/components/button";
 import {
   Select,
@@ -33,6 +29,13 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@residency/ui/components/tabs";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@residency/ui/components/accordion";
+import { Separator } from "@residency/ui/components/separator";
 
 // WRAPPERS
 
@@ -108,10 +111,65 @@ const ListSkeleton = () => {
   );
 };
 
+interface AdditionalWrapperProps {
+  children: React.ReactNode;
+}
+export const AdditionalWrapper = ({ children }: AdditionalWrapperProps) => {
+  return (
+    <div>
+      <Separator className="mt-2" />
+      <Accordion
+        type="single"
+        collapsible
+        className="text-sm text-muted-foreground"
+      >
+        <AccordionItem value="background">
+          <AccordionTrigger>applicant info</AccordionTrigger>
+          <AccordionContent className="space-y-3 p-0">
+            {children}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
+  );
+};
+
+// not super clean with typing, but works
+interface InterviewWrapperProps {
+  interview: FullApplicantType["interview"];
+  children: React.ReactNode;
+}
+export const InterviewWrapper = ({
+  interview,
+  children,
+}: InterviewWrapperProps) => {
+  if (!interview) {
+    return (
+      <Alert variant="destructive" className="bg-red-50 border-red-200 mt-2">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          this applicant has not completed their interview yet.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <audio
+        src={interview.interview.audioUrl}
+        controls
+        className="w-full py-1"
+      />
+      {children}
+    </div>
+  );
+};
+
 // HEADER SECTION
 
 interface HeaderSectionProps {
-  basicInfo: FullApplicantType["basicInfo"];
+  basicInfo: FullApplicantType["applicant"]["basicInfo"];
   id: Id<"applicants">;
 }
 export const HeaderSection = ({ basicInfo, id }: HeaderSectionProps) => {
@@ -204,7 +262,7 @@ const ApplicantDecision = ({ applicantId }: ApplicantDecisionProps) => {
 // BODY SECTIONS
 
 interface BackgroundSectionProps {
-  background: FullApplicantType["background"];
+  background: FullApplicantType["applicant"]["background"];
 }
 export const BackgroundSection = ({ background }: BackgroundSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -238,7 +296,7 @@ export const BackgroundSection = ({ background }: BackgroundSectionProps) => {
 };
 
 interface MissionSectionProps {
-  mission: FullApplicantType["mission"];
+  mission: FullApplicantType["applicant"]["mission"];
 }
 export const MissionSection = ({ mission }: MissionSectionProps) => {
   return (
@@ -256,7 +314,7 @@ export const MissionSection = ({ mission }: MissionSectionProps) => {
 };
 
 interface LinksSectionProps {
-  links: FullApplicantType["links"];
+  links: FullApplicantType["applicant"]["links"];
 }
 export const LinksSection = ({ links }: LinksSectionProps) => {
   const { twitter, linkedin, github, website } = links;
@@ -286,39 +344,11 @@ const LinkIcon = ({ link, Svg }: LinkIconProps) => {
   );
 };
 
-interface InterviewSectionProps {
-  interview: FirstRoundApplicantType["interview"];
-}
-
-export const InterviewSection = ({ interview }: InterviewSectionProps) => {
-  if (!interview) {
-    return (
-      <Alert variant="destructive" className="bg-red-50 border-red-200">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          this applicant has not completed their interview yet.
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <audio
-        src={interview.interview.audioUrl}
-        controls
-        className="w-full py-1"
-      />
-      <GradesSection interview={interview} />
-    </div>
-  );
-};
-
 interface GradesSectionProps {
-  interview: NonNullable<FirstRoundApplicantType["interview"]>;
+  interview: InterviewGrade;
 }
 
-const GradesSection = ({ interview }: GradesSectionProps) => {
+export const GradesSection = ({ interview }: GradesSectionProps) => {
   return (
     <Tabs defaultValue="score">
       <TabsList className="w-full">
@@ -335,7 +365,13 @@ const GradesSection = ({ interview }: GradesSectionProps) => {
           </TabsTrigger>
         ))}
       </TabsList>
-      <ScoreTab interview={interview} />
+      <TabsContent value="score" className="pt-2">
+        <ScoreTable interview={interview} />
+        <div className="flex items-center gap-2 mt-4">
+          <span className="font-semibold">final score:</span>
+          <Badge className="bg-green-500">{interview.interview.score}</Badge>
+        </div>
+      </TabsContent>
       {interview.grades.map((g) => (
         <CriteriaTab key={g.criteria} grade={g} />
       ))}
@@ -344,50 +380,44 @@ const GradesSection = ({ interview }: GradesSectionProps) => {
 };
 
 interface ScoreTabProps {
-  interview: NonNullable<FirstRoundApplicantType["interview"]>;
+  interview: InterviewGrade;
 }
 
-const ScoreTab = ({ interview }: ScoreTabProps) => (
-  <TabsContent value="score" className="pt-2">
-    <div>
-      <table className="w-full border-collapse border border-gray-200">
-        <thead>
-          <tr>
-            {interview.grades.map((grade) => (
-              <th
-                key={grade.criteria}
-                className="p-2 text-center lowercase border border-gray-200 bg-gray-50 font-normal"
-              >
-                {grade.criteria}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            {interview.grades.map((grade) => (
-              <td
-                key={grade.criteria}
-                className="p-2 text-center border border-gray-200"
-              >
-                <div className="flex justify-center">
-                  <GradeBadge grade={grade.grade} />
-                </div>
-              </td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div className="flex items-center gap-2 mt-4">
-      <span className="font-semibold">final score:</span>
-      <Badge className="bg-green-500">{interview.interview.score}</Badge>
-    </div>
-  </TabsContent>
+export const ScoreTable = ({ interview }: ScoreTabProps) => (
+  <div>
+    <table className="w-full border-collapse border border-gray-200">
+      <thead>
+        <tr>
+          {interview.grades.map((grade) => (
+            <th
+              key={grade.criteria}
+              className="p-2 text-center lowercase border border-gray-200 bg-gray-50 font-normal"
+            >
+              {grade.criteria}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          {interview.grades.map((grade) => (
+            <td
+              key={grade.criteria}
+              className="p-2 text-center border border-gray-200"
+            >
+              <div className="flex justify-center">
+                <GradeBadge grade={grade.grade} />
+              </div>
+            </td>
+          ))}
+        </tr>
+      </tbody>
+    </table>
+  </div>
 );
 
 interface CriteriaTabProps {
-  grade: NonNullable<FirstRoundApplicantType["interview"]>["grades"][number];
+  grade: InterviewGrade["grades"][number];
 }
 const CriteriaTab = ({ grade }: CriteriaTabProps) => {
   const { criteria, quote, rationale, grade: gradeValue } = grade;

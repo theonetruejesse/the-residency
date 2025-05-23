@@ -86,27 +86,3 @@ export const createSessionPersona = internalMutation({
     });
   },
 });
-
-// INTERVIEW STUFF
-
-export const getInterview = internalQuery({
-  args: { applicantId: v.id("applicants") },
-  handler: async (ctx, args) => {
-    const interview = await ctx.db
-      .query("interviews")
-      .withIndex("by_applicantId", (q) => q.eq("applicantId", args.applicantId))
-      .unique();
-
-    if (!interview) return null;
-
-    const grades = await ctx.db
-      .query("grades")
-      .withIndex("by_interviewId", (q) => q.eq("interviewId", interview._id))
-      .collect();
-
-    return {
-      interview,
-      grades,
-    };
-  },
-});

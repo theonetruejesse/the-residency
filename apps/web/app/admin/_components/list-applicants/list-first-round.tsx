@@ -1,23 +1,19 @@
 "use client";
 
-import { api, FirstRoundApplicantType } from "@residency/api";
+import { api } from "@residency/api";
+import type { FullApplicantType, InterviewGrade } from "@residency/api";
 import { usePaginatedQuery } from "convex/react";
-import { Separator } from "@residency/ui/components/separator";
 import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@residency/ui/components/accordion";
-import { Accordion } from "@residency/ui/components/accordion";
-import {
+  AdditionalWrapper,
   BackgroundSection,
   CardWrapper,
+  GradesSection,
   HeaderSection,
-  InterviewSection,
+  InterviewWrapper,
   LinksSection,
   ListWrapper,
   MissionSection,
-} from "./list-helpers";
+} from "./helpers-list";
 
 const useFirstRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -33,7 +29,7 @@ const useFirstRoundList = () => {
   return { results, status, loadMore };
 };
 
-export const FirstRoundApplicants = () => {
+export const ListFirstRound = () => {
   const { results, status, loadMore } = useFirstRoundList();
 
   return (
@@ -46,7 +42,7 @@ export const FirstRoundApplicants = () => {
 };
 
 interface FirstRoundCardProps {
-  result: FirstRoundApplicantType;
+  result: FullApplicantType;
 }
 const FirstRoundCard = ({ result }: FirstRoundCardProps) => {
   const { applicant, interview } = result;
@@ -57,32 +53,31 @@ const FirstRoundCard = ({ result }: FirstRoundCardProps) => {
         <HeaderSection basicInfo={applicant.basicInfo} id={applicant.id} />
         <InterviewSection interview={interview} />
       </div>
-      <Separator className="mt-2" />
       <AdditionalSection applicant={applicant} />
     </CardWrapper>
   );
 };
 
+interface InterviewSectionProps {
+  interview: FullApplicantType["interview"];
+}
+const InterviewSection = ({ interview }: InterviewSectionProps) => {
+  return (
+    <InterviewWrapper interview={interview}>
+      <GradesSection interview={interview as InterviewGrade} />
+    </InterviewWrapper>
+  );
+};
+
 interface AdditionalSectionProps {
-  applicant: FirstRoundApplicantType["applicant"];
+  applicant: FullApplicantType["applicant"];
 }
 const AdditionalSection = ({ applicant }: AdditionalSectionProps) => {
-  const { background, mission, links } = applicant;
-
   return (
-    <Accordion
-      type="single"
-      collapsible
-      className="text-sm text-muted-foreground"
-    >
-      <AccordionItem value="background">
-        <AccordionTrigger>additional info</AccordionTrigger>
-        <AccordionContent className="space-y-3 p-0">
-          <BackgroundSection background={background} />
-          <MissionSection mission={mission} />
-          <LinksSection links={links} />
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <AdditionalWrapper>
+      <BackgroundSection background={applicant.background} />
+      <MissionSection mission={applicant.mission} />
+      <LinksSection links={applicant.links} />
+    </AdditionalWrapper>
   );
 };
