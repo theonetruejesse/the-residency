@@ -49,10 +49,8 @@ const FirstRoundCard = ({ result }: FirstRoundCardProps) => {
 
   return (
     <CardWrapper>
-      <div className="flex flex-col space-y-2">
-        <HeaderSection basicInfo={applicant.basicInfo} id={applicant.id} />
-        <InterviewSection interview={interview} />
-      </div>
+      <HeaderSection basicInfo={applicant.basicInfo} id={applicant.id} />
+      <InterviewSection interview={interview} />
       <AdditionalSection applicant={applicant} />
     </CardWrapper>
   );

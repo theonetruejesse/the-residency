@@ -2,7 +2,7 @@
 
 import { api } from "@residency/api";
 import type { FullApplicantType, InterviewGrade } from "@residency/api";
-import { usePaginatedQuery } from "convex/react";
+import { useMutation, usePaginatedQuery } from "convex/react";
 import {
   AdditionalWrapper,
   BackgroundSection,
@@ -12,12 +12,13 @@ import {
   LinksSection,
   ListWrapper,
   MissionSection,
+  RankingSection,
   ScoreTable,
 } from "./helpers-list";
 
-const useFirstRoundList = () => {
+const useSecondRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
-    api.application.admin.firstRoundApplicants,
+    api.application.admin.secondRoundApplicants,
     {
       paginationOpts: {
         numItems: 10,
@@ -30,34 +31,36 @@ const useFirstRoundList = () => {
 };
 
 export const ListSecondRound = () => {
-  const { results, status, loadMore } = useFirstRoundList();
+  const { results, status, loadMore } = useSecondRoundList();
 
   return (
     <ListWrapper status={status} loadMore={loadMore} title="second round">
       {results.map((result) => (
-        <FirstRoundCard key={result.applicant.id as string} result={result} />
+        <SecondRoundCard key={result.applicant.id as string} result={result} />
       ))}
     </ListWrapper>
   );
 };
 
-interface FirstRoundCardProps {
+interface SecondRoundCardProps {
   result: FullApplicantType;
 }
-const FirstRoundCard = ({ result }: FirstRoundCardProps) => {
+const SecondRoundCard = ({ result }: SecondRoundCardProps) => {
   const { applicant } = result;
 
   return (
     <CardWrapper>
-      <div className="flex flex-col space-y-2">
-        <HeaderSection basicInfo={applicant.basicInfo} id={applicant.id} />
-      </div>
+      <HeaderSection basicInfo={applicant.basicInfo} id={applicant.id} />
+      <RankingSection
+        applicantId={applicant.id}
+        applicantRanking={applicant.decision.ranking}
+      />
       <AdditionalSection result={result} />
     </CardWrapper>
   );
 };
 
-const AdditionalSection = ({ result }: FirstRoundCardProps) => {
+const AdditionalSection = ({ result }: SecondRoundCardProps) => {
   const { applicant, interview } = result;
 
   return (

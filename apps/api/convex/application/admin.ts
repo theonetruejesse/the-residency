@@ -11,7 +11,7 @@ import {
   Missions,
   Links,
 } from "../model/applicants";
-import { adminAction, adminQuery } from "../utils/wrappers";
+import { adminAction, adminMutation, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
 import { internalAction, internalQuery } from "../_generated/server";
@@ -83,6 +83,18 @@ export const approveRound = adminAction({
         });
         break;
     }
+  },
+});
+
+export const setApplicantRanking = adminMutation({
+  args: {
+    applicantId: v.id("applicants"),
+    ranking: RANKING_OPTIONS,
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.applicantId, {
+      ranking: args.ranking,
+    });
   },
 });
 
@@ -212,8 +224,8 @@ export const intakeApplicants = adminQuery({
         return await ctx.runQuery(
           internal.application.applicant.getFullApplicant,
           {
-            applicant,
             includeInterview: false,
+            applicant,
           }
         );
       })
@@ -280,8 +292,8 @@ export const secondRoundApplicants = adminQuery({
         return await ctx.runQuery(
           internal.application.applicant.getFullApplicant,
           {
-            applicant,
             includeInterview: true,
+            applicant,
           }
         );
       })

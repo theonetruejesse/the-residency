@@ -13,7 +13,6 @@ import {
 import { CURRENT_COHORT } from "../constants";
 import { FullApplicantType, InterviewGrade } from "../types/application.types";
 import { internal } from "../_generated/api";
-import { Interviews, Grades } from "../model/sessions";
 
 export const createApplicant = internalMutation({
   args: v.object({
