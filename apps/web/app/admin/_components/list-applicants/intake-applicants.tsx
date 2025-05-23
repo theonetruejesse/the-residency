@@ -27,7 +27,7 @@ interface IntakeCardProps {
   applicant: FullApplicantType;
 }
 
-export const IntakeCard = ({ applicant }: IntakeCardProps) => {
+const IntakeCard = ({ applicant }: IntakeCardProps) => {
   const { basicInfo, background, mission, links } = applicant;
 
   return (
