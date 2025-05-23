@@ -2,7 +2,7 @@
 
 import { api } from "@residency/api";
 import type { FullApplicantType, InterviewGrade } from "@residency/api";
-import { useMutation, usePaginatedQuery } from "convex/react";
+import { usePaginatedQuery } from "convex/react";
 import {
   AdditionalWrapper,
   BackgroundSection,

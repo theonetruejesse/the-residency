@@ -2,79 +2,100 @@
 
 import { Label } from "@residency/ui/components/label";
 import { Input } from "@residency/ui/components/input";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@residency/ui/components/accordion";
 import { RequiredIndicator } from "@/components/required-indicator";
 import { ActionButton } from "@/components/action-button";
 import { useState } from "react";
 import { api } from "@residency/api";
 import { useAction } from "convex/react";
 import { toast } from "sonner";
+import { Button } from "@residency/ui/components/button";
+import { Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@residency/ui/components/dialog";
 
-export const InviteAdminForm = () => {
+export const InviteAdminButton = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  return (
+    <>
+      <Button
+        onClick={() => setIsModalOpen(true)}
+        className="fixed bottom-6 left-6 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+        size="lg"
+      >
+        invite admin
+        <Plus className="w-4 h-4 mr-2" />
+      </Button>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>invite admin</DialogTitle>
+          </DialogHeader>
+          <InviteAdminForm onSuccess={() => setIsModalOpen(false)} />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
+interface InviteAdminFormProps {
+  onSuccess?: () => void;
+}
+
+const InviteAdminForm = ({ onSuccess }: InviteAdminFormProps) => {
   const { errors, isSubmitting, handleChange, handleSubmit, formData } =
-    useInviteForm();
+    useInviteForm(onSuccess);
 
   return (
-    <Accordion type="single" collapsible className="w-full">
-      <AccordionItem value="invite-admin">
-        <AccordionTrigger className="text-lg font-medium">
-          invite admin
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="rounded-lg shadow-md bg-white/80 backdrop-blur-sm mx-2 w-full max-w-xl">
-            <form
-              className="space-y-4 p-8 space-y-6"
-              onSubmit={async (e) => {
-                await handleSubmit(e);
-              }}
-            >
-              <div className="grid grid-cols-2 gap-4">
-                <InputField
-                  label="first name"
-                  name="firstName"
-                  value={formData.firstName}
-                  errors={errors}
-                  onChange={handleChange}
-                />
-                <InputField
-                  label="last name"
-                  name="lastName"
-                  value={formData.lastName}
-                  errors={errors}
-                  onChange={handleChange}
-                />
-              </div>
-              <InputField
-                label="phone number"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                errors={errors}
-                onChange={handleChange}
-              />
-              <InputField
-                label="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                errors={errors}
-                onChange={handleChange}
-              />
-              <ActionButton
-                actionText="send invite"
-                loadingText="sending..."
-                isDisabled={isSubmitting}
-                type="submit"
-              />
-            </form>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <div className="mx-2 w-full">
+      <form
+        className="space-y-4 p-8 space-y-6"
+        onSubmit={async (e) => {
+          await handleSubmit(e);
+        }}
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <InputField
+            label="first name"
+            name="firstName"
+            value={formData.firstName}
+            errors={errors}
+            onChange={handleChange}
+          />
+          <InputField
+            label="last name"
+            name="lastName"
+            value={formData.lastName}
+            errors={errors}
+            onChange={handleChange}
+          />
+        </div>
+        <InputField
+          label="phone number"
+          name="phoneNumber"
+          value={formData.phoneNumber}
+          errors={errors}
+          onChange={handleChange}
+        />
+        <InputField
+          label="email"
+          name="email"
+          type="email"
+          value={formData.email}
+          errors={errors}
+          onChange={handleChange}
+        />
+        <ActionButton
+          actionText="send invite"
+          loadingText="sending..."
+          isDisabled={isSubmitting}
+          type="submit"
+        />
+      </form>
+    </div>
   );
 };
 
@@ -122,7 +143,7 @@ const DEFAULT_FORM_DATA: InviteFormData = {
   phoneNumber: "",
 };
 
-const useInviteForm = () => {
+const useInviteForm = (onSuccess?: () => void) => {
   const inviteAdmin = useAction(api.application.admin.inviteAdmin);
   const [formData, setFormData] = useState<InviteFormData>(DEFAULT_FORM_DATA);
   const [errors, setErrors] = useState<InviteFormErrors>({});
@@ -161,6 +182,7 @@ const useInviteForm = () => {
       await inviteAdmin({ basicInfo: formData });
       toast.success(`invite sent to ${formData.email}`);
       setFormData(DEFAULT_FORM_DATA);
+      onSuccess?.();
     } catch (error) {
       setErrors({
         ...errors,
