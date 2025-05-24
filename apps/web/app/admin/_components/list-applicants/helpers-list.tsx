@@ -1,18 +1,9 @@
 "use client";
 
-import { api, FullApplicantType, InterviewGrade } from "@residency/api";
+import { FullApplicantType, InterviewGrade } from "@residency/api";
 import { Button } from "@residency/ui/components/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@residency/ui/components/select";
-import { useAction, useMutation } from "convex/react";
-import { AlertCircle, ChevronRight } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { Id } from "@residency/api";
 import { Badge } from "@residency/ui/components/badge";
 import {
   TwitterSvg,
@@ -166,100 +157,6 @@ export const InterviewWrapper = ({
   );
 };
 
-// HEADER SECTION
-
-interface HeaderSectionProps {
-  basicInfo: FullApplicantType["applicant"]["basicInfo"];
-  id: Id<"applicants">;
-}
-export const HeaderSection = ({ basicInfo, id }: HeaderSectionProps) => {
-  const { firstName, lastName } = basicInfo;
-
-  return (
-    <div className="flex items-center justify-between">
-      <h3 className="text-lg font-medium lowercase flex items-center gap-4">
-        {`${firstName} ${lastName}`}
-      </h3>
-      <ApplicantDecision applicantId={id} />
-    </div>
-  );
-};
-
-type StatusActions = "approve" | "waitlist" | "reject";
-
-const useFirstRoundDecision = (applicantId: Id<"applicants">) => {
-  const approveRound = useAction(api.application.admin.approveRound);
-  const waitlistApplicant = useAction(api.application.admin.waitlistApplicant);
-  const rejectApplicant = useAction(api.application.admin.rejectApplicant);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleAction = async (decision: StatusActions) => {
-    try {
-      setIsSubmitting(true);
-
-      switch (decision) {
-        case "approve":
-          await approveRound({ applicantId });
-          break;
-        case "waitlist":
-          await waitlistApplicant({ applicantId });
-          break;
-        case "reject":
-          await rejectApplicant({ applicantId });
-          break;
-      }
-    } catch (error) {
-      console.error("Error updating applicant status:", error);
-      // Potentially set an error state here to display to the user
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return { handleAction, isSubmitting };
-};
-
-type Statuses = FullApplicantType["applicant"]["decision"]["status"];
-
-interface ApplicantDecisionProps {
-  applicantId: Id<"applicants">;
-}
-const ApplicantDecision = ({ applicantId }: ApplicantDecisionProps) => {
-  const [decision, setDecision] = useState<Statuses>("pending");
-  const { handleAction, isSubmitting } = useFirstRoundDecision(applicantId);
-
-  return (
-    <div className="flex items-center gap-2">
-      <Select
-        defaultValue="pending"
-        onValueChange={(value) => setDecision(value as Statuses)}
-      >
-        <SelectTrigger className="w-[120px] h-full">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="pending">pending</SelectItem>
-          <SelectItem value="approve">approve</SelectItem>
-          <SelectItem value="waitlist">waitlist</SelectItem>
-          <SelectItem value="reject">reject</SelectItem>
-        </SelectContent>
-      </Select>
-      <Button
-        size="icon"
-        disabled={isSubmitting || decision === "pending"}
-        onClick={() => handleAction(decision as StatusActions)}
-        className="lowercase"
-      >
-        {isSubmitting ? (
-          <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white" />
-        ) : (
-          <ChevronRight className="h-4 w-4" />
-        )}
-      </Button>
-    </div>
-  );
-};
-
 // BODY SECTIONS
 
 interface BackgroundSectionProps {
@@ -278,14 +175,6 @@ export const BackgroundSection = ({ background }: BackgroundSectionProps) => {
         <span className="mr-1">{isExpanded ? "[-]" : "[+]"}</span>
         {isExpanded ? (
           <span className="flex flex-row gap-2">
-            {referrals && (
-              <Badge
-                variant="outline"
-                className="bg-slate-100 lowercase px-1 py-0"
-              >
-                referred by: {referrals}
-              </Badge>
-            )}
             {`${country}, ${gender}${college ? `, ${college}` : ""}`}
           </span>
         ) : (
@@ -463,78 +352,3 @@ const GradeBadge = ({ grade }: { grade: string }) => {
     </Badge>
   );
 };
-
-type Rankings = FullApplicantType["applicant"]["decision"]["ranking"];
-
-interface RankingSectionProps {
-  applicantId: Id<"applicants">;
-  applicantRanking: Rankings;
-}
-export const RankingSection = ({
-  applicantId,
-  applicantRanking,
-}: RankingSectionProps) => {
-  const [ranking, setRanking] = useState<Rankings>(applicantRanking);
-  const setRankingMutation = useMutation(
-    api.application.admin.setApplicantRanking
-  );
-
-  const handleRankingChange = (ranking: Rankings) => {
-    setRanking(ranking);
-    setRankingMutation({ applicantId, ranking });
-  };
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="font-semibold text-md">ranking: </span>
-      <Select
-        defaultValue={ranking}
-        value={ranking}
-        onValueChange={(value) => handleRankingChange(value as Rankings)}
-      >
-        <SelectTrigger className="py-5">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="likely_accept">
-            <RankingBadge ranking="likely_accept" />
-          </SelectItem>
-          <SelectItem value="maybe_accept">
-            <RankingBadge ranking="maybe_accept" />
-          </SelectItem>
-          <SelectItem value="neutral">
-            <RankingBadge ranking="neutral" />
-          </SelectItem>
-          <SelectItem value="maybe_reject">
-            <RankingBadge ranking="maybe_reject" />
-          </SelectItem>
-          <SelectItem value="likely_reject">
-            <RankingBadge ranking="likely_reject" />
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-  );
-};
-
-const rankingLabels: Record<Rankings, string> = {
-  likely_accept: "likely accept",
-  maybe_accept: "maybe accept",
-  neutral: "neutral",
-  maybe_reject: "maybe reject",
-  likely_reject: "likely reject",
-};
-
-const rankingColors: Record<Rankings, string> = {
-  likely_accept: "bg-green-50 text-green-700 border-green-200",
-  maybe_accept: "bg-lime-50 text-lime-700 border-lime-200",
-  neutral: "bg-gray-50 text-gray-700 border-gray-200",
-  maybe_reject: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  likely_reject: "bg-red-50 text-red-700 border-red-200",
-};
-
-const RankingBadge = ({ ranking }: { ranking: Rankings }) => (
-  <Badge variant="outline" className={`inline-block ${rankingColors[ranking]}`}>
-    {rankingLabels[ranking]}
-  </Badge>
-);

@@ -9,7 +9,7 @@ import { api } from "@residency/api";
 import { useAction } from "convex/react";
 import { toast } from "sonner";
 import { Button } from "@residency/ui/components/button";
-import { Plus } from "lucide-react";
+import { CirclePlus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,7 @@ export const InviteAdminButton = () => {
         size="lg"
       >
         invite admin
-        <Plus className="w-4 h-4 mr-2" />
+        <CirclePlus className="w-4 h-4 mr-2" />
       </Button>
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-[800px]">

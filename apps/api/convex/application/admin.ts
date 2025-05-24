@@ -1,25 +1,12 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
-import {
-  Backgrounds,
-  Applicants,
-  BasicInfo,
-  RANKING_OPTIONS,
-  ROUND_OPTIONS,
-  STATUS_OPTIONS,
-  Missions,
-  Links,
-} from "../model/applicants";
+import { BasicInfo, RANKING_OPTIONS } from "../model/applicants";
 import { adminAction, adminMutation, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
-import { internalAction, internalQuery } from "../_generated/server";
-import type {
-  FullApplicantType,
-  InterviewGrade,
-} from "../types/application.types";
-import { Grades, Interviews } from "../model/sessions";
+import { internalAction } from "../_generated/server";
+import type { FullApplicantType } from "../types/application.types";
 
 // todo, send emails with resend
 export const rejectApplicant = adminAction({

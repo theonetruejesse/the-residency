@@ -8,12 +8,12 @@ import {
   BackgroundSection,
   CardWrapper,
   GradesSection,
-  HeaderSection,
   InterviewWrapper,
   LinksSection,
   ListWrapper,
   MissionSection,
 } from "./helpers-list";
+import { HeaderSection } from "./card-header";
 
 const useFirstRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -49,7 +49,7 @@ const FirstRoundCard = ({ result }: FirstRoundCardProps) => {
 
   return (
     <CardWrapper>
-      <HeaderSection basicInfo={applicant.basicInfo} id={applicant.id} />
+      <HeaderSection applicant={applicant} />
       <InterviewSection interview={interview} />
       <AdditionalSection applicant={applicant} />
     </CardWrapper>

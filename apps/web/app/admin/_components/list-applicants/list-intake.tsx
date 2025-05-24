@@ -6,11 +6,11 @@ import { usePaginatedQuery } from "convex/react";
 import {
   BackgroundSection,
   CardWrapper,
-  HeaderSection,
   LinksSection,
   ListWrapper,
   MissionSection,
 } from "./helpers-list";
+import { HeaderSection } from "./card-header";
 
 const useIntakeList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -43,11 +43,11 @@ interface IntakeCardProps {
 }
 
 const IntakeCard = ({ result }: IntakeCardProps) => {
-  const { basicInfo, background, mission, links } = result.applicant;
+  const { background, mission, links } = result.applicant;
 
   return (
     <CardWrapper>
-      <HeaderSection basicInfo={basicInfo} id={result.applicant.id} />
+      <HeaderSection applicant={result.applicant} />
       <BackgroundSection background={background} />
       <MissionSection mission={mission} />
       <LinksSection links={links} />

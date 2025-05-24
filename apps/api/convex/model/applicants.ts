@@ -65,3 +65,33 @@ export const Links = Table("links", {
   github: v.optional(v.string()),
   website: v.optional(v.string()), // todo, array of url + description
 });
+
+export const Interviews = Table("interviews", {
+  applicantId: v.id("applicants"),
+  conversationId: v.string(), // elevenlabs conversation id
+  audioUrl: v.string(), // url to the audio file, stored in uploadthing
+  score: v.number(), // final score for the interview
+});
+
+export const CRITERIA_OPTIONS = v.union(
+  v.literal("mission"),
+  v.literal("intelligence"),
+  v.literal("vision"),
+  v.literal("traction"),
+  v.literal("determination")
+);
+
+export const GRADE_OPTIONS = v.union(
+  v.literal("high"),
+  v.literal("medium"),
+  v.literal("low"),
+  v.literal("unclear")
+);
+
+export const Grades = Table("grades", {
+  interviewId: v.id("interviews"),
+  criteria: CRITERIA_OPTIONS,
+  grade: GRADE_OPTIONS,
+  rationale: v.string(), // why this grade?
+  quote: v.string(), // quote from the interview
+});

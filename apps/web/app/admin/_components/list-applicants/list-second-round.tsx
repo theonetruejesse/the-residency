@@ -7,14 +7,13 @@ import {
   AdditionalWrapper,
   BackgroundSection,
   CardWrapper,
-  HeaderSection,
   InterviewWrapper,
   LinksSection,
   ListWrapper,
   MissionSection,
-  RankingSection,
   ScoreTable,
 } from "./helpers-list";
+import { HeaderSection } from "./card-header";
 
 const useSecondRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -50,11 +49,7 @@ const SecondRoundCard = ({ result }: SecondRoundCardProps) => {
 
   return (
     <CardWrapper>
-      <HeaderSection basicInfo={applicant.basicInfo} id={applicant.id} />
-      <RankingSection
-        applicantId={applicant.id}
-        applicantRanking={applicant.decision.ranking}
-      />
+      <HeaderSection applicant={applicant} />
       <AdditionalSection result={result} />
     </CardWrapper>
   );

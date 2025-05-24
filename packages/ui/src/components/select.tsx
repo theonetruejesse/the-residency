@@ -6,10 +6,27 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { cn } from "@residency/ui/lib/utils";
 
+type SelectVariant = "default" | "minimal";
+
+interface SelectContextType {
+  variant: SelectVariant;
+}
+
+const SelectContext = React.createContext<SelectContextType>({
+  variant: "default",
+});
+
 function Select({
+  variant = "default",
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />;
+}: React.ComponentProps<typeof SelectPrimitive.Root> & {
+  variant?: SelectVariant;
+}) {
+  return (
+    <SelectContext.Provider value={{ variant }}>
+      <SelectPrimitive.Root data-slot="select" {...props} />
+    </SelectContext.Provider>
+  );
 }
 
 function SelectGroup({
@@ -32,20 +49,32 @@ function SelectTrigger({
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default";
 }) {
+  const { variant } = React.useContext(SelectContext);
+
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
+      data-variant={variant}
       className={cn(
-        "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // Default styles
+        variant === "default" &&
+          "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8",
+        // Minimal styles
+        variant === "minimal" &&
+          "flex w-fit items-center justify-between text-sm outline-none border-none shadow-none p-1 disabled:cursor-not-allowed disabled:opacity-50",
+        // Common styles for both variants
+        "*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-4 opacity-50" />
-      </SelectPrimitive.Icon>
+      {variant !== "minimal" && (
+        <SelectPrimitive.Icon asChild>
+          <ChevronDownIcon className="size-4 opacity-50" />
+        </SelectPrimitive.Icon>
+      )}
     </SelectPrimitive.Trigger>
   );
 }
@@ -103,20 +132,26 @@ function SelectItem({
   children,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Item>) {
+  const { variant } = React.useContext(SelectContext);
+
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "focus:bg-accent focus:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        variant === "default" && "pr-8 pl-2",
+        variant === "minimal" && "px-2",
         className
       )}
       {...props}
     >
-      <span className="absolute right-2 flex size-3.5 items-center justify-center">
-        <SelectPrimitive.ItemIndicator>
-          <CheckIcon className="size-4" />
-        </SelectPrimitive.ItemIndicator>
-      </span>
+      {variant !== "minimal" && (
+        <span className="absolute right-2 flex size-3.5 items-center justify-center">
+          <SelectPrimitive.ItemIndicator>
+            <CheckIcon className="size-4" />
+          </SelectPrimitive.ItemIndicator>
+        </span>
+      )}
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   );
@@ -139,6 +174,12 @@ function SelectScrollUpButton({
   className,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.ScrollUpButton>) {
+  const { variant } = React.useContext(SelectContext);
+
+  if (variant === "minimal") {
+    return null;
+  }
+
   return (
     <SelectPrimitive.ScrollUpButton
       data-slot="select-scroll-up-button"
@@ -157,6 +198,12 @@ function SelectScrollDownButton({
   className,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.ScrollDownButton>) {
+  const { variant } = React.useContext(SelectContext);
+
+  if (variant === "minimal") {
+    return null;
+  }
+
   return (
     <SelectPrimitive.ScrollDownButton
       data-slot="select-scroll-down-button"
