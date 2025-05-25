@@ -21,6 +21,7 @@ export type FullApplicantType = {
     mission: Doc<"missions">;
   };
   interview: InterviewGrade | null;
+  notes: Doc<"notes">[];
 };
 
 export type InterviewGrade = {

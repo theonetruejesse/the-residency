@@ -293,3 +293,37 @@ export const secondRoundApplicants = adminQuery({
     };
   },
 });
+
+export const createApplicantNote = adminMutation({
+  args: {
+    applicantId: v.id("applicants"),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const adminId = ctx.user._id;
+    await ctx.runMutation(internal.application.applicant.createApplicantNote, {
+      applicantId: args.applicantId,
+      note: args.note,
+      createdBy: adminId,
+    });
+  },
+});
+
+export const updateApplicantNote = adminMutation({
+  args: {
+    noteId: v.id("notes"),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const adminId = ctx.user._id;
+    const note = await ctx.db.get(args.noteId);
+
+    if (!note) throw new Error("Note not found");
+    if (note.createdBy !== adminId) return;
+
+    await ctx.runMutation(internal.application.applicant.updateApplicantNote, {
+      noteId: args.noteId,
+      note: args.note,
+    });
+  },
+});

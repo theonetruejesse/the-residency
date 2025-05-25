@@ -7,6 +7,7 @@ import {
   Missions,
   Grades,
   Interviews,
+  Notes,
 } from "./model/applicants";
 import { Users } from "./model/users";
 import { Personas, Sessions } from "./model/sessions";
@@ -33,4 +34,5 @@ export default defineSchema({
   personas: Personas.table.index("by_sessionId", ["sessionId"]),
   interviews: Interviews.table.index("by_applicantId", ["applicantId"]),
   grades: Grades.table.index("by_interviewId", ["interviewId"]),
+  notes: Notes.table.index("by_applicantId", ["applicantId"]),
 });

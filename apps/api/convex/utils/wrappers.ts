@@ -15,9 +15,9 @@ import {
 } from "convex-helpers/server/customFunctions";
 import { Users } from "../model/users";
 import { Infer } from "convex/values";
+import { Doc } from "../_generated/dataModel";
 
 // Type for user data matching the Users.table.validator (without system fields)
-type UserData = Infer<typeof Users.table.validator>;
 
 /**
  * Ensures the user is authenticated and returns their user record (without system fields).
@@ -25,7 +25,7 @@ type UserData = Infer<typeof Users.table.validator>;
  */
 export async function AuthenticationRequired<
   C extends ActionCtx | MutationCtx | QueryCtx,
->({ ctx }: { ctx: C }): Promise<{ user: UserData }> {
+>({ ctx }: { ctx: C }): Promise<{ user: Doc<"users"> }> {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
     throw new Error("Not authenticated");
