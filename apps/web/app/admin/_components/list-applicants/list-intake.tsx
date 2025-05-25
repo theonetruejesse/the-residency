@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@residency/api";
-import type { FullApplicantType } from "@residency/api";
+import type { FullApplicantType, Id } from "@residency/api";
 import { usePaginatedQuery } from "convex/react";
 import {
   BackgroundSection,
@@ -9,7 +9,13 @@ import {
   MissionSection,
 } from "./section-content";
 import { HeaderSection } from "./section-header";
-import { ListWrapper, CardWrapper } from "./card-wrappers";
+import {
+  ListWrapper,
+  CardWrapper,
+  FooterWrapper,
+  AdditionalWrapper,
+} from "./card-wrappers";
+import { NotesSection } from "./section-notes";
 
 const useIntakeList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -42,7 +48,7 @@ interface IntakeCardProps {
 }
 
 const IntakeCard = ({ result }: IntakeCardProps) => {
-  const { background, mission, links } = result.applicant;
+  const { background, mission, links, id } = result.applicant;
 
   return (
     <CardWrapper>
@@ -50,6 +56,21 @@ const IntakeCard = ({ result }: IntakeCardProps) => {
       <BackgroundSection background={background} />
       <MissionSection mission={mission} />
       <LinksSection links={links} />
+      <AdditionalSection applicantId={id} notes={result.notes} />
     </CardWrapper>
+  );
+};
+
+interface AdditionalSectionProps {
+  applicantId: Id<"applicants">;
+  notes: FullApplicantType["notes"];
+}
+const AdditionalSection = ({ applicantId, notes }: AdditionalSectionProps) => {
+  return (
+    <FooterWrapper>
+      <AdditionalWrapper title="notes">
+        <NotesSection notes={notes} applicantId={applicantId} />
+      </AdditionalWrapper>
+    </FooterWrapper>
   );
 };

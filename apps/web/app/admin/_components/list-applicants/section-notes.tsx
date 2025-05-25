@@ -6,7 +6,7 @@ import { api } from "@residency/api";
 import { Button } from "@residency/ui/components/button";
 import { Textarea } from "@residency/ui/components/textarea";
 import { useMutation } from "convex/react";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Check, X } from "lucide-react";
 import { DateTime } from "luxon";
 import { useState } from "react";
 
@@ -34,8 +34,41 @@ interface NoteCardProps {
 }
 
 const NoteCard = ({ note }: NoteCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(note.note);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const editNote = useMutation(api.application.admin.editNote);
+
   const formatRelativeTime = (timestamp: number) => {
     return DateTime.fromMillis(timestamp).toRelative();
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editedContent.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      await editNote({
+        noteId: note._id,
+        note: editedContent.trim(),
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Failed to edit note:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditedContent(note.note);
+    setIsEditing(false);
+  };
+
+  const handleStartEdit = () => {
+    setEditedContent(note.note);
+    setIsEditing(true);
   };
 
   return (
@@ -50,20 +83,55 @@ const NoteCard = ({ note }: NoteCardProps) => {
             {formatRelativeTime(note._creationTime)}
           </p>
         </div>
-        <NoteActions note={note} />
+        <NoteActions
+          note={note}
+          isEditing={isEditing}
+          isSubmitting={isSubmitting}
+          onStartEdit={handleStartEdit}
+          onSaveEdit={handleSaveEdit}
+          onCancelEdit={handleCancelEdit}
+          canSave={
+            editedContent.trim() !== "" && editedContent.trim() !== note.note
+          }
+        />
       </div>
 
       {/* Content */}
-      <p className="text-sm text-gray-700 leading-relaxed">{note.note}</p>
+      {isEditing ? (
+        <div className="mt-2">
+          <Textarea
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
+            className="min-h-[80px] text-sm"
+            disabled={isSubmitting}
+          />
+        </div>
+      ) : (
+        <p className="text-sm text-gray-700 leading-relaxed">{note.note}</p>
+      )}
     </div>
   );
 };
 
 interface NoteActionsProps {
   note: Note;
+  isEditing: boolean;
+  isSubmitting: boolean;
+  onStartEdit: () => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
+  canSave: boolean;
 }
 
-const NoteActions = ({ note }: NoteActionsProps) => {
+const NoteActions = ({
+  note,
+  isEditing,
+  isSubmitting,
+  onStartEdit,
+  onSaveEdit,
+  onCancelEdit,
+  canSave,
+}: NoteActionsProps) => {
   const deleteNote = useMutation(api.application.admin.deleteNote);
 
   const user = useUser();
@@ -72,12 +140,38 @@ const NoteActions = ({ note }: NoteActionsProps) => {
 
   if (!isCreator) return null;
 
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
+          onClick={onSaveEdit}
+          disabled={!canSave || isSubmitting}
+        >
+          <Check className="h-3 w-3" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
+          onClick={onCancelEdit}
+          disabled={isSubmitting}
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-1">
       <Button
         variant="ghost"
         size="sm"
         className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
+        onClick={onStartEdit}
       >
         <Edit2 className="h-3 w-3" />
       </Button>
@@ -129,6 +223,7 @@ const AddNote = ({ applicantId }: AddNoteProps) => {
       />
       <div className="flex justify-end">
         <Button
+          variant="secondary"
           onClick={handleSubmit}
           disabled={!newNote.trim() || isSubmitting}
           size="sm"

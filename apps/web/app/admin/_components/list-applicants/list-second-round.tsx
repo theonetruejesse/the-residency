@@ -17,6 +17,7 @@ import {
   AdditionalWrapper,
 } from "./card-wrappers";
 import { ScoreTable } from "./section-grade";
+import { NotesSection } from "./section-notes";
 
 const useSecondRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -48,11 +49,12 @@ interface SecondRoundCardProps {
   result: FullApplicantType;
 }
 const SecondRoundCard = ({ result }: SecondRoundCardProps) => {
-  const { applicant } = result;
+  const { applicant, notes } = result;
 
   return (
     <CardWrapper>
       <HeaderSection applicant={applicant} />
+      <NotesSection notes={notes} applicantId={applicant.id} />
       <AdditionalSection result={result} />
     </CardWrapper>
   );

@@ -1,4 +1,5 @@
-import { FullApplicantType, Id, api } from "@residency/api";
+import type { FullApplicantType, Id } from "@residency/api";
+import { api } from "@residency/api";
 import { Badge } from "@residency/ui/components/badge";
 import { Button } from "@residency/ui/components/button";
 import {
@@ -22,7 +23,7 @@ export const HeaderSection = ({ applicant }: HeaderSectionProps) => {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium lowercase flex items-center gap-4">
+        <h3 className="text-xl font-medium lowercase flex items-center gap-4">
           {`${firstName} ${lastName}`}
         </h3>
         <ApplicantDecision applicantId={applicant.id} />
@@ -48,10 +49,11 @@ export const HeaderSection = ({ applicant }: HeaderSectionProps) => {
 type StatusActions = "approve" | "waitlist" | "reject";
 
 const useStatusDecision = (applicantId: Id<"applicants">) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const approveRound = useAction(api.application.admin.approveRound);
   const waitlistApplicant = useAction(api.application.admin.waitlistApplicant);
   const rejectApplicant = useAction(api.application.admin.rejectApplicant);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAction = async (decision: StatusActions) => {
     try {
@@ -79,21 +81,29 @@ const useStatusDecision = (applicantId: Id<"applicants">) => {
   return { handleAction, isSubmitting };
 };
 
-type Statuses = FullApplicantType["applicant"]["decision"]["status"];
-
 interface ApplicantDecisionProps {
   applicantId: Id<"applicants">;
 }
+
+type StatusStates = StatusActions | "pending";
+
 const ApplicantDecision = ({ applicantId }: ApplicantDecisionProps) => {
-  const [decision, setDecision] = useState<Statuses>("pending");
+  const [decision, setDecision] = useState<StatusStates>("pending");
   const { handleAction, isSubmitting } = useStatusDecision(applicantId);
+
+  const statuses = [
+    "pending",
+    "approve",
+    "waitlist",
+    "reject",
+  ] as StatusStates[];
 
   return (
     <div className="flex items-center gap-2">
       <Select
         variant="minimal"
         defaultValue="pending"
-        onValueChange={(value) => setDecision(value as Statuses)}
+        onValueChange={(value) => setDecision(value as StatusStates)}
       >
         <SelectTrigger>
           <SelectValue asChild>
@@ -101,18 +111,11 @@ const ApplicantDecision = ({ applicantId }: ApplicantDecisionProps) => {
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="pending">
-            <StatusBadge status="pending" />
-          </SelectItem>
-          <SelectItem value="accepted">
-            <StatusBadge status="accepted" />
-          </SelectItem>
-          <SelectItem value="waitlisted">
-            <StatusBadge status="waitlisted" />
-          </SelectItem>
-          <SelectItem value="rejected">
-            <StatusBadge status="rejected" />
-          </SelectItem>
+          {statuses.map((status) => (
+            <SelectItem key={status} value={status}>
+              <StatusBadge status={status as StatusStates} />
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
       <Button
@@ -151,6 +154,14 @@ const SelectRanking = ({
     setRankingMutation({ applicantId, ranking });
   };
 
+  const rankingOptions = [
+    "likely_accept",
+    "maybe_accept",
+    "neutral",
+    "maybe_reject",
+    "likely_reject",
+  ] as Rankings[];
+
   return (
     <div className="flex items-center gap-1">
       <span className="font-normal text-md">ranking:</span>
@@ -166,21 +177,11 @@ const SelectRanking = ({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="likely_accept">
-            <RankingBadge ranking="likely_accept" />
-          </SelectItem>
-          <SelectItem value="maybe_accept">
-            <RankingBadge ranking="maybe_accept" />
-          </SelectItem>
-          <SelectItem value="neutral">
-            <RankingBadge ranking="neutral" />
-          </SelectItem>
-          <SelectItem value="maybe_reject">
-            <RankingBadge ranking="maybe_reject" />
-          </SelectItem>
-          <SelectItem value="likely_reject">
-            <RankingBadge ranking="likely_reject" />
-          </SelectItem>
+          {rankingOptions.map((ranking) => (
+            <SelectItem key={ranking} value={ranking}>
+              <RankingBadge ranking={ranking} />
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </div>
@@ -206,7 +207,10 @@ const rankingColors: Record<Rankings, string> = {
 };
 
 const RankingBadge = ({ ranking }: { ranking: Rankings }) => (
-  <Badge variant="outline" className={`inline-block ${rankingColors[ranking]}`}>
+  <Badge
+    variant="outline"
+    className={`inline-block ${rankingColors[ranking]} `}
+  >
     {rankingLabels[ranking]}
   </Badge>
 );
@@ -214,28 +218,28 @@ const RankingBadge = ({ ranking }: { ranking: Rankings }) => (
 const RankingBadgeWithChevron = ({ ranking }: { ranking: Rankings }) => (
   <Badge
     variant="outline"
-    className={`inline-flex items-center gap-1 ${rankingColors[ranking]}`}
+    className={`inline-flex items-center gap-1 ${rankingColors[ranking]} font-semibold`}
   >
     {rankingLabels[ranking]}
     <ChevronDown className="h-3 w-3" />
   </Badge>
 );
 
-const statusLabels: Record<Statuses, string> = {
+const statusLabels: Record<StatusStates, string> = {
   pending: "pending",
-  accepted: "approve",
-  waitlisted: "waitlist",
-  rejected: "reject",
+  approve: "approve",
+  waitlist: "waitlist",
+  reject: "reject",
 };
 
-const statusColors: Record<Statuses, string> = {
+const statusColors: Record<StatusStates, string> = {
   pending: "bg-gray-50 text-gray-700 border-gray-200",
-  accepted: "bg-green-50 text-green-700 border-green-200",
-  waitlisted: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  rejected: "bg-red-50 text-red-700 border-red-200",
+  approve: "bg-green-50 text-green-700 border-green-200",
+  waitlist: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  reject: "bg-red-50 text-red-700 border-red-200",
 };
 
-const StatusBadge = ({ status }: { status: Statuses }) => (
+const StatusBadge = ({ status }: { status: StatusStates }) => (
   <Badge
     variant="outline"
     className={`inline-block text-sm ${statusColors[status]}`}
@@ -244,7 +248,7 @@ const StatusBadge = ({ status }: { status: Statuses }) => (
   </Badge>
 );
 
-const StatusBadgeWithChevron = ({ status }: { status: Statuses }) => (
+const StatusBadgeWithChevron = ({ status }: { status: StatusStates }) => (
   <Badge
     variant="outline"
     className={`inline-flex items-center gap-1 text-lg font-normal ${statusColors[status]}`}
