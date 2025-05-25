@@ -294,7 +294,7 @@ export const secondRoundApplicants = adminQuery({
   },
 });
 
-export const createApplicantNote = adminMutation({
+export const createNote = adminMutation({
   args: {
     applicantId: v.id("applicants"),
     note: v.string(),
@@ -309,7 +309,7 @@ export const createApplicantNote = adminMutation({
   },
 });
 
-export const updateApplicantNote = adminMutation({
+export const editNote = adminMutation({
   args: {
     noteId: v.id("notes"),
     note: v.string(),
@@ -324,6 +324,17 @@ export const updateApplicantNote = adminMutation({
     await ctx.runMutation(internal.application.applicant.updateApplicantNote, {
       noteId: args.noteId,
       note: args.note,
+    });
+  },
+});
+
+export const deleteNote = adminMutation({
+  args: {
+    noteId: v.id("notes"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runMutation(internal.application.applicant.deleteApplicantNote, {
+      noteId: args.noteId,
     });
   },
 });

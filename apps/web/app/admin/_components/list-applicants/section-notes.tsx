@@ -1,0 +1,141 @@
+"use client";
+
+import { useUser } from "@clerk/nextjs";
+import type { Note, Id } from "@residency/api";
+import { api } from "@residency/api";
+import { Button } from "@residency/ui/components/button";
+import { Textarea } from "@residency/ui/components/textarea";
+import { useMutation } from "convex/react";
+import { Edit2, Trash2 } from "lucide-react";
+import { DateTime } from "luxon";
+import { useState } from "react";
+
+interface NotesSectionProps {
+  notes: Note[];
+  applicantId: Id<"applicants">;
+}
+export const NotesSection = ({ notes, applicantId }: NotesSectionProps) => {
+  return (
+    <div className="space-y-2">
+      {notes.length !== 0 && (
+        <div className="space-y-1">
+          {notes.map((note) => (
+            <NoteCard key={note._id} note={note} />
+          ))}
+        </div>
+      )}
+      <AddNote applicantId={applicantId} />
+    </div>
+  );
+};
+
+interface NoteCardProps {
+  note: Note;
+}
+
+const NoteCard = ({ note }: NoteCardProps) => {
+  const formatRelativeTime = (timestamp: number) => {
+    return DateTime.fromMillis(timestamp).toRelative();
+  };
+
+  return (
+    <div key={note._id} className="px-3 py-2 border rounded-lg bg-gray-50">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-1">
+        <div>
+          <h4 className="text-sm font-medium text-gray-900 lowercase">
+            {note.creator}
+          </h4>
+          <p className="text-xs text-muted-foreground">
+            {formatRelativeTime(note._creationTime)}
+          </p>
+        </div>
+        <NoteActions note={note} />
+      </div>
+
+      {/* Content */}
+      <p className="text-sm text-gray-700 leading-relaxed">{note.note}</p>
+    </div>
+  );
+};
+
+interface NoteActionsProps {
+  note: Note;
+}
+
+const NoteActions = ({ note }: NoteActionsProps) => {
+  const deleteNote = useMutation(api.application.admin.deleteNote);
+
+  const user = useUser();
+  const convexUserId = user.user?.publicMetadata.convexUserId;
+  const isCreator = note.createdBy === convexUserId;
+
+  if (!isCreator) return null;
+
+  return (
+    <div className="flex items-center gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
+      >
+        <Edit2 className="h-3 w-3" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 w-6 p-0 text-gray-500 hover:text-red-600"
+        onClick={() => deleteNote({ noteId: note._id })}
+      >
+        <Trash2 className="h-3 w-3" />
+      </Button>
+    </div>
+  );
+};
+
+interface AddNoteProps {
+  applicantId: Id<"applicants">;
+}
+
+const AddNote = ({ applicantId }: AddNoteProps) => {
+  const [newNote, setNewNote] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const createNote = useMutation(api.application.admin.createNote);
+
+  const handleSubmit = async () => {
+    if (!newNote.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      await createNote({
+        applicantId,
+        note: newNote.trim(),
+      });
+      setNewNote("");
+    } catch (error) {
+      console.error("Failed to create note:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <Textarea
+        value={newNote}
+        onChange={(e) => setNewNote(e.target.value)}
+        className="min-h-[80px] text-sm"
+      />
+      <div className="flex justify-end">
+        <Button
+          onClick={handleSubmit}
+          disabled={!newNote.trim() || isSubmitting}
+          size="sm"
+        >
+          {isSubmitting ? "adding..." : "add note"}
+        </Button>
+      </div>
+    </div>
+  );
+};

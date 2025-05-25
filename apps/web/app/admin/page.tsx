@@ -34,7 +34,7 @@ const ListApplicants = () => {
           applicants summer 2025
         </AccordionTrigger>
         <AccordionContent>
-          <Separator className="mb-8" />
+          <Separator className="mb-8 my-4" />
           <ApplicantsTabs />
         </AccordionContent>
       </AccordionItem>

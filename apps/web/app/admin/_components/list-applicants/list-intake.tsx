@@ -5,12 +5,11 @@ import type { FullApplicantType } from "@residency/api";
 import { usePaginatedQuery } from "convex/react";
 import {
   BackgroundSection,
-  CardWrapper,
   LinksSection,
-  ListWrapper,
   MissionSection,
-} from "./helpers-list";
-import { HeaderSection } from "./card-header";
+} from "./section-content";
+import { HeaderSection } from "./section-header";
+import { ListWrapper, CardWrapper } from "./card-wrappers";
 
 const useIntakeList = () => {
   const { results, status, loadMore } = usePaginatedQuery(

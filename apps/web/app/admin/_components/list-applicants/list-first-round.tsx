@@ -4,16 +4,20 @@ import { api } from "@residency/api";
 import type { FullApplicantType, InterviewGrade } from "@residency/api";
 import { usePaginatedQuery } from "convex/react";
 import {
-  AdditionalWrapper,
   BackgroundSection,
-  CardWrapper,
-  GradesSection,
-  InterviewWrapper,
   LinksSection,
-  ListWrapper,
   MissionSection,
-} from "./helpers-list";
-import { HeaderSection } from "./card-header";
+} from "./section-content";
+import { GradesSection } from "./section-grade";
+import {
+  FooterWrapper,
+  CardWrapper,
+  InterviewWrapper,
+  ListWrapper,
+  AdditionalWrapper,
+} from "./card-wrappers";
+import { HeaderSection } from "./section-header";
+import { NotesSection } from "./section-notes";
 
 const useFirstRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -45,13 +49,13 @@ interface FirstRoundCardProps {
   result: FullApplicantType;
 }
 const FirstRoundCard = ({ result }: FirstRoundCardProps) => {
-  const { applicant, interview } = result;
+  const { applicant, interview, notes } = result;
 
   return (
     <CardWrapper>
       <HeaderSection applicant={applicant} />
       <InterviewSection interview={interview} />
-      <AdditionalSection applicant={applicant} />
+      <AdditionalSection applicant={applicant} notes={notes} />
     </CardWrapper>
   );
 };
@@ -69,13 +73,19 @@ const InterviewSection = ({ interview }: InterviewSectionProps) => {
 
 interface AdditionalSectionProps {
   applicant: FullApplicantType["applicant"];
+  notes: FullApplicantType["notes"];
 }
-const AdditionalSection = ({ applicant }: AdditionalSectionProps) => {
+const AdditionalSection = ({ applicant, notes }: AdditionalSectionProps) => {
   return (
-    <AdditionalWrapper>
-      <BackgroundSection background={applicant.background} />
-      <MissionSection mission={applicant.mission} />
-      <LinksSection links={applicant.links} />
-    </AdditionalWrapper>
+    <FooterWrapper>
+      <AdditionalWrapper title="applicant info">
+        <BackgroundSection background={applicant.background} />
+        <MissionSection mission={applicant.mission} />
+        <LinksSection links={applicant.links} />
+      </AdditionalWrapper>
+      <AdditionalWrapper title="notes">
+        <NotesSection notes={notes} applicantId={applicant.id} />
+      </AdditionalWrapper>
+    </FooterWrapper>
   );
 };

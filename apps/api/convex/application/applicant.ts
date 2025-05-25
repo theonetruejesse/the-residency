@@ -2,11 +2,7 @@ import { v } from "convex/values";
 import { internalQuery, internalMutation } from "../_generated/server";
 import {
   Applicants,
-  Backgrounds,
   BasicInfo,
-  Links,
-  Missions,
-  RANKING_OPTIONS,
   ROUND_OPTIONS,
   STATUS_OPTIONS,
 } from "../model/applicants";
@@ -121,39 +117,6 @@ export const getApplicantInterview = internalQuery({
   },
 });
 
-export const createApplicantNote = internalMutation({
-  args: {
-    applicantId: v.id("applicants"),
-    createdBy: v.id("users"),
-    note: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db.insert("notes", {
-      ...args,
-    });
-  },
-});
-
-export const updateApplicantNote = internalMutation({
-  args: {
-    noteId: v.id("notes"),
-    note: v.string(),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.db.patch(args.noteId, { note: args.note });
-  },
-});
-
-export const getApplicantNotes = internalQuery({
-  args: { applicantId: v.id("applicants") },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("notes")
-      .withIndex("by_applicantId", (q) => q.eq("applicantId", args.applicantId))
-      .collect();
-  },
-});
-
 export const setApplicantUserId = internalMutation({
   args: {
     applicantId: v.id("applicants"),
@@ -212,11 +175,25 @@ export const getFullApplicant = internalQuery({
       );
     }
 
-    const notes = await ctx.runQuery(
+    const applicantNotes = await ctx.runQuery(
       internal.application.applicant.getApplicantNotes,
       {
         applicantId: args.applicant._id,
       }
+    );
+    const notes = await Promise.all(
+      applicantNotes.map(async (note) => {
+        const { createdBy } = note;
+        const user = await ctx.runQuery(
+          internal.application.user.getUserBasicInfo,
+          { userId: createdBy }
+        );
+        if (!user) throw new Error("User not found");
+        return {
+          ...note,
+          creator: `${user.firstName} ${user.lastName}`,
+        };
+      })
     );
 
     return {
@@ -231,5 +208,47 @@ export const getFullApplicant = internalQuery({
       interview,
       notes,
     };
+  },
+});
+
+// Notes
+
+export const createApplicantNote = internalMutation({
+  args: {
+    applicantId: v.id("applicants"),
+    createdBy: v.id("users"),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("notes", {
+      ...args,
+    });
+  },
+});
+
+export const updateApplicantNote = internalMutation({
+  args: {
+    noteId: v.id("notes"),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.patch(args.noteId, { note: args.note });
+  },
+});
+
+export const getApplicantNotes = internalQuery({
+  args: { applicantId: v.id("applicants") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("notes")
+      .withIndex("by_applicantId", (q) => q.eq("applicantId", args.applicantId))
+      .collect();
+  },
+});
+
+export const deleteApplicantNote = internalMutation({
+  args: { noteId: v.id("notes") },
+  handler: async (ctx, args) => {
+    return await ctx.db.delete(args.noteId);
   },
 });

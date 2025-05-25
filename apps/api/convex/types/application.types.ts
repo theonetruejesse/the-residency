@@ -21,8 +21,10 @@ export type FullApplicantType = {
     mission: Doc<"missions">;
   };
   interview: InterviewGrade | null;
-  notes: Doc<"notes">[];
+  notes: Note[];
 };
+
+export type Note = Doc<"notes"> & { creator: string };
 
 export type InterviewGrade = {
   interview: Doc<"interviews">;

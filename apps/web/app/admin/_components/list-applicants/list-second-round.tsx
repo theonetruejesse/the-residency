@@ -4,16 +4,19 @@ import { api } from "@residency/api";
 import type { FullApplicantType, InterviewGrade } from "@residency/api";
 import { usePaginatedQuery } from "convex/react";
 import {
-  AdditionalWrapper,
   BackgroundSection,
+  LinksSection,
+  MissionSection,
+} from "./section-content";
+import { HeaderSection } from "./section-header";
+import {
+  FooterWrapper,
   CardWrapper,
   InterviewWrapper,
-  LinksSection,
   ListWrapper,
-  MissionSection,
-  ScoreTable,
-} from "./helpers-list";
-import { HeaderSection } from "./card-header";
+  AdditionalWrapper,
+} from "./card-wrappers";
+import { ScoreTable } from "./section-grade";
 
 const useSecondRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
@@ -59,12 +62,14 @@ const AdditionalSection = ({ result }: SecondRoundCardProps) => {
   const { applicant, interview } = result;
 
   return (
-    <AdditionalWrapper>
-      <ScoreSection interview={interview} />
-      <BackgroundSection background={applicant.background} />
-      <MissionSection mission={applicant.mission} />
-      <LinksSection links={applicant.links} />
-    </AdditionalWrapper>
+    <FooterWrapper>
+      <AdditionalWrapper title="applicant info">
+        <ScoreSection interview={interview} />
+        <BackgroundSection background={applicant.background} />
+        <MissionSection mission={applicant.mission} />
+        <LinksSection links={applicant.links} />
+      </AdditionalWrapper>
+    </FooterWrapper>
   );
 };
 

@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 import { BasicInfo } from "../model/applicants";
-import { Users } from "../model/users";
 
 export const createApplicantUser = internalMutation({
   args: {
