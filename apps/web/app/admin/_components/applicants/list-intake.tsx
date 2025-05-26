@@ -14,12 +14,10 @@ import {
   AdditionalWrapper,
 } from "./helper-wrappers";
 import { NotesSection } from "./section-notes";
-import { useApplicantStore } from "./query-provider";
+import { useApplicantQuery } from "./query-provider";
 
 export const ListIntake = () => {
-  const { results, status, loadMore } = useApplicantStore(
-    (state) => state.queries.intake
-  );
+  const { results, status, loadMore } = useApplicantQuery("intake");
 
   return (
     <ListWrapper status={status} loadMore={loadMore} title="intake round">

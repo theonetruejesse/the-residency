@@ -17,12 +17,10 @@ import {
 } from "./helper-wrappers";
 import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
-import { useApplicantStore } from "./query-provider";
+import { useApplicantQuery } from "./query-provider";
 
 export const ListSecondRound = () => {
-  const { results, status, loadMore } = useApplicantStore(
-    (state) => state.queries.secondRound
-  );
+  const { results, status, loadMore } = useApplicantQuery("secondRound");
 
   return (
     <ListWrapper status={status} loadMore={loadMore} title="second round">

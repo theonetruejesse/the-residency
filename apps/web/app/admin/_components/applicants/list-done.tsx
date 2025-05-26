@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  AdditionalWrapper,
-  CardWrapper,
   KanbanWrapper,
+  CardWrapper,
+  AdditionalWrapper,
   ListWrapper,
 } from "./helper-wrappers";
 import {
@@ -14,14 +14,14 @@ import {
 import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
 import { DoneHeaderSection } from "./section-header";
-import { useApplicantStore } from "./query-provider";
+import { useApplicantQuery } from "./query-provider";
 import { type ConvexQueryResult } from "./query-store";
 import type { FullApplicantType } from "@residency/api";
 
 export const DisplayDone = () => {
-  const accepted = useApplicantStore((state) => state.queries.accepted);
-  const waitlisted = useApplicantStore((state) => state.queries.waitlisted);
-  const rejected = useApplicantStore((state) => state.queries.rejected);
+  const accepted = useApplicantQuery("accepted");
+  const waitlisted = useApplicantQuery("waitlisted");
+  const rejected = useApplicantQuery("rejected");
 
   return (
     <KanbanWrapper>

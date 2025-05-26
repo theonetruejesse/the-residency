@@ -1,4 +1,5 @@
-import { FullApplicantType } from "@residency/api";
+import { createStore } from "zustand";
+import type { FullApplicantType } from "@residency/api";
 
 export type ConvexQueryResult = {
   results: FullApplicantType[];
@@ -15,12 +16,15 @@ export type QueryType =
   | "waitlisted";
 
 export interface ApplicantQueryStore {
-  //   rawData: Record<QueryType, FullApplicantType[]>; // will use for search filtering
+  // Query data
   queries: Record<QueryType, ConvexQueryResult>;
   setQueryResults: (queryType: QueryType, result: ConvexQueryResult) => void;
-}
 
-import { createStore } from "zustand";
+  // Search state
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  clearSearch: () => void;
+}
 
 const initialQueryState: ConvexQueryResult = {
   results: [],
@@ -30,6 +34,7 @@ const initialQueryState: ConvexQueryResult = {
 
 export const createApplicantQueryStore = () =>
   createStore<ApplicantQueryStore>((set, get) => ({
+    searchTerm: "",
     queries: {
       intake: initialQueryState,
       firstRound: initialQueryState,
@@ -38,7 +43,6 @@ export const createApplicantQueryStore = () =>
       rejected: initialQueryState,
       waitlisted: initialQueryState,
     },
-
     setQueryResults: (queryType, result) =>
       set((state) => ({
         queries: {
@@ -49,4 +53,7 @@ export const createApplicantQueryStore = () =>
           },
         },
       })),
+
+    setSearchTerm: (term) => set({ searchTerm: term }),
+    clearSearch: () => set({ searchTerm: "" }),
   }));

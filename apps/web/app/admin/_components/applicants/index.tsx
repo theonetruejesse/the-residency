@@ -19,6 +19,11 @@ import { ListFirstRound } from "./list-first-round";
 import { ListIntake } from "./list-intake";
 import { ListSecondRound } from "./list-second-round";
 import { ApplicantQueryProvider } from "./query-provider";
+import { useState } from "react";
+import { Button } from "@residency/ui/components/button";
+import { Input } from "@residency/ui/components/input";
+import { Search } from "lucide-react";
+import { useApplicantStore } from "./query-provider";
 
 export const ListApplicants = () => {
   return (
@@ -30,7 +35,7 @@ export const ListApplicants = () => {
           </AccordionTrigger>
           <AccordionContent>
             <Separator className="mb-8 my-4" />
-            <ApplicantsTabs />
+            <ViewApplicants />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -38,29 +43,87 @@ export const ListApplicants = () => {
   );
 };
 
-const ApplicantsTabs = () => {
+const ViewApplicants = () => {
   return (
     <Tabs defaultValue="pending">
-      <TabsList className="shadow mb-5 flex-1 font-normal">
-        <TabsTrigger value="pending">pending</TabsTrigger>
-        <TabsTrigger value="done">done</TabsTrigger>
-      </TabsList>
-      <TabsContent value="pending">
-        <DisplayPending />
-      </TabsContent>
-      <TabsContent value="done">
-        <DisplayDone />
-      </TabsContent>
+      <ViewHeader />
+      <ViewContent />
     </Tabs>
   );
 };
 
-const DisplayPending = () => {
+const ViewContent = () => {
   return (
-    <KanbanWrapper>
-      <ListIntake />
-      <ListFirstRound />
-      <ListSecondRound />
-    </KanbanWrapper>
+    <>
+      <TabsContent value="pending">
+        <KanbanWrapper>
+          <ListIntake />
+          <ListFirstRound />
+          <ListSecondRound />
+        </KanbanWrapper>
+      </TabsContent>
+      <TabsContent value="done">
+        <DisplayDone />
+      </TabsContent>
+    </>
+  );
+};
+
+const ViewHeader = () => {
+  return (
+    <div className="flex flex-row items-center gap-2 w-full mb-5">
+      <TabsList className="shadow font-normal">
+        <TabsTrigger value="pending">pending</TabsTrigger>
+        <TabsTrigger value="done">done</TabsTrigger>
+      </TabsList>
+      <SearchBar />
+    </div>
+  );
+};
+
+const SearchBar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Connect to the store for search state
+  const searchTerm = useApplicantStore((state) => state.searchTerm);
+  const setSearchTerm = useApplicantStore((state) => state.setSearchTerm);
+  const clearSearch = useApplicantStore((state) => state.clearSearch);
+
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+    if (isOpen) {
+      clearSearch();
+    }
+  };
+
+  return (
+    <div className="flex items-center">
+      <div
+        className={`flex items-center transition-all duration-300 ease-in-out ${isOpen ? "w-64" : "w-10"} h-10`}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleToggle}
+          className="h-8 w-8 rounded-full hover:bg-gray-100 flex-shrink-0 text-muted-foreground"
+        >
+          <Search className="h-3 w-3" />
+          <span className="sr-only">
+            {isOpen ? "close search" : "open search"}
+          </span>
+        </Button>
+
+        {isOpen && (
+          <Input
+            type="text"
+            placeholder="search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-secondary ml-1"
+            autoFocus
+          />
+        )}
+      </div>
+    </div>
   );
 };

@@ -15,12 +15,10 @@ import {
 } from "./helper-wrappers";
 import { PendingHeaderSection } from "./section-header";
 import { NotesSection } from "./section-notes";
-import { useApplicantStore } from "./query-provider";
+import { useApplicantQuery } from "./query-provider";
 
 export const ListFirstRound = () => {
-  const { results, status, loadMore } = useApplicantStore(
-    (state) => state.queries.firstRound
-  );
+  const { results, status, loadMore } = useApplicantQuery("firstRound");
 
   return (
     <ListWrapper status={status} loadMore={loadMore} title="first round">
