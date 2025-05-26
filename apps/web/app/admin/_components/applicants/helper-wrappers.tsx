@@ -11,7 +11,7 @@ import { Skeleton } from "@residency/ui/components/skeleton";
 
 export const CardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Card className="w-lg py-6">
+    <Card className="w-full py-6">
       <CardContent className="px-6 flex flex-col space-y-3">
         {children}
       </CardContent>
@@ -38,7 +38,7 @@ export const ListWrapper = ({
   title,
 }: ListWrapperProps) => {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 w-lg">
       <h1 className="text-xl font-medium">{title}</h1>
       {status !== "LoadingFirstPage" ? (
         <>
