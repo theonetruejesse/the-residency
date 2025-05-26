@@ -25,6 +25,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@residency/ui/components/tooltip";
+import { toast } from "sonner";
 
 interface HeaderSectionProps {
   applicant: FullApplicantType["applicant"];
@@ -37,7 +38,11 @@ export const PendingHeaderSection = ({ applicant }: HeaderSectionProps) => {
     <div>
       <div className="flex items-center justify-between">
         <GivenBasicInfo basicInfo={applicant.basicInfo} />
-        <ApplicantDecision applicantId={applicant.id} />
+        <ApplicantDecision
+          applicantId={applicant.id}
+          applicantName={`${firstName} ${lastName}`}
+          applicantRound={applicant.decision.round}
+        />
       </div>
       <div className="flex items-center justify-between">
         <SelectRanking
@@ -95,11 +100,21 @@ const GivenBasicInfo = ({ basicInfo }: GivenBasicInfoProps) => {
 
 interface ApplicantDecisionProps {
   applicantId: Id<"applicants">;
+  applicantName: string;
+  applicantRound: FullApplicantType["applicant"]["decision"]["round"];
 }
 
-const ApplicantDecision = ({ applicantId }: ApplicantDecisionProps) => {
+const ApplicantDecision = ({
+  applicantId,
+  applicantName,
+  applicantRound,
+}: ApplicantDecisionProps) => {
   const [decision, setDecision] = useState<StatusStates>("pending");
-  const { handleAction, isSubmitting } = useStatusDecision(applicantId);
+  const { handleAction, isSubmitting } = useStatusDecision({
+    applicantId,
+    applicantName,
+    applicantRound,
+  });
 
   const statuses = [
     "pending",
@@ -196,7 +211,11 @@ const SelectRanking = ({
   );
 };
 
-const useStatusDecision = (applicantId: Id<"applicants">) => {
+const useStatusDecision = ({
+  applicantId,
+  applicantName,
+  applicantRound,
+}: ApplicantDecisionProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const approveRound = useAction(api.application.admin.approveRound);
@@ -222,9 +241,45 @@ const useStatusDecision = (applicantId: Id<"applicants">) => {
       console.error("Error updating applicant status:", error);
       // Potentially set an error state here to display to the user
     } finally {
+      // artificial delay of 2sec, help ux seem more responsive with convex reactive updates
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      toastMessage(decision, applicantName, applicantRound);
       setIsSubmitting(false);
     }
   };
 
   return { handleAction, isSubmitting };
+};
+
+const toastMessage = (
+  decision: StatusActions,
+  applicantName: string,
+  applicantRound: FullApplicantType["applicant"]["decision"]["round"]
+) => {
+  let message = "";
+
+  switch (applicantRound) {
+    case "intake":
+      message = `${applicantName} has been approved to first round!`;
+      break;
+    case "first_round":
+      message = `${applicantName} has been approved to second round!`;
+      break;
+    case "second_round":
+      message = `${applicantName} has been accepted!`;
+      break;
+  }
+
+  switch (decision) {
+    case "approve":
+      break;
+    case "waitlist":
+      message = `${applicantName} has been waitlisted!`;
+      break;
+    case "reject":
+      message = `${applicantName} has been rejected!`;
+      break;
+  }
+
+  toast.success(message);
 };

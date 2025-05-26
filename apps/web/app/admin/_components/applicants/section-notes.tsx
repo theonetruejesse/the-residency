@@ -146,20 +146,20 @@ const NoteActions = ({
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
-          onClick={onSaveEdit}
-          disabled={!canSave || isSubmitting}
-        >
-          <Check className="h-3 w-3" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
           className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
           onClick={onCancelEdit}
           disabled={isSubmitting}
         >
           <X className="h-3 w-3" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
+          onClick={onSaveEdit}
+          disabled={!canSave || isSubmitting}
+        >
+          <Check className="h-3 w-3" />
         </Button>
       </div>
     );
@@ -170,18 +170,18 @@ const NoteActions = ({
       <Button
         variant="ghost"
         size="sm"
-        className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
-        onClick={onStartEdit}
-      >
-        <Edit2 className="h-3 w-3" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
         className="h-6 w-6 p-0 text-gray-500 hover:text-red-600"
         onClick={() => deleteNote({ noteId: note._id })}
       >
         <Trash2 className="h-3 w-3" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
+        onClick={onStartEdit}
+      >
+        <Edit2 className="h-3 w-3" />
       </Button>
     </div>
   );
