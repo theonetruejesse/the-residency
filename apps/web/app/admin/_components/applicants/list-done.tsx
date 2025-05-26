@@ -7,7 +7,7 @@ import {
   CardWrapper,
   KanbanWrapper,
   ListWrapper,
-} from "./wrappers";
+} from "./helper-wrappers";
 import {
   BackgroundSection,
   MissionSection,

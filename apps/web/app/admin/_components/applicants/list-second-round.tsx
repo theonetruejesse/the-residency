@@ -14,7 +14,7 @@ import {
   CardWrapper,
   ListWrapper,
   AdditionalWrapper,
-} from "./wrappers";
+} from "./helper-wrappers";
 import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
 import { PAGINATION_CONFIG } from "../config";

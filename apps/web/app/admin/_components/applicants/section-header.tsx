@@ -1,6 +1,5 @@
 import type { FullApplicantType, Id } from "@residency/api";
 import { api } from "@residency/api";
-import { Badge } from "@residency/ui/components/badge";
 import { Button } from "@residency/ui/components/button";
 import {
   Select,
@@ -12,7 +11,7 @@ import {
 import { useAction, useMutation } from "convex/react";
 import { ChevronRight, Info } from "lucide-react";
 import { useState } from "react";
-import type { StatusActions, StatusStates, Rankings } from "./badges";
+import type { StatusActions, StatusStates, Rankings } from "./helper-badges";
 import {
   StatusSelectBadge,
   StatusBadge,
@@ -20,7 +19,7 @@ import {
   RankingBadge,
   ReferralBadge,
   RoundBadge,
-} from "./badges";
+} from "./helper-badges";
 import {
   Tooltip,
   TooltipTrigger,

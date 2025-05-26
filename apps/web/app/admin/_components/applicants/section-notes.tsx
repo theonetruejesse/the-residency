@@ -215,22 +215,21 @@ const AddNote = ({ applicantId }: AddNoteProps) => {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="relative space-y-2">
       <Textarea
         value={newNote}
         onChange={(e) => setNewNote(e.target.value)}
-        className="min-h-[80px] text-sm"
+        className="min-h-[80px] text-sm pr-20"
       />
-      <div className="flex justify-end">
-        <Button
-          variant="secondary"
-          onClick={handleSubmit}
-          disabled={!newNote.trim() || isSubmitting}
-          size="sm"
-        >
-          {isSubmitting ? "adding..." : "add note"}
-        </Button>
-      </div>
+      <Button
+        variant="secondary"
+        onClick={handleSubmit}
+        disabled={!newNote.trim() || isSubmitting}
+        size="sm"
+        className="absolute bottom-2 right-2 z-10"
+      >
+        {isSubmitting ? "adding..." : "add note"}
+      </Button>
     </div>
   );
 };

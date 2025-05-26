@@ -1,8 +1,8 @@
 export const PAGINATION_CONFIG = [
   {
     paginationOpts: {
-      numItems: 10,
+      numItems: 20,
     },
   },
-  { initialNumItems: 10 },
+  { initialNumItems: 20 },
 ] as const;

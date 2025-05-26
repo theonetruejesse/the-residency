@@ -14,7 +14,7 @@ import {
   CardWrapper,
   ListWrapper,
   AdditionalWrapper,
-} from "./wrappers";
+} from "./helper-wrappers";
 import { PendingHeaderSection } from "./section-header";
 import { NotesSection } from "./section-notes";
 import { PAGINATION_CONFIG } from "../config";

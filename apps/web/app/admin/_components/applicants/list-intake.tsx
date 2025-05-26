@@ -14,7 +14,7 @@ import {
   CardWrapper,
   FooterWrapper,
   AdditionalWrapper,
-} from "./wrappers";
+} from "./helper-wrappers";
 import { NotesSection } from "./section-notes";
 import { PAGINATION_CONFIG } from "../config";
 

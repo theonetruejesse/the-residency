@@ -16,7 +16,7 @@ import {
   TabsTrigger,
 } from "@residency/ui/components/tabs";
 import { DisplayDone } from "./_components/applicants/list-done";
-import { KanbanWrapper } from "./_components/applicants/wrappers";
+import { KanbanWrapper } from "./_components/applicants/helper-wrappers";
 
 export default function AdminPage() {
   return (
