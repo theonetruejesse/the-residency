@@ -1,10 +1,10 @@
 import { FullApplicantType } from "@residency/api";
 
-export interface ConvexQueryResult {
+export type ConvexQueryResult = {
   results: FullApplicantType[];
   status: "LoadingFirstPage" | "CanLoadMore" | "Exhausted" | "LoadingMore";
   loadMore: (numItems: number) => void;
-}
+};
 
 export type QueryType =
   | "intake"

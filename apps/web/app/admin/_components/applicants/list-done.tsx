@@ -1,8 +1,5 @@
 "use client";
 
-import { usePaginatedQuery } from "convex/react";
-import { api } from "@residency/api";
-import type { FullApplicantType } from "@residency/api";
 import {
   AdditionalWrapper,
   CardWrapper,
@@ -16,30 +13,16 @@ import {
 } from "./section-content";
 import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
-import { PAGINATION_CONFIG } from "../config";
 import { DoneHeaderSection } from "./section-header";
-
-const useDone = () => {
-  const rejected = usePaginatedQuery(
-    api.application.admin.rejectedApplicants,
-    ...PAGINATION_CONFIG
-  );
-
-  const waitlisted = usePaginatedQuery(
-    api.application.admin.waitlistedApplicants,
-    ...PAGINATION_CONFIG
-  );
-
-  const accepted = usePaginatedQuery(
-    api.application.admin.acceptedApplicants,
-    ...PAGINATION_CONFIG
-  );
-
-  return { rejected, waitlisted, accepted };
-};
+import { useApplicantStore } from "./query-provider";
+import { type ConvexQueryResult } from "./query-store";
+import type { FullApplicantType } from "@residency/api";
 
 export const DisplayDone = () => {
-  const { waitlisted, rejected, accepted } = useDone();
+  const accepted = useApplicantStore((state) => state.queries.accepted);
+  const waitlisted = useApplicantStore((state) => state.queries.waitlisted);
+  const rejected = useApplicantStore((state) => state.queries.rejected);
+
   return (
     <KanbanWrapper>
       <ListDone query={accepted} title="accepted" />
@@ -51,7 +34,7 @@ export const DisplayDone = () => {
 
 interface ListDoneProps {
   title: string;
-  query: ReturnType<typeof useDone>[keyof ReturnType<typeof useDone>];
+  query: ConvexQueryResult;
 }
 export const ListDone = ({ query, title }: ListDoneProps) => {
   const { results, status, loadMore } = query;
