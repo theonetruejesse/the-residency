@@ -8,24 +8,20 @@ import {
   LinksSection,
   MissionSection,
 } from "./section-content";
-import { HeaderSection } from "./section-header";
+import { PendingHeaderSection } from "./section-header";
 import {
   ListWrapper,
   CardWrapper,
   FooterWrapper,
   AdditionalWrapper,
-} from "./card-wrappers";
+} from "./wrappers";
 import { NotesSection } from "./section-notes";
+import { PAGINATION_CONFIG } from "../config";
 
 const useIntakeList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
     api.application.admin.intakeApplicants,
-    {
-      paginationOpts: {
-        numItems: 10,
-      },
-    },
-    { initialNumItems: 10 }
+    ...PAGINATION_CONFIG
   );
 
   return { results, status, loadMore };
@@ -52,7 +48,7 @@ const IntakeCard = ({ result }: IntakeCardProps) => {
 
   return (
     <CardWrapper>
-      <HeaderSection applicant={result.applicant} />
+      <PendingHeaderSection applicant={result.applicant} />
       <BackgroundSection background={background} />
       <MissionSection mission={mission} />
       <LinksSection links={links} />

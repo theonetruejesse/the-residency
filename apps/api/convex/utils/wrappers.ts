@@ -13,8 +13,6 @@ import {
   customQuery,
   customCtx,
 } from "convex-helpers/server/customFunctions";
-import { Users } from "../model/users";
-import { Infer } from "convex/values";
 import { Doc } from "../_generated/dataModel";
 
 // Type for user data matching the Users.table.validator (without system fields)

@@ -6,15 +6,17 @@ import {
   AccordionTrigger,
 } from "@residency/ui/components/accordion";
 import { Separator } from "@residency/ui/components/separator";
-import { ListIntake } from "./_components/list-applicants/list-intake";
-import { ListFirstRound } from "./_components/list-applicants/list-first-round";
-import { ListSecondRound } from "./_components/list-applicants/list-second-round";
+import { ListIntake } from "./_components/applicants/list-intake";
+import { ListFirstRound } from "./_components/applicants/list-first-round";
+import { ListSecondRound } from "./_components/applicants/list-second-round";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@residency/ui/components/tabs";
+import { DisplayDone } from "./_components/applicants/list-done";
+import { KanbanWrapper } from "./_components/applicants/wrappers";
 
 export default function AdminPage() {
   return (
@@ -50,14 +52,14 @@ const ApplicantsTabs = () => {
         <TabsTrigger value="done">done</TabsTrigger>
       </TabsList>
       <TabsContent value="pending">
-        <div className="flex flex-row gap-4 overflow-x-auto pb-4">
+        <KanbanWrapper>
           <ListIntake />
           <ListFirstRound />
           <ListSecondRound />
-        </div>
+        </KanbanWrapper>
       </TabsContent>
       <TabsContent value="done">
-        <div>done</div>
+        <DisplayDone />
       </TabsContent>
     </Tabs>
   );

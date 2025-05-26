@@ -1,19 +1,20 @@
 // todo, resolve the type issues later
 
+import { Infer } from "convex/values";
 import { Id, Doc } from "../_generated/dataModel";
+import {
+  RANKING_OPTIONS,
+  ROUND_OPTIONS,
+  STATUS_OPTIONS,
+} from "../model/applicants";
 
 export type FullApplicantType = {
   applicant: {
     id: Id<"applicants">;
     decision: {
-      status: "pending" | "waitlisted" | "accepted" | "rejected";
-      round: "intake" | "first_round" | "second_round";
-      ranking:
-        | "likely_reject"
-        | "maybe_reject"
-        | "neutral"
-        | "maybe_accept"
-        | "likely_accept";
+      status: Infer<typeof STATUS_OPTIONS>;
+      round: Infer<typeof ROUND_OPTIONS>;
+      ranking: Infer<typeof RANKING_OPTIONS>;
     };
     basicInfo: Doc<"basicInfo">;
     background: Doc<"backgrounds">;

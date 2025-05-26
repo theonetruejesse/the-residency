@@ -1,7 +1,12 @@
-import { v } from "convex/values";
+import { Infer, v } from "convex/values";
 import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
-import { BasicInfo, RANKING_OPTIONS } from "../model/applicants";
+import {
+  BasicInfo,
+  RANKING_OPTIONS,
+  ROUND_OPTIONS,
+  STATUS_OPTIONS,
+} from "../model/applicants";
 import { adminAction, adminMutation, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
@@ -192,107 +197,87 @@ export const inviteAdmin = adminAction({
 
 // QUERIES
 
-export const intakeApplicants = adminQuery({
-  args: { paginationOpts: paginationOptsValidator },
-  handler: async (ctx, args) => {
-    const result = await ctx.db
-      .query("applicants")
-      .withIndex("by_cycle", (q) =>
-        q
-          .eq("cohort", CURRENT_COHORT)
-          .eq("round", "intake")
-          .eq("status", "pending")
-      )
-      .order("desc")
-      .paginate(args.paginationOpts);
+const cycleQuery = (
+  round: Infer<typeof ROUND_OPTIONS>,
+  includeInterview: boolean
+) => {
+  return adminQuery({
+    args: { paginationOpts: paginationOptsValidator },
+    handler: async (ctx, args) => {
+      const result = await ctx.db
+        .query("applicants")
+        .withIndex("by_cycle", (q) =>
+          q
+            .eq("cohort", CURRENT_COHORT)
+            .eq("round", round)
+            .eq("status", "pending")
+        )
+        .order("desc")
+        .paginate(args.paginationOpts);
 
-    const page: FullApplicantType[] = await Promise.all(
-      result.page.map(async (applicant) => {
-        return await ctx.runQuery(
-          internal.application.applicant.getFullApplicant,
-          {
-            includeInterview: false,
-            applicant,
-          }
-        );
-      })
-    );
+      const page: FullApplicantType[] = await Promise.all(
+        result.page.map(async (applicant) => {
+          return await ctx.runQuery(
+            internal.application.applicant.getFullApplicant,
+            {
+              includeInterview,
+              applicant,
+            }
+          );
+        })
+      );
 
-    return {
-      page,
-      isDone: result.isDone,
-      continueCursor: result.continueCursor,
-    };
-  },
-});
+      return {
+        page,
+        isDone: result.isDone,
+        continueCursor: result.continueCursor,
+      };
+    },
+  });
+};
 
-export const firstRoundApplicants = adminQuery({
-  args: { paginationOpts: paginationOptsValidator },
-  handler: async (ctx, args) => {
-    const result = await ctx.db
-      .query("applicants")
-      .withIndex("by_cycle", (q) =>
-        q
-          .eq("cohort", CURRENT_COHORT)
-          .eq("round", "first_round")
-          .eq("status", "pending")
-      )
-      .order("desc")
-      .paginate(args.paginationOpts);
+export const intakeApplicants = cycleQuery("intake", false);
+export const firstRoundApplicants = cycleQuery("first_round", true);
+export const secondRoundApplicants = cycleQuery("second_round", true);
 
-    const page: FullApplicantType[] = await Promise.all(
-      result.page.map(async (applicant) => {
-        return await ctx.runQuery(
-          internal.application.applicant.getFullApplicant,
-          {
-            includeInterview: true,
-            applicant,
-          }
-        );
-      })
-    );
+const statusQuery = (status: Infer<typeof STATUS_OPTIONS>) => {
+  return adminQuery({
+    args: { paginationOpts: paginationOptsValidator },
+    handler: async (ctx, args) => {
+      const result = await ctx.db
+        .query("applicants")
+        .withIndex("by_status", (q) =>
+          q.eq("cohort", CURRENT_COHORT).eq("status", status)
+        )
+        .order("desc")
+        .paginate(args.paginationOpts);
 
-    return {
-      page,
-      isDone: result.isDone,
-      continueCursor: result.continueCursor,
-    };
-  },
-});
+      const page: FullApplicantType[] = await Promise.all(
+        result.page.map(async (applicant) => {
+          return await ctx.runQuery(
+            internal.application.applicant.getFullApplicant,
+            {
+              includeInterview: true,
+              applicant,
+            }
+          );
+        })
+      );
 
-export const secondRoundApplicants = adminQuery({
-  args: { paginationOpts: paginationOptsValidator },
-  handler: async (ctx, args) => {
-    const result = await ctx.db
-      .query("applicants")
-      .withIndex("by_cycle", (q) =>
-        q
-          .eq("cohort", CURRENT_COHORT)
-          .eq("round", "second_round")
-          .eq("status", "pending")
-      )
-      .order("desc")
-      .paginate(args.paginationOpts);
+      return {
+        page,
+        isDone: result.isDone,
+        continueCursor: result.continueCursor,
+      };
+    },
+  });
+};
 
-    const page: FullApplicantType[] = await Promise.all(
-      result.page.map(async (applicant) => {
-        return await ctx.runQuery(
-          internal.application.applicant.getFullApplicant,
-          {
-            includeInterview: true,
-            applicant,
-          }
-        );
-      })
-    );
+export const acceptedApplicants = statusQuery("accepted");
+export const rejectedApplicants = statusQuery("rejected");
+export const waitlistedApplicants = statusQuery("waitlisted");
 
-    return {
-      page,
-      isDone: result.isDone,
-      continueCursor: result.continueCursor,
-    };
-  },
-});
+// NOTE MUTATIONS
 
 export const createNote = adminMutation({
   args: {

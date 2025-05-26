@@ -1,33 +1,28 @@
 "use client";
 
 import { api } from "@residency/api";
-import type { FullApplicantType, InterviewGrade } from "@residency/api";
+import type { FullApplicantType } from "@residency/api";
 import { usePaginatedQuery } from "convex/react";
 import {
   BackgroundSection,
   LinksSection,
   MissionSection,
 } from "./section-content";
-import { GradesSection } from "./section-grade";
+import { GradesSection } from "./section-interview";
 import {
   FooterWrapper,
   CardWrapper,
-  InterviewWrapper,
   ListWrapper,
   AdditionalWrapper,
-} from "./card-wrappers";
-import { HeaderSection } from "./section-header";
+} from "./wrappers";
+import { PendingHeaderSection } from "./section-header";
 import { NotesSection } from "./section-notes";
+import { PAGINATION_CONFIG } from "../config";
 
 const useFirstRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
     api.application.admin.firstRoundApplicants,
-    {
-      paginationOpts: {
-        numItems: 10,
-      },
-    },
-    { initialNumItems: 10 }
+    ...PAGINATION_CONFIG
   );
 
   return { results, status, loadMore };
@@ -49,25 +44,14 @@ interface FirstRoundCardProps {
   result: FullApplicantType;
 }
 const FirstRoundCard = ({ result }: FirstRoundCardProps) => {
-  const { applicant, interview, notes } = result;
+  const { applicant, notes, interview } = result;
 
   return (
     <CardWrapper>
-      <HeaderSection applicant={applicant} />
-      <InterviewSection interview={interview} />
+      <PendingHeaderSection applicant={applicant} />
+      <GradesSection interview={interview} />
       <AdditionalSection applicant={applicant} notes={notes} />
     </CardWrapper>
-  );
-};
-
-interface InterviewSectionProps {
-  interview: FullApplicantType["interview"];
-}
-const InterviewSection = ({ interview }: InterviewSectionProps) => {
-  return (
-    <InterviewWrapper interview={interview}>
-      <GradesSection interview={interview as InterviewGrade} />
-    </InterviewWrapper>
   );
 };
 

@@ -14,10 +14,7 @@ import { Personas, Sessions } from "./model/sessions";
 
 export default defineSchema({
   applicants: Applicants.table
-    .index("by_status", ["status"])
-    .index("by_cohort", ["cohort"])
-    .index("by_ranking", ["ranking"])
-    .index("by_userId", ["userId"])
+    .index("by_status", ["cohort", "status"])
     .index("by_cycle", ["cohort", "round", "status"]),
   basicInfo: BasicInfo.table,
   missions: Missions.table,

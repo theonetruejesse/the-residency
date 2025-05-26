@@ -1,33 +1,28 @@
 "use client";
 
 import { api } from "@residency/api";
-import type { FullApplicantType, InterviewGrade } from "@residency/api";
+import type { FullApplicantType } from "@residency/api";
 import { usePaginatedQuery } from "convex/react";
 import {
   BackgroundSection,
   LinksSection,
   MissionSection,
 } from "./section-content";
-import { HeaderSection } from "./section-header";
+import { PendingHeaderSection } from "./section-header";
 import {
   FooterWrapper,
   CardWrapper,
-  InterviewWrapper,
   ListWrapper,
   AdditionalWrapper,
-} from "./card-wrappers";
-import { ScoreTable } from "./section-grade";
+} from "./wrappers";
+import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
+import { PAGINATION_CONFIG } from "../config";
 
 const useSecondRoundList = () => {
   const { results, status, loadMore } = usePaginatedQuery(
     api.application.admin.secondRoundApplicants,
-    {
-      paginationOpts: {
-        numItems: 10,
-      },
-    },
-    { initialNumItems: 10 }
+    ...PAGINATION_CONFIG
   );
 
   return { results, status, loadMore };
@@ -53,7 +48,7 @@ const SecondRoundCard = ({ result }: SecondRoundCardProps) => {
 
   return (
     <CardWrapper>
-      <HeaderSection applicant={applicant} />
+      <PendingHeaderSection applicant={applicant} />
       <NotesSection notes={notes} applicantId={applicant.id} />
       <AdditionalSection result={result} />
     </CardWrapper>
@@ -74,16 +69,3 @@ const AdditionalSection = ({ result }: SecondRoundCardProps) => {
     </FooterWrapper>
   );
 };
-
-interface ScoreSectionProps {
-  interview: FullApplicantType["interview"];
-}
-const ScoreSection = ({ interview }: ScoreSectionProps) => {
-  return (
-    <InterviewWrapper interview={interview}>
-      <ScoreTable interview={interview as InterviewGrade} />
-    </InterviewWrapper>
-  );
-};
-
-// const ScoreSection;
