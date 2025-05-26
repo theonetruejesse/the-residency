@@ -1,8 +1,6 @@
 "use client";
 
-import { api } from "@residency/api";
 import type { FullApplicantType, Id } from "@residency/api";
-import { usePaginatedQuery } from "convex/react";
 import {
   BackgroundSection,
   LinksSection,
@@ -16,19 +14,12 @@ import {
   AdditionalWrapper,
 } from "./helper-wrappers";
 import { NotesSection } from "./section-notes";
-import { PAGINATION_CONFIG } from "../config";
-
-const useIntakeList = () => {
-  const { results, status, loadMore } = usePaginatedQuery(
-    api.application.admin.intakeApplicants,
-    ...PAGINATION_CONFIG
-  );
-
-  return { results, status, loadMore };
-};
+import { useApplicantStore } from "./query-provider";
 
 export const ListIntake = () => {
-  const { results, status, loadMore } = useIntakeList();
+  const { results, status, loadMore } = useApplicantStore(
+    (state) => state.queries.intake
+  );
 
   return (
     <ListWrapper status={status} loadMore={loadMore} title="intake round">

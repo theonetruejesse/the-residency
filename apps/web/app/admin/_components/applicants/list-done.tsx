@@ -1,7 +1,8 @@
 "use client";
 
 import { usePaginatedQuery } from "convex/react";
-import { api, FullApplicantType } from "@residency/api";
+import { api } from "@residency/api";
+import type { FullApplicantType } from "@residency/api";
 import {
   AdditionalWrapper,
   CardWrapper,
@@ -40,13 +41,11 @@ const useDone = () => {
 export const DisplayDone = () => {
   const { waitlisted, rejected, accepted } = useDone();
   return (
-    <div>
-      <KanbanWrapper>
-        <ListDone query={accepted} title="accepted" />
-        <ListDone query={waitlisted} title="waitlisted" />
-        <ListDone query={rejected} title="rejected" />
-      </KanbanWrapper>
-    </div>
+    <KanbanWrapper>
+      <ListDone query={accepted} title="accepted" />
+      <ListDone query={waitlisted} title="waitlisted" />
+      <ListDone query={rejected} title="rejected" />
+    </KanbanWrapper>
   );
 };
 

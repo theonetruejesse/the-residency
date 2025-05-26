@@ -1,8 +1,6 @@
 "use client";
 
-import { api } from "@residency/api";
 import type { FullApplicantType } from "@residency/api";
-import { usePaginatedQuery } from "convex/react";
 import {
   BackgroundSection,
   LinksSection,
@@ -17,19 +15,12 @@ import {
 } from "./helper-wrappers";
 import { PendingHeaderSection } from "./section-header";
 import { NotesSection } from "./section-notes";
-import { PAGINATION_CONFIG } from "../config";
-
-const useFirstRoundList = () => {
-  const { results, status, loadMore } = usePaginatedQuery(
-    api.application.admin.firstRoundApplicants,
-    ...PAGINATION_CONFIG
-  );
-
-  return { results, status, loadMore };
-};
+import { useApplicantStore } from "./query-provider";
 
 export const ListFirstRound = () => {
-  const { results, status, loadMore } = useFirstRoundList();
+  const { results, status, loadMore } = useApplicantStore(
+    (state) => state.queries.firstRound
+  );
 
   return (
     <ListWrapper status={status} loadMore={loadMore} title="first round">

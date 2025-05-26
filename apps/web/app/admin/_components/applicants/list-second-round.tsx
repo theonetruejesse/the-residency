@@ -17,19 +17,12 @@ import {
 } from "./helper-wrappers";
 import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
-import { PAGINATION_CONFIG } from "../config";
-
-const useSecondRoundList = () => {
-  const { results, status, loadMore } = usePaginatedQuery(
-    api.application.admin.secondRoundApplicants,
-    ...PAGINATION_CONFIG
-  );
-
-  return { results, status, loadMore };
-};
+import { useApplicantStore } from "./query-provider";
 
 export const ListSecondRound = () => {
-  const { results, status, loadMore } = useSecondRoundList();
+  const { results, status, loadMore } = useApplicantStore(
+    (state) => state.queries.secondRound
+  );
 
   return (
     <ListWrapper status={status} loadMore={loadMore} title="second round">
