@@ -1,10 +1,11 @@
 import { createStore } from "zustand";
 import type { FullApplicantType } from "@residency/api";
 
-export type ConvexQueryResult = {
+export type QueryResult = {
   results: FullApplicantType[];
   status: "LoadingFirstPage" | "CanLoadMore" | "Exhausted" | "LoadingMore";
   loadMore: (numItems: number) => void;
+  totalCount: number;
 };
 
 export type QueryType =
@@ -17,8 +18,8 @@ export type QueryType =
 
 export interface ApplicantQueryStore {
   // Query data
-  queries: Record<QueryType, ConvexQueryResult>;
-  setQueryResults: (queryType: QueryType, result: ConvexQueryResult) => void;
+  queries: Record<QueryType, QueryResult>;
+  setQueryResults: (queryType: QueryType, result: QueryResult) => void;
 
   // Search state
   searchTerm: string;
@@ -26,10 +27,11 @@ export interface ApplicantQueryStore {
   clearSearch: () => void;
 }
 
-const initialQueryState: ConvexQueryResult = {
+const initialQueryState: QueryResult = {
   results: [],
   status: "Exhausted",
   loadMore: () => {},
+  totalCount: 0,
 };
 
 export const createApplicantQueryStore = () =>

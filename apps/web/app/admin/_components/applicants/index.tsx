@@ -13,17 +13,14 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@residency/ui/components/tabs";
-import { KanbanWrapper } from "./helper-wrappers";
-import { DisplayDone } from "./list-done";
-import { ListFirstRound } from "./list-first-round";
-import { ListIntake } from "./list-intake";
-import { ListSecondRound } from "./list-second-round";
+import { DisplayDone } from "./display-done";
 import { ApplicantQueryProvider } from "./query-provider";
 import { useState } from "react";
 import { Button } from "@residency/ui/components/button";
 import { Input } from "@residency/ui/components/input";
 import { Search } from "lucide-react";
-import { useApplicantStore } from "./query-provider";
+import { useSearch } from "./query-hooks";
+import { DisplayPending } from "./display-pending";
 
 export const ListApplicants = () => {
   return (
@@ -52,23 +49,6 @@ const ViewApplicants = () => {
   );
 };
 
-const ViewContent = () => {
-  return (
-    <>
-      <TabsContent value="pending">
-        <KanbanWrapper>
-          <ListIntake />
-          <ListFirstRound />
-          <ListSecondRound />
-        </KanbanWrapper>
-      </TabsContent>
-      <TabsContent value="done">
-        <DisplayDone />
-      </TabsContent>
-    </>
-  );
-};
-
 const ViewHeader = () => {
   return (
     <div className="flex flex-row items-center gap-2 w-full mb-5">
@@ -81,13 +61,22 @@ const ViewHeader = () => {
   );
 };
 
+const ViewContent = () => {
+  return (
+    <>
+      <TabsContent value="pending">
+        <DisplayPending />
+      </TabsContent>
+      <TabsContent value="done">
+        <DisplayDone />
+      </TabsContent>
+    </>
+  );
+};
+
 const SearchBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-
-  // Connect to the store for search state
-  const searchTerm = useApplicantStore((state) => state.searchTerm);
-  const setSearchTerm = useApplicantStore((state) => state.setSearchTerm);
-  const clearSearch = useApplicantStore((state) => state.clearSearch);
+  const { searchTerm, setSearchTerm, clearSearch } = useSearch();
 
   const handleToggle = () => {
     setIsOpen(!isOpen);

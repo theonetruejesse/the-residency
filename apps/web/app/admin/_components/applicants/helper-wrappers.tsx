@@ -9,6 +9,12 @@ import { Card, CardContent } from "@residency/ui/components/card";
 import { Separator } from "@residency/ui/components/separator";
 import { Skeleton } from "@residency/ui/components/skeleton";
 
+export const DisplayWrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="flex flex-row gap-4 overflow-x-auto pb-4">{children}</div>
+  );
+};
+
 export const CardWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <Card className="w-full py-6">
@@ -16,12 +22,6 @@ export const CardWrapper = ({ children }: { children: React.ReactNode }) => {
         {children}
       </CardContent>
     </Card>
-  );
-};
-
-export const KanbanWrapper = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex flex-row gap-4 overflow-x-auto pb-4">{children}</div>
   );
 };
 

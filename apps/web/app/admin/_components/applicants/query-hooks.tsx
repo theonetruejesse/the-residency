@@ -1,38 +1,41 @@
-import { api, type FullApplicantType } from "@residency/api";
-import { useMemo } from "react";
+import { type FullApplicantType } from "@residency/api";
+import { useMemo, useState, useEffect } from "react";
 import { useApplicantStore } from "./query-provider";
 import { QueryType } from "./query-store";
-import { useQuery } from "convex/react";
 
-// a bit inefficent, and desynced but i am done
-type ListTitles =
-  | "intake"
-  | "first_round"
-  | "second_round"
-  | "waitlisted"
-  | "accepted"
-  | "rejected";
+// we debounce the search which helps prevent laggy ui when typing
+export const useSearch = () => {
+  const searchTerm = useApplicantStore((state) => state.searchTerm);
+  const setSearchTerm = useApplicantStore((state) => state.setSearchTerm);
+  const clearSearch = useApplicantStore((state) => state.clearSearch);
 
-export const useListTitle = (opt: ListTitles) => {
-  const count = useQuery(api.application.admin.totalCount, {
-    opt,
-  });
-  const displayCount = count ? ` (${count})` : "";
+  // Local state for immediate input updates
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
 
-  switch (opt) {
-    case "intake":
-      return `intake round${displayCount}`;
-    case "first_round":
-      return `first round${displayCount}`;
-    case "second_round":
-      return `second round${displayCount}`;
-    case "waitlisted":
-      return `waitlisted${displayCount}`;
-    case "accepted":
-      return `accepted${displayCount}`;
-    case "rejected":
-      return `rejected${displayCount}`;
-  }
+  const handleClearSearch = () => {
+    setLocalSearchTerm("");
+    clearSearch();
+  };
+
+  // Debounced effect to update the store search term
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSearchTerm(localSearchTerm);
+    }, 100); // 100ms delay
+
+    return () => clearTimeout(timeoutId);
+  }, [localSearchTerm, setSearchTerm]);
+
+  // Sync local state when store search term is cleared externally
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
+
+  return {
+    searchTerm: localSearchTerm,
+    setSearchTerm: setLocalSearchTerm,
+    clearSearch: handleClearSearch,
+  };
 };
 
 // Filter function moved here to ensure it's stable
@@ -92,7 +95,8 @@ export const useApplicantQuery = (queryType: QueryType) => {
       results: filteredResults,
       status: query.status,
       loadMore: query.loadMore,
+      totalCount: query.totalCount,
     }),
-    [filteredResults, query.status, query.loadMore]
+    [filteredResults, query.status, query.loadMore, query.totalCount]
   );
 };

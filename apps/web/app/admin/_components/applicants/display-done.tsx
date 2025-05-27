@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  KanbanWrapper,
+  DisplayWrapper,
   CardWrapper,
   AdditionalWrapper,
   ListWrapper,
@@ -14,31 +14,27 @@ import {
 import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
 import { DoneHeaderSection } from "./section-header";
-import { useApplicantQuery, useListTitle } from "./query-hooks";
-import { type ConvexQueryResult } from "./query-store";
+import { useApplicantQuery } from "./query-hooks";
+import { type QueryResult } from "./query-store";
 import type { FullApplicantType } from "@residency/api";
 
 export const DisplayDone = () => {
-  const accepted = useApplicantQuery("accepted");
-  const waitlisted = useApplicantQuery("waitlisted");
-  const rejected = useApplicantQuery("rejected");
-
-  const acceptedTitle = useListTitle("accepted");
-  const waitlistedTitle = useListTitle("waitlisted");
-  const rejectedTitle = useListTitle("rejected");
+  const a = useApplicantQuery("accepted");
+  const w = useApplicantQuery("waitlisted");
+  const r = useApplicantQuery("rejected");
 
   return (
-    <KanbanWrapper>
-      <ListDone query={accepted} title={acceptedTitle} />
-      <ListDone query={waitlisted} title={waitlistedTitle} />
-      <ListDone query={rejected} title={rejectedTitle} />
-    </KanbanWrapper>
+    <DisplayWrapper>
+      <ListDone query={a} title={`accepted (${a.totalCount})`} />
+      <ListDone query={w} title={`waitlisted (${w.totalCount})`} />
+      <ListDone query={r} title={`rejected (${r.totalCount})`} />
+    </DisplayWrapper>
   );
 };
 
 interface ListDoneProps {
   title: string;
-  query: ConvexQueryResult;
+  query: QueryResult;
 }
 export const ListDone = ({ query, title }: ListDoneProps) => {
   const { results, status, loadMore } = query;
