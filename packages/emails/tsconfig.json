@@ -1,0 +1,11 @@
+{
+  "extends": "@residency/tsconfig/react-library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@residency/emails/*": ["./emails/*"]
+    }
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}
