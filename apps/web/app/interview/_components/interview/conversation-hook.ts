@@ -2,7 +2,7 @@
 
 import { useConversation } from "@11labs/react";
 import { useCallback } from "react";
-import { InterviewProps } from "./index.js";
+import { InterviewProps } from "./index.jsx";
 import { useAction } from "convex/react";
 import { api } from "@residency/api";
 

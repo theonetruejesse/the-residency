@@ -208,14 +208,3 @@ export const getMaxWaitTime = query({
     return waitTime;
   },
 });
-
-// TODO; fix this later
-// check if userIdString is valid and return userId
-export const userIdFromStr = query({
-  args: { userIdString: v.string() },
-  returns: v.union(v.id("users"), v.null()),
-  handler: async (ctx, args) => {
-    const documentId = ctx.db.normalizeId("users", args.userIdString);
-    return documentId;
-  },
-});
