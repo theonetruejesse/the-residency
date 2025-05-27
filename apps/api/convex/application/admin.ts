@@ -277,6 +277,39 @@ export const acceptedApplicants = statusQuery("accepted");
 export const rejectedApplicants = statusQuery("rejected");
 export const waitlistedApplicants = statusQuery("waitlisted");
 
+// naive implementation; use aggregate if really needed to scale
+export const totalCount = adminQuery({
+  args: {
+    opt: v.union(STATUS_OPTIONS, ROUND_OPTIONS),
+  },
+  handler: async (ctx, args) => {
+    let result = [];
+
+    //not really a high maintainable way but it works
+    const statuses = ["pending", "waitlisted", "accepted", "rejected"];
+    if (statuses.includes(args.opt)) {
+      result = await ctx.db
+        .query("applicants")
+        .withIndex("by_status", (q) =>
+          q
+            .eq("cohort", CURRENT_COHORT)
+            .eq("status", args.opt as Infer<typeof STATUS_OPTIONS>)
+        )
+        .collect();
+    } else {
+      result = await ctx.db
+        .query("applicants")
+        .withIndex("by_cycle", (q) =>
+          q
+            .eq("cohort", CURRENT_COHORT)
+            .eq("round", args.opt as Infer<typeof ROUND_OPTIONS>)
+            .eq("status", "pending")
+        )
+        .collect();
+    }
+    return result.length;
+  },
+});
 // NOTE MUTATIONS
 
 export const createNote = adminMutation({

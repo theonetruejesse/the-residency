@@ -1,8 +1,6 @@
 "use client";
 
-import { api } from "@residency/api";
-import type { FullApplicantType } from "@residency/api";
-import { usePaginatedQuery } from "convex/react";
+import { type FullApplicantType } from "@residency/api";
 import {
   BackgroundSection,
   LinksSection,
@@ -17,13 +15,14 @@ import {
 } from "./helper-wrappers";
 import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
-import { useApplicantQuery } from "./query-provider";
+import { useApplicantQuery, useListTitle } from "./query-hooks";
 
 export const ListSecondRound = () => {
   const { results, status, loadMore } = useApplicantQuery("secondRound");
+  const title = useListTitle("second_round");
 
   return (
-    <ListWrapper status={status} loadMore={loadMore} title="second round">
+    <ListWrapper status={status} loadMore={loadMore} title={title}>
       {results.map((result) => (
         <SecondRoundCard key={result.applicant.id as string} result={result} />
       ))}

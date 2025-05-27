@@ -14,7 +14,7 @@ import {
 import { ScoreSection } from "./section-interview";
 import { NotesSection } from "./section-notes";
 import { DoneHeaderSection } from "./section-header";
-import { useApplicantQuery } from "./query-provider";
+import { useApplicantQuery, useListTitle } from "./query-hooks";
 import { type ConvexQueryResult } from "./query-store";
 import type { FullApplicantType } from "@residency/api";
 
@@ -23,11 +23,15 @@ export const DisplayDone = () => {
   const waitlisted = useApplicantQuery("waitlisted");
   const rejected = useApplicantQuery("rejected");
 
+  const acceptedTitle = useListTitle("accepted");
+  const waitlistedTitle = useListTitle("waitlisted");
+  const rejectedTitle = useListTitle("rejected");
+
   return (
     <KanbanWrapper>
-      <ListDone query={accepted} title="accepted" />
-      <ListDone query={waitlisted} title="waitlisted" />
-      <ListDone query={rejected} title="rejected" />
+      <ListDone query={accepted} title={acceptedTitle} />
+      <ListDone query={waitlisted} title={waitlistedTitle} />
+      <ListDone query={rejected} title={rejectedTitle} />
     </KanbanWrapper>
   );
 };

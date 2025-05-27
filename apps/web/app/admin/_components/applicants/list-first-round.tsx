@@ -15,13 +15,14 @@ import {
 } from "./helper-wrappers";
 import { PendingHeaderSection } from "./section-header";
 import { NotesSection } from "./section-notes";
-import { useApplicantQuery } from "./query-provider";
+import { useApplicantQuery, useListTitle } from "./query-hooks";
 
 export const ListFirstRound = () => {
   const { results, status, loadMore } = useApplicantQuery("firstRound");
+  const title = useListTitle("first_round");
 
   return (
-    <ListWrapper status={status} loadMore={loadMore} title="first round">
+    <ListWrapper status={status} loadMore={loadMore} title={title}>
       {results.map((result) => (
         <FirstRoundCard key={result.applicant.id as string} result={result} />
       ))}

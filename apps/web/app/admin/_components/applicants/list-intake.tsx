@@ -1,6 +1,6 @@
 "use client";
 
-import type { FullApplicantType, Id } from "@residency/api";
+import { api, type FullApplicantType, type Id } from "@residency/api";
 import {
   BackgroundSection,
   LinksSection,
@@ -14,13 +14,14 @@ import {
   AdditionalWrapper,
 } from "./helper-wrappers";
 import { NotesSection } from "./section-notes";
-import { useApplicantQuery } from "./query-provider";
+import { useApplicantQuery, useListTitle } from "./query-hooks";
 
 export const ListIntake = () => {
   const { results, status, loadMore } = useApplicantQuery("intake");
+  const title = useListTitle("intake");
 
   return (
-    <ListWrapper status={status} loadMore={loadMore} title="intake round">
+    <ListWrapper status={status} loadMore={loadMore} title={title}>
       {results.map((result) => (
         <IntakeCard key={result.applicant.id as string} result={result} />
       ))}
