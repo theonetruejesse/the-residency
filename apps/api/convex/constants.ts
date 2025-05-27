@@ -1,6 +1,7 @@
 import { createClerkClient } from "@clerk/backend";
 import { GoogleGenAI } from "@google/genai";
 import { ElevenLabsClient } from "elevenlabs";
+import { Resend } from "resend";
 
 // SETTINGS
 export const CURRENT_COHORT = "SUMMER_2025";
@@ -14,12 +15,15 @@ export const MAX_SESSION_DURATION = 20 * 60 * 1000; // 20 minutes in millisecond
 export const ELEVEN_LABS_AGENT_ID = process.env.ELEVEN_LABS_AGENT_ID; // clean this up later
 export const ELEVEN_LABS_WEBHOOK_SECRET =
   process.env.ELEVEN_LABS_WEBHOOK_SECRET;
-
 const ELEVEN_LABS_API_KEY = process.env.ELEVEN_LABS_API_KEY;
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
 const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY;
 export const CLERK_WEBHOOK_SIGNING_SECRET =
   process.env.CLERK_WEBHOOK_SIGNING_SECRET;
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 if (
   !ELEVEN_LABS_AGENT_ID ||
@@ -27,7 +31,8 @@ if (
   !GEMINI_API_KEY ||
   !ELEVEN_LABS_WEBHOOK_SECRET ||
   !CLERK_SECRET_KEY ||
-  !CLERK_WEBHOOK_SIGNING_SECRET
+  !CLERK_WEBHOOK_SIGNING_SECRET ||
+  !RESEND_API_KEY
 ) {
   throw new Error("Environment variables not configured");
 }
@@ -42,3 +47,5 @@ export const geminiClient = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 export const clerkClient = createClerkClient({
   secretKey: CLERK_SECRET_KEY,
 });
+
+export const resendClient = new Resend(RESEND_API_KEY);
