@@ -1,7 +1,7 @@
 import { Button } from "@react-email/components";
 import { EmailWrapper } from "@residency/emails/components/wrapper";
 
-export default function AcceptanceEmail() {
+export default function ApproveFirstRoundEmail() {
   return (
     <EmailWrapper>
       <Button

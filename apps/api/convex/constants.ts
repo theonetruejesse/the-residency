@@ -10,8 +10,7 @@ export const MAX_CONCURRENT_CALLS = 5;
 // 5 minutes to start, 15 minutes for the call itself; user gets kicked out after this time
 export const MAX_SESSION_DURATION = 20 * 60 * 1000; // 20 minutes in milliseconds
 
-// ENV VARIABLES (+validation); honestly not needed since convex checks for them
-// todo, just remove this
+// ENV VARIABLES (+validation)
 export const ELEVEN_LABS_AGENT_ID = process.env.ELEVEN_LABS_AGENT_ID; // clean this up later
 export const ELEVEN_LABS_WEBHOOK_SECRET =
   process.env.ELEVEN_LABS_WEBHOOK_SECRET;
@@ -25,6 +24,8 @@ export const CLERK_WEBHOOK_SIGNING_SECRET =
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
+export const WEB_URL = process.env.WEB_URL;
+
 if (
   !ELEVEN_LABS_AGENT_ID ||
   !ELEVEN_LABS_API_KEY ||
@@ -32,7 +33,8 @@ if (
   !ELEVEN_LABS_WEBHOOK_SECRET ||
   !CLERK_SECRET_KEY ||
   !CLERK_WEBHOOK_SIGNING_SECRET ||
-  !RESEND_API_KEY
+  !RESEND_API_KEY ||
+  !WEB_URL
 ) {
   throw new Error("Environment variables not configured");
 }

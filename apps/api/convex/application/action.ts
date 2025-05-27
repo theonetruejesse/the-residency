@@ -7,6 +7,7 @@ import {
   ELEVEN_LABS_AGENT_ID,
   elevenClient,
   geminiClient,
+  WEB_URL,
 } from "../constants";
 import { rolePrompt, taglinePrompt } from "../utils/prompts";
 import { Missions } from "../model/applicants";
@@ -75,7 +76,8 @@ export const inviteApplicantUser = internalAction({
 
     const response = await clerkClient.invitations.createInvitation({
       emailAddress: basicInfo.email,
-      // redirectUrl: "https://www.example.com/my-sign-up", // todo, set this if necessary
+      redirectUrl: `${WEB_URL}/signup?r=interview`,
+      ignoreExisting: true,
       publicMetadata: {
         convexUserId: args.userId,
       },
@@ -91,7 +93,8 @@ export const inviteAdmin = internalAction({
   handler: async (ctx, args) => {
     const response = await clerkClient.invitations.createInvitation({
       emailAddress: args.email,
-      // redirectUrl: "https://www.example.com/my-sign-up", // todo, fix this to handle admin redirects
+      redirectUrl: `${WEB_URL}/signup?r=admin`,
+      ignoreExisting: true,
       publicMetadata: {
         role: "admin",
         convexUserId: args.userId,

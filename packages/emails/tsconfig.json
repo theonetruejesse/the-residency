@@ -2,8 +2,10 @@
   "extends": "@residency/tsconfig/react-library.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "paths": {
-      "@residency/emails/*": ["./emails/*"]
+      "@residency/emails/*": ["./*"],
     }
   },
   "include": ["."],

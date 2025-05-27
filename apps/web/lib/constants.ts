@@ -1,6 +1,9 @@
 export const RESIDENCY_URL = "https://www.livetheresidency.com";
 
-export const APP_URL = "http://localhost:3000";
+export const APP_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "https://www.livetheresidency.com"; // todo, change this to the actual url
 
 // uploadthing hosted urls
 // no public cdn since we are not made of money
