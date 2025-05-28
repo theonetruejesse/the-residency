@@ -37,21 +37,21 @@ export default internalMutation({
     // Applicant seeding logic starts here
     console.log("Starting to seed applicant data...");
 
-    const numApplicants = 40;
+    const numApplicants = 30;
     const cohort = "SUMMER_2025" as const;
     const ranking = "neutral" as const;
 
     const rounds = [
-      ...Array(20).fill("intake" as const),
-      ...Array(15).fill("first_round" as const),
-      ...Array(5).fill("second_round" as const),
+      ...Array(10).fill("intake" as const),
+      ...Array(10).fill("first_round" as const),
+      ...Array(10).fill("second_round" as const),
     ];
 
     const statuses = [
-      ...Array(35).fill("pending" as const),
-      ...Array(2).fill("waitlisted" as const),
-      ...Array(2).fill("accepted" as const),
-      ...Array(1).fill("rejected" as const),
+      ...Array(15).fill("pending" as const),
+      ...Array(5).fill("waitlisted" as const),
+      ...Array(5).fill("accepted" as const),
+      ...Array(5).fill("rejected" as const),
     ];
 
     const applicantIds = [];

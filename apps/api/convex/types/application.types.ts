@@ -1,5 +1,3 @@
-// todo, resolve the type issues later
-
 import { Infer } from "convex/values";
 import { Id, Doc } from "../_generated/dataModel";
 import {
@@ -7,6 +5,7 @@ import {
   ROUND_OPTIONS,
   STATUS_OPTIONS,
 } from "../model/applicants";
+import { SESSION_STATUS_OPTIONS } from "../model/sessions";
 
 export type FullApplicantType = {
   applicant: {
@@ -30,4 +29,22 @@ export type Note = Doc<"notes"> & { creator: string };
 export type InterviewGrade = {
   interview: Doc<"interviews">;
   grades: Doc<"grades">[];
+};
+
+export type UserApplicant = {
+  user: Doc<"users">;
+  applicant: Doc<"applicants">;
+};
+
+export type ApplicantProfile = {
+  applicant: Doc<"applicants">;
+  mission: Doc<"missions">;
+};
+
+export type SessionStatus = Infer<typeof SESSION_STATUS_OPTIONS>;
+
+export type WaitListMember = {
+  sessionId: Id<"sessions">;
+  role: string;
+  tagline: string;
 };

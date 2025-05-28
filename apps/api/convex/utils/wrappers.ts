@@ -14,82 +14,54 @@ import {
   customCtx,
 } from "convex-helpers/server/customFunctions";
 import { Doc } from "../_generated/dataModel";
+import { UserApplicant } from "../types/application.types";
 
-// Type for user data matching the Users.table.validator (without system fields)
-
-/**
- * Ensures the user is authenticated and returns their user record (without system fields).
- * Throws if not authenticated or user not found.
- */
-export async function AuthenticationRequired<
+async function AuthenticationRequired<
   C extends ActionCtx | MutationCtx | QueryCtx,
 >({ ctx }: { ctx: C }): Promise<{ user: Doc<"users"> }> {
   const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Not authenticated");
-  }
+  if (!identity) throw new Error("Not authenticated");
+
   const clerkId = identity.subject;
   const user = await ctx.runQuery(internal.application.user.getUserByClerkId, {
     clerkId,
   });
-  if (!user) {
-    throw new Error("Not authorized");
-  }
+  if (!user) throw new Error("Not authorized");
   return { user };
 }
 
-// ADMIN WRAPPERS (authenticated + role check)
-export const adminAction = customAction(
-  action,
-  customCtx(async (ctx) => {
-    const { user } = await AuthenticationRequired({ ctx });
-    if (user.role !== "admin") {
-      throw new Error("Not authorized");
-    }
-    return { user };
-  })
-);
+const adminFn = async (ctx: ActionCtx | MutationCtx | QueryCtx) => {
+  const { user } = await AuthenticationRequired({ ctx });
+  if (user.role !== "admin") throw new Error("Not authorized");
+  return { user };
+};
 
-export const adminMutation = customMutation(
-  mutation,
-  customCtx(async (ctx) => {
-    const { user } = await AuthenticationRequired({ ctx });
-    if (user.role !== "admin") {
-      throw new Error("Not authorized");
-    }
-    return { user };
-  })
-);
+const uaFn = async (
+  ctx: ActionCtx | MutationCtx | QueryCtx
+): Promise<UserApplicant> => {
+  const { user } = await AuthenticationRequired({ ctx });
 
-export const adminQuery = customQuery(
-  query,
-  customCtx(async (ctx) => {
-    const { user } = await AuthenticationRequired({ ctx });
-    if (user.role !== "admin") {
-      throw new Error("Not authorized");
-    }
-    return { user };
-  })
-);
+  const applicant = await ctx.runQuery(
+    internal.application.applicant.getUserApplicant,
+    { userId: user._id }
+  );
+  if (!applicant) throw new Error("Applicant not found");
 
-// USER WRAPPERS (authenticated only)
-export const userAction = customAction(
-  action,
-  customCtx(async (ctx) => {
-    return await AuthenticationRequired({ ctx });
-  })
-);
+  return { user, applicant };
+};
 
-export const userMutation = customMutation(
-  mutation,
-  customCtx(async (ctx) => {
-    return await AuthenticationRequired({ ctx });
-  })
-);
+const userFn = async (
+  ctx: ActionCtx | MutationCtx | QueryCtx
+): Promise<{ user: Doc<"users"> }> => {
+  return await AuthenticationRequired({ ctx });
+};
 
-export const userQuery = customQuery(
-  query,
-  customCtx(async (ctx) => {
-    return await AuthenticationRequired({ ctx });
-  })
-);
+export const adminAction = customAction(action, customCtx(adminFn));
+export const adminMutation = customMutation(mutation, customCtx(adminFn));
+export const adminQuery = customQuery(query, customCtx(adminFn));
+
+export const userApplicantAction = customAction(action, customCtx(uaFn));
+export const userApplicantMutation = customMutation(mutation, customCtx(uaFn));
+export const userApplicantQuery = customQuery(query, customCtx(uaFn));
+
+export const userQuery = customQuery(query, customCtx(userFn));

@@ -1,15 +1,18 @@
 import { v } from "convex/values";
-import { action, mutation, query } from "../_generated/server";
+import { mutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { Id, Doc } from "../_generated/dataModel";
+import { Backgrounds, BasicInfo, Links, Missions } from "../model/applicants";
 import {
-  Applicants,
-  Backgrounds,
-  BasicInfo,
-  Links,
-  Missions,
-} from "../model/applicants";
-import { SESSION_STATUS_OPTIONS, Sessions } from "../model/sessions";
+  userApplicantAction,
+  userApplicantQuery,
+  userQuery,
+} from "../utils/wrappers";
+import {
+  ApplicantProfile,
+  SessionStatus,
+  WaitListMember,
+} from "../types/application.types";
 
 export const submitIntake = mutation({
   args: {
@@ -47,36 +50,32 @@ export const submitIntake = mutation({
 });
 
 // we either join the queue or join the call; this function handles both
-export const handleJoin = action({
-  args: {
-    applicantId: v.id("applicants"),
-  },
-  handler: async (ctx, args) => {
-    const { applicantId } = args;
+export const handleJoin = userApplicantAction({
+  args: {},
+  handler: async (ctx) => {
+    const { applicant } = ctx;
 
-    const userSession = await ctx.runQuery(
+    const session = await ctx.runQuery(
       internal.application.applicant.getApplicantSession,
-      { applicantId }
+      { applicantId: applicant._id }
     );
-    if (!userSession) throw new Error("User session not found");
+    if (!session) throw new Error("Session not found");
 
     await ctx.runAction(internal.application.queue.handleJoin, {
-      sessionId: userSession._id,
+      sessionId: session._id,
     });
   },
 });
 
 // remove user from the active call list or queue
-export const handleLeave = action({
-  args: {
-    applicantId: v.id("applicants"),
-  },
-  handler: async (ctx, args) => {
-    const { applicantId } = args;
+export const handleLeave = userApplicantAction({
+  args: {},
+  handler: async (ctx) => {
+    const { applicant } = ctx;
 
     const session = await ctx.runQuery(
       internal.application.applicant.getApplicantSession,
-      { applicantId }
+      { applicantId: applicant._id }
     );
     if (!session) throw new Error("Session not found");
 
@@ -87,58 +86,26 @@ export const handleLeave = action({
 });
 
 // QUERIES
-export const getProfile = query({
-  args: {
-    applicantId: v.id("applicants"),
-  },
-  returns: v.union(
-    v.object({
-      applicant: Applicants.table.validator,
-      mission: Missions.table.validator,
-      session: Sessions.table.validator,
-    }),
-    v.null()
-  ),
-  handler: async (
-    ctx,
-    args
-  ): Promise<{
-    applicant: Doc<"applicants">;
-    mission: Doc<"missions">;
-    session: Doc<"sessions">;
-  } | null> => {
-    const { applicantId } = args;
-
-    const applicant = await ctx.db.get(applicantId);
-    if (!applicant) throw new Error("Applicant not found");
+export const getProfile = userApplicantQuery({
+  args: {},
+  handler: async (ctx): Promise<ApplicantProfile> => {
+    const { applicant } = ctx;
 
     const mission = await ctx.db.get(applicant.missionId);
     if (!mission) throw new Error("Mission not found");
 
-    const session = await ctx.runQuery(
-      internal.application.applicant.getApplicantSession,
-      { applicantId }
-    );
-    if (!session) throw new Error("Session not found");
-
-    return { applicant, mission, session };
+    return { applicant, mission };
   },
 });
 
-export const getInterviewStatus = query({
-  args: {
-    applicantId: v.id("applicants"),
-  },
-  returns: SESSION_STATUS_OPTIONS,
-  handler: async (
-    ctx,
-    args
-  ): Promise<
-    "active_call" | "in_queue" | "post_interview" | "join_queue" | "join_call"
-  > => {
+export const getSessionStatus = userApplicantQuery({
+  args: {},
+  handler: async (ctx): Promise<SessionStatus> => {
+    const { applicant } = ctx;
+
     const applicantSession = await ctx.runQuery(
       internal.application.applicant.getApplicantSession,
-      { applicantId: args.applicantId }
+      { applicantId: applicant._id }
     );
     if (!applicantSession) throw new Error("Applicant session not found");
 
@@ -156,24 +123,9 @@ export const getInterviewStatus = query({
 });
 
 // returns all waiting list members: sessions, personas
-export const getWaitingList = query({
+export const getWaitingList = userQuery({
   args: {},
-  returns: v.array(
-    v.object({
-      sessionId: v.id("sessions"),
-      role: v.string(),
-      tagline: v.string(),
-    })
-  ),
-  handler: async (
-    ctx
-  ): Promise<
-    {
-      sessionId: Id<"sessions">;
-      role: string;
-      tagline: string;
-    }[]
-  > => {
+  handler: async (ctx): Promise<WaitListMember[]> => {
     const sessions = await ctx.runQuery(
       internal.application.queue.listWaitingSessions
     );
@@ -197,13 +149,21 @@ export const getWaitingList = query({
 });
 
 // returns the max wait time for a session in the queue (in minutes)
-export const getMaxWaitTime = query({
-  args: { sessionId: v.id("sessions") },
+export const getMaxWaitTime = userApplicantQuery({
+  args: {},
   returns: v.number(),
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
+    const { applicant } = ctx;
+
+    const session = await ctx.runQuery(
+      internal.application.applicant.getApplicantSession,
+      { applicantId: applicant._id }
+    );
+    if (!session) throw new Error("Session not found");
+
     const waitTime: number = await ctx.runQuery(
       internal.application.wait.getSessionWaitTime,
-      { sessionId: args.sessionId }
+      { sessionId: session._id }
     );
     return waitTime;
   },
