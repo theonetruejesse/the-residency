@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 // Timer hook
 export const useInterviewTimer = (isConnected: boolean) => {
-  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [timeLeft, setTimeLeft] = useState(10 * 60);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {

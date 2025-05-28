@@ -6,12 +6,15 @@ import { Resend } from "resend";
 // SETTINGS
 export const CURRENT_COHORT = "SUMMER_2025";
 export const MAX_CONCURRENT_CALLS = 5;
-// todo, change this to 15 minutes total
-// 5 minutes to start, 15 minutes for the call itself; user gets kicked out after this time
-export const MAX_SESSION_DURATION = 20 * 60 * 1000; // 20 minutes in milliseconds
 
-// ENV VARIABLES (+validation)
-export const ELEVEN_LABS_AGENT_ID = process.env.ELEVEN_LABS_AGENT_ID; // clean this up later
+// 5 minutes to start, 10 minutes for the call itself; applicant gets kicked out after this time
+const MAX_WAIT = 5 * 60 * 1000; // 5 minutes in milliseconds
+const MAX_CALL = 10 * 60 * 1000; // 10 minutes in milliseconds
+export const MAX_SESSION_DURATION = MAX_CALL + MAX_WAIT;
+
+// ENV VARIABLES (+ validation)
+// todo, clean this up later
+export const ELEVEN_LABS_AGENT_ID = process.env.ELEVEN_LABS_AGENT_ID;
 export const ELEVEN_LABS_WEBHOOK_SECRET =
   process.env.ELEVEN_LABS_WEBHOOK_SECRET;
 const ELEVEN_LABS_API_KEY = process.env.ELEVEN_LABS_API_KEY;

@@ -12,22 +12,12 @@ import {
 import { rolePrompt, taglinePrompt } from "../utils/prompts";
 import { Missions } from "../model/applicants";
 import { internal } from "../_generated/api";
-
-export const generateSessionUrl = internalAction({
-  args: {},
-  returns: v.string(),
-  handler: async (_ctx, _args) => {
-    try {
-      const response = await elevenClient.conversationalAi.getSignedUrl({
-        agent_id: ELEVEN_LABS_AGENT_ID as string,
-      });
-      return response.signed_url;
-    } catch (error) {
-      console.error("Error getting signed URL:", error);
-      throw error;
-    }
-  },
-});
+import {
+  agentCriterias,
+  agentDynamicVariables,
+  agentFirstMessage,
+  agentSystemPrompt,
+} from "../utils/agent";
 
 export const generateContent = internalAction({
   args: {
@@ -102,3 +92,40 @@ export const inviteAdmin = internalAction({
     });
   },
 });
+
+export const generateSessionUrl = internalAction({
+  args: {},
+  returns: v.string(),
+  handler: async (_ctx, _args) => {
+    try {
+      await syncAgentConfig();
+      const response = await elevenClient.conversationalAi.getSignedUrl({
+        agent_id: ELEVEN_LABS_AGENT_ID as string,
+      });
+      return response.signed_url;
+    } catch (error) {
+      console.error("Error getting signed URL:", error);
+      throw error;
+    }
+  },
+});
+
+const syncAgentConfig = async () => {
+  const updatedAgent = await elevenClient.conversationalAi.updateAgent(
+    ELEVEN_LABS_AGENT_ID as string,
+    {
+      platform_settings: {
+        data_collection: agentCriterias,
+      },
+      conversation_config: {
+        agent: {
+          dynamic_variables: agentDynamicVariables,
+          prompt: agentSystemPrompt,
+          first_message: agentFirstMessage,
+        },
+      },
+    }
+  );
+
+  return updatedAgent;
+};
