@@ -1,11 +1,11 @@
 import { Card } from "@residency/ui/components/card";
 
-export const ChaliceChatCopy = (props: { userName: string }) => {
+export const ChaliceChatCopy = (props: { firstName: string }) => {
   return (
-    <Card className="flex flex-col items-center gap-4 glass p-8 mb-4">
+    <Card className="flex flex-col items-center gap-4 glass p-8 mb-4 lowercase">
       <div className="flex flex-col items-center gap-8">
         <h1 className="text-4xl font-bold">
-          Hi {props.userName}! Welcome to Chalice Chat.
+          Hi {props.firstName}! Welcome to Chalice Chat.
         </h1>
 
         <div className="flex flex-col gap-4 text-md text-gray-800">

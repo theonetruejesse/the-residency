@@ -37,7 +37,9 @@ export type UserApplicant = {
 };
 
 export type ApplicantProfile = {
-  applicant: Doc<"applicants">;
+  id: Id<"applicants">;
+  session: Doc<"sessions">;
+  basicInfo: Doc<"basicInfo">;
   mission: Doc<"missions">;
 };
 

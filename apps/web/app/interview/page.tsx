@@ -1,14 +1,60 @@
-import { fetchQuery } from "convex/nextjs";
-import { api } from "@residency/api";
-import { SessionRouter } from "./_components/session-router";
-import { redirect } from "next/navigation";
-import { RESIDENCY_URL } from "@/lib/constants";
-import { PreloadProvider } from "./_components/queries/preload-provider";
+"use client";
 
-export default async function Page() {
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@residency/ui/components/card";
+import { Interview } from "./_components/interview";
+import { JoinRouter } from "./_components/join-router";
+import { api } from "@residency/api";
+import { useQuerySuspense } from "@/hooks/suspense-query";
+import { Suspense } from "react";
+
+export default function Page() {
   return (
-    <PreloadProvider userId={validatedUserId}>
+    <Suspense fallback={<div>Suspense Loading...</div>}>
       <SessionRouter />
-    </PreloadProvider>
+    </Suspense>
   );
 }
+
+const SessionRouter = () => {
+  const applicant = useQuerySuspense(api.application.index.getProfile);
+  const sessionStatus = useQuerySuspense(
+    api.application.index.getSessionStatus
+  );
+
+  switch (sessionStatus) {
+    case "active_call":
+      return <Interview applicant={applicant} />;
+    case "post_interview":
+      return <PostSession firstName={applicant.basicInfo.firstName} />;
+    default:
+      return (
+        <JoinRouter
+          status={sessionStatus}
+          firstName={applicant.basicInfo.firstName}
+        />
+      );
+  }
+};
+
+const PostSession = ({ firstName }: { firstName: string }) => {
+  return (
+    <div className="flex items-center justify-center min-h-svh">
+      <Card className="w-[600px] glass">
+        <CardHeader>
+          <CardTitle className="text-2xl">Thanks for Interviewing!</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-lg">
+            hi {firstName}, we&apos;re working on evaluating your interview.
+            we&apos;ll email you with the results as soon as possible.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

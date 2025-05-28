@@ -1,16 +1,15 @@
 import { api } from "@residency/api";
 import { useAction } from "convex/react";
 import { ChaliceChatCopy } from "./assets/chat-copy";
-import { useApplicant } from "./queries/preload-hooks";
 import { WaitingList } from "./waiting-list";
 import { ActionButton } from "@/components/action-button";
 
 interface JoinRouterProps {
   status: "in_queue" | "join_queue" | "join_call";
-  userName: string;
+  firstName: string;
 }
 
-export const JoinRouter = ({ status, userName }: JoinRouterProps) => {
+export const JoinRouter = ({ status, firstName }: JoinRouterProps) => {
   let StatusComponent = null;
   switch (status) {
     case "join_call":
@@ -23,7 +22,7 @@ export const JoinRouter = ({ status, userName }: JoinRouterProps) => {
   return (
     <div className="flex flex-col items-center justify-center w-full">
       <div className="w-[900px] mt-15">
-        <ChaliceChatCopy userName={userName} />
+        <ChaliceChatCopy firstName={firstName} />
         {StatusComponent}
       </div>
     </div>
@@ -31,15 +30,12 @@ export const JoinRouter = ({ status, userName }: JoinRouterProps) => {
 };
 
 const JoinCallButton = () => {
-  const applicant = useApplicant();
-  const handleJoin = useAction(api.user.application.handleJoin);
+  const handleJoin = useAction(api.application.index.handleJoin);
   return (
     <ActionButton
-      handleClick={() => {
-        handleJoin({ userId: applicant.user._id });
-      }}
-      actionText="Join Interview"
-      loadingText="Joining..."
+      handleClick={async () => await handleJoin()}
+      actionText="join interview"
+      loadingText="joining..."
     />
   );
 };

@@ -91,16 +91,16 @@ function ConfirmationDialog({
         <DialogHeader>
           <DialogTitle>End Interview Early?</DialogTitle>
           <DialogDescription>
-            There are still {formatTime(timeLeft)} left in this interview. Are
+            there are still {formatTime(timeLeft)} left in this interview. are
             you sure you want to end it now?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex flex-row justify-end gap-2 sm:justify-end">
           <Button variant="outline" onClick={onCancel}>
-            Continue Interview
+            continue
           </Button>
           <Button variant="destructive" onClick={async () => await onConfirm()}>
-            End Interview
+            end
           </Button>
         </DialogFooter>
       </DialogContent>

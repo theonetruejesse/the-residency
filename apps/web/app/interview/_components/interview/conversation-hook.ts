@@ -2,20 +2,31 @@
 
 import { useConversation } from "@11labs/react";
 import { useCallback } from "react";
-import { InterviewProps } from "./index.jsx";
 import { useAction } from "convex/react";
 import { api } from "@residency/api";
 
-const sessionConfig = (props: InterviewProps) => {
-  const { session, user, mission } = props.applicant;
+interface SessionConfigProps {
+  name: string;
+  id: string;
+  interest: string;
+  accomplishment: string;
+  sessionUrl: string;
+}
+
+const sessionConfig = ({
+  name,
+  id,
+  interest,
+  accomplishment,
+  sessionUrl,
+}: SessionConfigProps) => {
   return {
-    signedUrl: session.sessionUrl!, // at this point, sessionUrl should be non-null
+    signedUrl: sessionUrl,
     dynamicVariables: {
-      user_name: user.firstName,
-      user_id: user._id, // for the webhook
-      user_interest: mission.interest,
-      user_accomplishment: mission.accomplishment,
-      first_question: session.firstQuestion,
+      applicant_name: name,
+      applicant_id: id,
+      applicant_interest: interest,
+      applicant_accomplishment: accomplishment,
     },
   };
 };
@@ -30,7 +41,7 @@ async function requestMicrophonePermission() {
   }
 }
 
-export function useConvo(props: InterviewProps) {
+export function useConvo(props: SessionConfigProps) {
   const conversation = useConversation({
     onConnect: () => {
       console.log("connected");
@@ -47,6 +58,12 @@ export function useConvo(props: InterviewProps) {
     },
   });
 
+  const leave = useAction(api.application.index.handleLeave);
+  const stopConversation = useCallback(async () => {
+    await leave();
+    await conversation.endSession();
+  }, [conversation, leave]);
+
   const startConversation = async () => {
     const hasPermission = await requestMicrophonePermission();
     if (!hasPermission) {
@@ -62,12 +79,6 @@ export function useConvo(props: InterviewProps) {
       alert("Failed to start conversation. Please check the console.");
     }
   };
-  const leave = useAction(api.user.application.handleLeave);
-  const userId = props.applicant.user._id;
-  const stopConversation = useCallback(async () => {
-    await leave({ userId });
-    await conversation.endSession();
-  }, [conversation, userId, leave]);
 
   return {
     status: conversation.status,

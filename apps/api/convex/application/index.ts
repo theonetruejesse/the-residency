@@ -91,10 +91,24 @@ export const getProfile = userApplicantQuery({
   handler: async (ctx): Promise<ApplicantProfile> => {
     const { applicant } = ctx;
 
-    const mission = await ctx.db.get(applicant.missionId);
-    if (!mission) throw new Error("Mission not found");
+    const basicInfo = await ctx.db.get(applicant.basicInfoId);
+    if (!basicInfo)
+      throw new Error(
+        `BasicInfo not found for applicant ${applicant.basicInfoId}`
+      );
 
-    return { applicant, mission };
+    const mission = await ctx.db.get(applicant.missionId);
+    if (!mission)
+      throw new Error(`Mission not found for applicant ${applicant.missionId}`);
+
+    const session = await ctx.runQuery(
+      internal.application.applicant.getApplicantSession,
+      { applicantId: applicant._id }
+    );
+    if (!session)
+      throw new Error(`Session not found for applicant ${applicant._id}`);
+
+    return { id: applicant._id, basicInfo, mission, session };
   },
 });
 

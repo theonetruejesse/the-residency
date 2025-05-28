@@ -5,7 +5,7 @@ import "../position.css";
 import * as React from "react";
 import { Card } from "@residency/ui/components/card";
 import { useConvo } from "./conversation-hook";
-import { api, Doc, Id } from "@residency/api";
+import { api, type ApplicantProfile } from "@residency/api";
 import { Chalice } from "../assets/chalice";
 import { BackgroundWave } from "../assets/wave-background";
 import { InterviewButton } from "./interview-button";
@@ -13,20 +13,21 @@ import { useAction } from "convex/react";
 import { useEffect, useRef } from "react";
 
 export interface InterviewProps {
-  applicant: {
-    user: Doc<"users">;
-    mission: Doc<"missions">;
-    session: Doc<"sessions">;
-  };
+  applicant: ApplicantProfile;
 }
 export function Interview(props: InterviewProps) {
+  const { id, basicInfo, mission, session } = props.applicant;
+
   const { status, isSpeaking, startConversation, stopConversation } = useConvo({
-    ...props,
+    id: id as string,
+    name: basicInfo.firstName,
+    interest: mission.interest,
+    accomplishment: mission.accomplishment,
+    sessionUrl: session.sessionUrl!, // at this point, sessionUrl should be non-null
   });
 
   const isConnected = status === "connected";
-
-  useDetectLeave(isConnected, props.applicant.user._id);
+  useDetectLeave(isConnected);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 flex flex-col justify-center items-center interview-container">
@@ -49,17 +50,17 @@ export function Interview(props: InterviewProps) {
   );
 }
 
-const useDetectLeave = (isConnected: boolean, userId: Id<"users">) => {
-  const leave = useAction(api.user.application.handleLeave);
+const useDetectLeave = (isConnected: boolean) => {
+  const leave = useAction(api.application.index.handleLeave);
   const wasConnectedRef = useRef(false);
 
   useEffect(() => {
     // If we were connected before but not anymore, trigger the leave action
     if (wasConnectedRef.current && !isConnected) {
-      leave({ userId });
+      leave();
     }
 
     // Track connection state for next change
     wasConnectedRef.current = isConnected;
-  }, [isConnected, userId, leave]);
+  }, [isConnected, leave]);
 };
