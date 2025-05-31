@@ -52,9 +52,7 @@ export const handleJoin = internalAction({
   handler: async (ctx, { sessionId }) => {
     const session = await ctx.runQuery(
       internal.application.session.getSession,
-      {
-        sessionId,
-      }
+      { sessionId }
     );
     if (!session) throw new Error("Session not found");
     if (session.sessionUrl || session.inCall) return null; // shouldnt handle queue after interview

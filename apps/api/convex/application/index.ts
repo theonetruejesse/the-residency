@@ -86,32 +86,6 @@ export const handleLeave = userApplicantAction({
 });
 
 // QUERIES
-export const getProfile = userApplicantQuery({
-  args: {},
-  handler: async (ctx): Promise<ApplicantProfile> => {
-    const { applicant } = ctx;
-
-    const basicInfo = await ctx.db.get(applicant.basicInfoId);
-    if (!basicInfo)
-      throw new Error(
-        `BasicInfo not found for applicant ${applicant.basicInfoId}`
-      );
-
-    const mission = await ctx.db.get(applicant.missionId);
-    if (!mission)
-      throw new Error(`Mission not found for applicant ${applicant.missionId}`);
-
-    const session = await ctx.runQuery(
-      internal.application.applicant.getApplicantSession,
-      { applicantId: applicant._id }
-    );
-    if (!session)
-      throw new Error(`Session not found for applicant ${applicant._id}`);
-
-    return { id: applicant._id, basicInfo, mission, session };
-  },
-});
-
 export const getSessionStatus = userApplicantQuery({
   args: {},
   handler: async (ctx): Promise<SessionStatus> => {
@@ -180,5 +154,31 @@ export const getMaxWaitTime = userApplicantQuery({
       { sessionId: session._id }
     );
     return waitTime;
+  },
+});
+
+export const getProfile = userApplicantQuery({
+  args: {},
+  handler: async (ctx): Promise<ApplicantProfile> => {
+    const { applicant } = ctx;
+
+    const basicInfo = await ctx.db.get(applicant.basicInfoId);
+    if (!basicInfo)
+      throw new Error(
+        `BasicInfo not found for applicant ${applicant.basicInfoId}`
+      );
+
+    const mission = await ctx.db.get(applicant.missionId);
+    if (!mission)
+      throw new Error(`Mission not found for applicant ${applicant.missionId}`);
+
+    const session = await ctx.runQuery(
+      internal.application.applicant.getApplicantSession,
+      { applicantId: applicant._id }
+    );
+    if (!session)
+      throw new Error(`Session not found for applicant ${applicant._id}`);
+
+    return { id: applicant._id, basicInfo, mission, session };
   },
 });
