@@ -7,7 +7,6 @@ import {
 } from "../_generated/server";
 import { MAX_CONCURRENT_CALLS, MAX_SESSION_DURATION } from "../constants";
 import { Doc } from "../_generated/dataModel";
-import { Sessions } from "../model/sessions";
 
 // --- Queries ---
 
@@ -16,7 +15,7 @@ export const listActiveCalls = internalQuery({
   handler: async (ctx): Promise<Doc<"sessions">[]> => {
     return await ctx.db
       .query("sessions")
-      .withIndex("by_inCall_scheduledEndTime", (q) => q.eq("inCall", true))
+      .withIndex("by_inCall", (q) => q.eq("inCall", true))
       .order("asc")
       .collect();
   },
@@ -92,7 +91,6 @@ export const joinQueue = internalMutation({
 export const joinCall = internalAction({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, { sessionId }) => {
-    console.log(`joinCall invoked for session ${sessionId}`);
     try {
       // schedule the end of the call
       const scheduledEndTime = Date.now() + MAX_SESSION_DURATION;
@@ -146,8 +144,6 @@ export const scheduledLeave = internalAction({
     sessionId: v.id("sessions"),
   },
   handler: async (ctx, { sessionId }) => {
-    console.log(`scheduledLeave invoked for session ${sessionId}`);
-
     await ctx.runMutation(internal.application.queue.leaveQueue, {
       sessionId,
     });
@@ -161,8 +157,6 @@ export const handleLeave = internalAction({
     sessionId: v.id("sessions"),
   },
   handler: async (ctx, { sessionId }) => {
-    console.log(`handleLeave (manual) invoked for session ${sessionId}`);
-
     const session = await ctx.runQuery(
       internal.application.session.getSession,
       { sessionId }

@@ -8,7 +8,6 @@ interface JoinRouterProps {
   status: "in_queue" | "join_queue" | "join_call";
   firstName: string;
 }
-
 export const JoinRouter = ({ status, firstName }: JoinRouterProps) => {
   let StatusComponent = null;
   switch (status) {

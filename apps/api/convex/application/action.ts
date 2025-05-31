@@ -69,6 +69,7 @@ export const inviteApplicantUser = internalAction({
       redirectUrl: `${WEB_URL}/signup?r=interview`,
       ignoreExisting: true,
       publicMetadata: {
+        role: "applicant",
         convexUserId: args.userId,
       },
     });

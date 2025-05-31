@@ -28,7 +28,7 @@ export default defineSchema({
   sessions: Sessions.table
     .index("by_applicantId", ["applicantId"])
     .index("by_waiting_queuedAt", ["waiting", "queuedAt"])
-    .index("by_inCall_scheduledEndTime", ["inCall", "scheduledEndTime"]),
+    .index("by_inCall", ["inCall"]),
   personas: Personas.table.index("by_sessionId", ["sessionId"]),
   interviews: Interviews.table.index("by_applicantId", ["applicantId"]),
   grades: Grades.table.index("by_interviewId", ["interviewId"]),
