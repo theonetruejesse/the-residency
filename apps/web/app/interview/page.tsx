@@ -11,10 +11,11 @@ import { JoinRouter } from "./_components/join-router";
 import { api } from "@residency/api";
 import { useQuerySuspense } from "@/hooks/suspense-query";
 import { Suspense } from "react";
+import { InterviewSkeleton } from "./_components/interview-skeleton";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>Suspense Loading...</div>}>
+    <Suspense fallback={<InterviewSkeleton />}>
       <SessionRouter />
     </Suspense>
   );
@@ -43,7 +44,7 @@ const SessionRouter = () => {
 
 const PostSession = ({ firstName }: { firstName: string }) => {
   return (
-    <div className="flex items-center justify-center min-h-svh">
+    <div className="flex items-center justify-center min-h-svh pb-15">
       <Card className="w-[600px] glass">
         <CardHeader>
           <CardTitle className="text-2xl">Thanks for Interviewing!</CardTitle>

@@ -20,7 +20,7 @@ export const JoinRouter = ({ status, firstName }: JoinRouterProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center w-full">
-      <div className="w-[900px] mt-15">
+      <div className="w-[900px]">
         <ChaliceChatCopy firstName={firstName} />
         {StatusComponent}
       </div>

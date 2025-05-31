@@ -1,6 +1,7 @@
 "use client";
 
 import { Authenticated, AuthLoading } from "convex/react";
+import { InterviewSkeleton } from "./_components/interview-skeleton";
 
 interface InterviewLayoutProps {
   children: React.ReactNode;
@@ -8,10 +9,10 @@ interface InterviewLayoutProps {
 
 export default function InterviewLayout({ children }: InterviewLayoutProps) {
   return (
-    <div>
+    <div className="pt-15 lowercase">
       <Authenticated>{children}</Authenticated>
       <AuthLoading>
-        <p>loading...</p>
+        <InterviewSkeleton />
       </AuthLoading>
     </div>
   );
