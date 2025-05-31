@@ -11,11 +11,11 @@ import { JoinRouter } from "./_components/join-router";
 import { api } from "@residency/api";
 import { useQuerySuspense } from "@/hooks/suspense-query";
 import { Suspense } from "react";
-import { InterviewSkeleton } from "./_components/interview-skeleton";
+import { LoadingSkeleton } from "./_components/loading-skeleton";
 
 export default function Page() {
   return (
-    <Suspense fallback={<InterviewSkeleton />}>
+    <Suspense fallback={<LoadingSkeleton />}>
       <SessionRouter />
     </Suspense>
   );

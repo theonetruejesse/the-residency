@@ -46,7 +46,7 @@ const ChalicePotion = (props: ChaliceProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: potionOpacity }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.7 }}
+          transition={{ duration: 1.7, ease: "easeInOut" }}
         >
           <svg
             viewBox="0 0 122 20"
