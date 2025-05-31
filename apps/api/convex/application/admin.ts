@@ -19,6 +19,12 @@ export const rejectApplicant = adminAction({
     applicantId: v.id("applicants"),
   },
   handler: async (ctx, args) => {
+    const { basicInfo } = await ctx.runQuery(
+      internal.application.applicant.getApplicantBasicInfo,
+      { applicantId: args.applicantId }
+    );
+    if (!basicInfo) throw new Error("Basic info not found");
+
     await ctx.runMutation(
       internal.application.applicant.updateApplicantStatus,
       {
@@ -26,6 +32,12 @@ export const rejectApplicant = adminAction({
         status: "rejected",
       }
     );
+
+    await ctx.runAction(internal.application.emails.sendEmail, {
+      email: basicInfo.email,
+      name: basicInfo.firstName,
+      emailType: "rejection",
+    });
   },
 });
 
@@ -34,6 +46,12 @@ export const waitlistApplicant = adminAction({
     applicantId: v.id("applicants"),
   },
   handler: async (ctx, args) => {
+    const { basicInfo } = await ctx.runQuery(
+      internal.application.applicant.getApplicantBasicInfo,
+      { applicantId: args.applicantId }
+    );
+    if (!basicInfo) throw new Error("Basic info not found");
+
     await ctx.runMutation(
       internal.application.applicant.updateApplicantStatus,
       {
@@ -41,6 +59,12 @@ export const waitlistApplicant = adminAction({
         status: "waitlisted",
       }
     );
+
+    await ctx.runAction(internal.application.emails.sendEmail, {
+      email: basicInfo.email,
+      name: basicInfo.firstName,
+      emailType: "waitlist",
+    });
   },
 });
 
@@ -50,23 +74,27 @@ export const approveRound = adminAction({
   },
   handler: async (ctx, args) => {
     const { applicantId } = args;
-    const applicant = await ctx.runQuery(
-      internal.application.applicant.getApplicant,
+    const { applicant, basicInfo } = await ctx.runQuery(
+      internal.application.applicant.getApplicantBasicInfo,
       { applicantId }
     );
-    if (!applicant) throw new Error("Applicant not found");
 
     const { round } = applicant;
+    const { email, firstName } = basicInfo;
 
     switch (round) {
       case "intake":
         await ctx.runAction(internal.application.admin.approveIntake, {
           applicantId: args.applicantId,
+          name: firstName,
+          email,
         });
         break;
       case "first_round":
         await ctx.runAction(internal.application.admin.approveFirstRound, {
           applicantId: args.applicantId,
+          name: firstName,
+          email,
         });
         break;
       case "second_round":
@@ -78,22 +106,11 @@ export const approveRound = adminAction({
   },
 });
 
-export const setApplicantRanking = adminMutation({
-  args: {
-    applicantId: v.id("applicants"),
-    ranking: RANKING_OPTIONS,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.applicantId, {
-      ranking: args.ranking,
-    });
-  },
-});
-
-// todo, send emails with resend
 export const approveIntake = internalAction({
   args: {
     applicantId: v.id("applicants"),
+    name: v.string(),
+    email: v.string(),
   },
   handler: async (ctx, args): Promise<Id<"sessions">> => {
     // 1. update applicant round
@@ -133,7 +150,7 @@ export const approveIntake = internalAction({
       }),
     ]);
 
-    // 5. invite applicant user and set applicant user id in parallel
+    // 5. invite applicant user, set applicant user id, and send email in parallel
     await Promise.all([
       ctx.runAction(internal.application.action.inviteApplicantUser, {
         userId,
@@ -142,26 +159,38 @@ export const approveIntake = internalAction({
         applicantId: args.applicantId,
         userId,
       }),
+      ctx.runAction(internal.application.emails.sendEmail, {
+        email: args.email,
+        name: args.name,
+        emailType: "to-first",
+      }),
     ]);
 
     return sessionId;
   },
 });
 
-// todo, send emails with resend
 export const approveFirstRound = internalAction({
   args: {
     applicantId: v.id("applicants"),
+    name: v.string(),
+    email: v.string(),
   },
   handler: async (ctx, args) => {
-    await ctx.runMutation(internal.application.applicant.updateApplicantRound, {
-      applicantId: args.applicantId,
-      round: "second_round",
-    });
+    await Promise.all([
+      ctx.runMutation(internal.application.applicant.updateApplicantRound, {
+        applicantId: args.applicantId,
+        round: "second_round",
+      }),
+      ctx.runAction(internal.application.emails.sendEmail, {
+        email: args.email,
+        name: args.name,
+        emailType: "to-second",
+      }),
+    ]);
   },
 });
 
-// TODO send email
 export const approveSecondRound = internalAction({
   args: {
     applicantId: v.id("applicants"),
@@ -174,6 +203,8 @@ export const approveSecondRound = internalAction({
         status: "accepted",
       }
     );
+
+    // we send emails manually for accepted applicants
   },
 });
 
@@ -310,6 +341,19 @@ export const totalCount = adminQuery({
     return result.length;
   },
 });
+
+export const setApplicantRanking = adminMutation({
+  args: {
+    applicantId: v.id("applicants"),
+    ranking: RANKING_OPTIONS,
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.applicantId, {
+      ranking: args.ranking,
+    });
+  },
+});
+
 // NOTE MUTATIONS
 
 export const createNote = adminMutation({

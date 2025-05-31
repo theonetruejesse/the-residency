@@ -29,6 +29,8 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 export const WEB_URL = process.env.WEB_URL;
 
+export const EMAIL_ADDRESS = "noreply@test.collegiate-consulting.com"; // todo, change me; e.g, nick@uncommonapp.app
+
 if (
   !ELEVEN_LABS_AGENT_ID ||
   !ELEVEN_LABS_API_KEY ||

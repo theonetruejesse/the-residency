@@ -7,7 +7,7 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { useMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "@residency/api";
 import { FormData, FormErrors } from "./form-types";
 import { IntakeData, saveIntakeData } from "../_store/redis-intake";
@@ -44,7 +44,7 @@ export function FormProvider({
   const [formData, setFormData] = useState<FormData>(initialData.formData);
   const [errors, setErrors] = useState<ExtendedFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const submitIntake = useMutation(api.application.index.submitIntake);
+  const submitIntake = useAction(api.application.index.submitIntake);
 
   useEffect(() => {
     const saveData = async () => {

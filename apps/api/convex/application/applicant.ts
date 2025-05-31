@@ -88,14 +88,13 @@ export const getApplicant = internalQuery({
 
 export const getApplicantBasicInfo = internalQuery({
   args: { applicantId: v.id("applicants") },
-  returns: BasicInfo.table.validator,
   handler: async (ctx, args) => {
     const applicant = await ctx.db.get(args.applicantId);
     if (!applicant) throw new Error("Applicant not found");
     const basicInfo = await ctx.db.get(applicant.basicInfoId);
     if (!basicInfo) throw new Error("Basic info not found");
 
-    return basicInfo;
+    return { basicInfo, applicant };
   },
 });
 

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { action, internalMutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { Id, Doc } from "../_generated/dataModel";
 import { Backgrounds, BasicInfo, Links, Missions } from "../model/applicants";
@@ -14,27 +14,32 @@ import {
   WaitListMember,
 } from "../types/application.types";
 
-export const submitIntake = mutation({
-  args: {
-    basicInfo: v.object({
-      ...BasicInfo.withoutSystemFields,
-    }),
-    mission: v.object({
-      ...Missions.withoutSystemFields,
-    }),
-    background: v.object({
-      ...Backgrounds.withoutSystemFields,
-    }),
-    link: v.object({
-      ...Links.withoutSystemFields,
-    }),
-  },
+const intakeArgs = {
+  basicInfo: v.object({
+    ...BasicInfo.withoutSystemFields,
+  }),
+  mission: v.object({
+    ...Missions.withoutSystemFields,
+  }),
+  background: v.object({
+    ...Backgrounds.withoutSystemFields,
+  }),
+  link: v.object({
+    ...Links.withoutSystemFields,
+  }),
+};
+
+export const submitIntake = action({
+  args: intakeArgs,
   returns: v.id("applicants"),
   handler: async (ctx, args): Promise<Id<"applicants">> => {
-    const basicInfoId = await ctx.db.insert("basicInfo", args.basicInfo);
-    const missionId = await ctx.db.insert("missions", args.mission);
-    const backgroundId = await ctx.db.insert("backgrounds", args.background);
-    const linkId = await ctx.db.insert("links", args.link);
+    const { basicInfoId, missionId, backgroundId, linkId } =
+      await ctx.runMutation(internal.application.index.fillApplicantTables, {
+        basicInfo: args.basicInfo,
+        mission: args.mission,
+        background: args.background,
+        link: args.link,
+      });
 
     const applicantId = await ctx.runMutation(
       internal.application.applicant.createApplicant,
@@ -45,7 +50,24 @@ export const submitIntake = mutation({
         linkId,
       }
     );
+
+    await ctx.runAction(internal.application.emails.sendEmail, {
+      email: args.basicInfo.email,
+      name: args.basicInfo.firstName,
+      emailType: "intake-confirmation",
+    });
     return applicantId;
+  },
+});
+
+export const fillApplicantTables = internalMutation({
+  args: intakeArgs,
+  handler: async (ctx, args) => {
+    const basicInfoId = await ctx.db.insert("basicInfo", args.basicInfo);
+    const missionId = await ctx.db.insert("missions", args.mission);
+    const backgroundId = await ctx.db.insert("backgrounds", args.background);
+    const linkId = await ctx.db.insert("links", args.link);
+    return { basicInfoId, missionId, backgroundId, linkId };
   },
 });
 

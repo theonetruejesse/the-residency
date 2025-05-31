@@ -18,6 +18,10 @@
   "dependencies": {
     "@clerk/backend": "^1.31.4",
     "@google/genai": "^0.10.0",
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "@react-email/components": "0.0.41",
+    "@residency/emails": "workspace:*",
     "@residency/eslint-config": "workspace:*",
     "@residency/tsconfig": "workspace:*",
     "convex": "catalog:",

@@ -63,6 +63,12 @@ importers:
       '@google/genai':
         specifier: ^0.10.0
         version: 0.10.0
+      '@react-email/components':
+        specifier: 0.0.41
+        version: 0.0.41(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@residency/emails':
+        specifier: workspace:*
+        version: link:../../packages/emails
       '@residency/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint-config
@@ -81,6 +87,12 @@ importers:
       nanoid:
         specifier: ^5.1.5
         version: 5.1.5
+      react:
+        specifier: catalog:react19
+        version: 19.0.0
+      react-dom:
+        specifier: catalog:react19
+        version: 19.0.0(react@19.0.0)
       resend:
         specifier: ^4.5.1
         version: 4.5.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
