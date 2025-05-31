@@ -1,6 +1,8 @@
 // seed the database
 import { v } from "convex/values";
 import { internalMutation, MutationCtx } from "../../_generated/server";
+import { internal } from "../../_generated/api";
+import { Id } from "../../_generated/dataModel";
 
 const sampleAudioUrl =
   "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3";
@@ -21,8 +23,8 @@ export default internalMutation({
     const anyInterview = await ctx.db.query("interviews").first();
     const anyGrade = await ctx.db.query("grades").first();
     if (
-      anyUser ||
-      anyBasicInfo ||
+      // anyUser ||
+      // anyBasicInfo ||
       anySession ||
       anyPersona ||
       anyBackground ||
@@ -42,16 +44,16 @@ export default internalMutation({
     const ranking = "neutral" as const;
 
     const rounds = [
-      ...Array(10).fill("intake" as const),
-      ...Array(10).fill("first_round" as const),
-      ...Array(10).fill("second_round" as const),
+      ...Array(5).fill("intake" as const),
+      ...Array(11).fill("first_round" as const),
+      ...Array(14).fill("second_round" as const),
     ];
 
     const statuses = [
-      ...Array(15).fill("pending" as const),
-      ...Array(5).fill("waitlisted" as const),
-      ...Array(5).fill("accepted" as const),
-      ...Array(5).fill("rejected" as const),
+      ...Array(20).fill("pending" as const),
+      ...Array(3).fill("waitlisted" as const),
+      ...Array(3).fill("accepted" as const),
+      ...Array(4).fill("rejected" as const),
     ];
 
     const applicantIds = [];
@@ -151,6 +153,152 @@ export default internalMutation({
       `Successfully seeded interviews and grades for ${firstRoundInterviewCount} first round applicants.`
     );
     // Interview seeding logic ends here
+
+    // User, Session, and Persona seeding logic starts here
+    console.log(
+      "Starting to seed users, sessions, and personas for first_round applicants..."
+    );
+
+    // Sample roles and taglines for personas based on missions
+    const samplePersonas = [
+      {
+        role: "Tech Innovation Pioneer",
+        tagline: "Pushing boundaries in emerging technologies",
+      },
+      {
+        role: "Digital Solutions Architect",
+        tagline: "Building scalable systems for complex challenges",
+      },
+      {
+        role: "Research Enthusiast",
+        tagline: "Bridging theory and practical applications",
+      },
+      {
+        role: "Product Visionary",
+        tagline: "Creating user-centric solutions that matter",
+      },
+      {
+        role: "Data Science Expert",
+        tagline: "Extracting insights from complex datasets",
+      },
+      {
+        role: "AI/ML Specialist",
+        tagline: "Advancing artificial intelligence applications",
+      },
+      {
+        role: "Full-Stack Developer",
+        tagline: "End-to-end solution development",
+      },
+      { role: "Systems Engineer", tagline: "Optimizing performance at scale" },
+      {
+        role: "UX Design Leader",
+        tagline: "Crafting exceptional user experiences",
+      },
+      {
+        role: "Startup Founder",
+        tagline: "Turning innovative ideas into reality",
+      },
+      {
+        role: "Open Source Contributor",
+        tagline: "Building the future of collaborative development",
+      },
+    ];
+
+    const sessionIds: Id<"sessions">[] = [];
+    const userIds: Id<"users">[] = [];
+
+    // Create users and sessions for all first_round applicants
+    for (const applicant of applicantIds) {
+      // Get the applicant record to access basicInfoId and missionId
+      const applicantRecord = await ctx.db.get(applicant.id);
+      if (!applicantRecord) throw new Error("Applicant not found");
+
+      // Create user with role "applicant"
+      const userId = await ctx.db.insert("users", {
+        role: "applicant",
+        basicInfoId: applicantRecord.basicInfoId,
+        missionId: applicantRecord.missionId,
+        backgroundId: applicantRecord.backgroundId,
+        linkId: applicantRecord.linkId,
+      });
+      userIds.push(userId);
+
+      // Create session
+      const sessionId = await ctx.db.insert("sessions", {
+        waiting: false,
+        inCall: false,
+        applicantId: applicant.id,
+        missionId: applicantRecord.missionId,
+      });
+      sessionIds.push(sessionId);
+    }
+
+    // Configure session states: 5 inCall (spaced a minute apart), 6 waiting
+    const baseTime = Date.now();
+
+    // Configure first 5 sessions as inCall with scheduled end times
+    for (let i = 0; i < 5; i++) {
+      const sessionId = sessionIds[i];
+      if (!sessionId) continue;
+
+      const firstDelay = 5 * 60 * 1000;
+      const scheduledEndTime = baseTime + firstDelay + (i + 1) * 60 * 1000; // Spaced 1 minute apart
+      const sessionUrl = `https://example.com/session/active-${i}`;
+
+      // Schedule the end of the call
+      const endCallFnId = await ctx.scheduler.runAt(
+        new Date(scheduledEndTime),
+        internal.application.queue.scheduledLeave,
+        { sessionId }
+      );
+
+      // Update session to be in call
+      await ctx.db.patch(sessionId, {
+        waiting: false,
+        inCall: true,
+        sessionUrl,
+        scheduledEndTime,
+        endCallFnId,
+        queuedAt: baseTime - 5 * 60 * 1000, // Started queue 5 minutes ago
+      });
+    }
+
+    // Configure remaining 6 sessions as waiting
+    for (let i = 5; i < sessionIds.length; i++) {
+      const sessionId = sessionIds[i];
+      if (!sessionId) continue;
+
+      const queuedAt = baseTime + (i - 5) * 2000; // Stagger queue join times by 2 seconds
+
+      await ctx.db.patch(sessionId, {
+        waiting: true,
+        inCall: false,
+        queuedAt,
+      });
+    }
+
+    // Create personas for all sessions
+    for (let i = 0; i < sessionIds.length; i++) {
+      const sessionId = sessionIds[i];
+      const personaData =
+        samplePersonas[i] || samplePersonas[i % samplePersonas.length];
+
+      if (!sessionId || !personaData) continue;
+
+      await ctx.db.insert("personas", {
+        sessionId,
+        role: personaData.role,
+        tagline: personaData.tagline,
+      });
+    }
+
+    console.log(
+      `Successfully seeded ${sessionIds.length} users, sessions, and personas for first_round applicants.`
+    );
+    console.log(
+      `Configured 5 sessions as inCall and ${sessionIds.length - 5} as waiting.`
+    );
+    // User, Session, and Persona seeding logic ends here
 
     return null;
   },

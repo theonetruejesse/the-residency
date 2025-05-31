@@ -37,7 +37,7 @@ export const ChaliceChatCopy = (props: { firstName: string }) => {
             </li>
             <li>The call is 10 minutes and cannot be paused once started.</li>
             <li>
-              Please start the interview within 5 minutes of joining (otherwise
+              Start the interview within 5 minutes of joining (otherwise
               you&apos;ll get cut off early).
             </li>
             <li>

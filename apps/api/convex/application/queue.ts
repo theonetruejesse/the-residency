@@ -13,7 +13,6 @@ import { Sessions } from "../model/sessions";
 
 export const listActiveCalls = internalQuery({
   args: {},
-  returns: v.array(Sessions.table.validator),
   handler: async (ctx): Promise<Doc<"sessions">[]> => {
     return await ctx.db
       .query("sessions")
@@ -25,7 +24,6 @@ export const listActiveCalls = internalQuery({
 
 export const listWaitingSessions = internalQuery({
   args: {},
-  returns: v.array(Sessions.table.validator),
   handler: async (ctx): Promise<Doc<"sessions">[]> => {
     // Return queued sessions in order of original queue time
     return await ctx.db
@@ -52,7 +50,6 @@ export const isQueueFull = internalQuery({
 
 export const handleJoin = internalAction({
   args: { sessionId: v.id("sessions") },
-  returns: v.null(),
   handler: async (ctx, { sessionId }) => {
     const session = await ctx.runQuery(
       internal.application.session.getSession,
@@ -82,7 +79,6 @@ export const handleJoin = internalAction({
 
 export const joinQueue = internalMutation({
   args: { sessionId: v.id("sessions") },
-  returns: v.null(),
   handler: async (ctx, { sessionId }) => {
     await ctx.runMutation(internal.application.session.updateSession, {
       sessionId,
@@ -95,7 +91,6 @@ export const joinQueue = internalMutation({
 
 export const joinCall = internalAction({
   args: { sessionId: v.id("sessions") },
-  returns: v.null(),
   handler: async (ctx, { sessionId }) => {
     console.log(`joinCall invoked for session ${sessionId}`);
     try {
@@ -132,7 +127,6 @@ export const joinCall = internalAction({
 
 export const startNextCall = internalAction({
   args: {},
-  returns: v.null(),
   handler: async (ctx) => {
     const waiting: Doc<"sessions">[] = await ctx.runQuery(
       internal.application.queue.listWaitingSessions,
@@ -151,7 +145,6 @@ export const scheduledLeave = internalAction({
   args: {
     sessionId: v.id("sessions"),
   },
-  returns: v.null(),
   handler: async (ctx, { sessionId }) => {
     console.log(`scheduledLeave invoked for session ${sessionId}`);
 
@@ -167,7 +160,6 @@ export const handleLeave = internalAction({
   args: {
     sessionId: v.id("sessions"),
   },
-  returns: v.null(),
   handler: async (ctx, { sessionId }) => {
     console.log(`handleLeave (manual) invoked for session ${sessionId}`);
 
@@ -195,7 +187,6 @@ export const handleLeave = internalAction({
 
 export const leaveQueue = internalMutation({
   args: { sessionId: v.id("sessions") },
-  returns: v.null(),
   handler: async (ctx, { sessionId }) => {
     await ctx.runMutation(internal.application.session.updateSession, {
       sessionId,
