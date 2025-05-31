@@ -26,10 +26,8 @@ export function Interview(props: InterviewProps) {
     sessionUrl: session.sessionUrl!, // at this point, sessionUrl should be non-null
   });
 
-  const isConnected = true;
-  // PROD
-  // const isConnected = status === "connected";
-  // useDetectLeave(isConnected);
+  const isConnected = status === "connected";
+  useDetectLeave(isConnected);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 flex flex-col justify-center items-center interview-container">
