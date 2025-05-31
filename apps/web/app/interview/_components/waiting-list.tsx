@@ -112,10 +112,9 @@ const WaitingListFooter = ({ status }: WaitingListProps) => {
   const isInQueue = status === "in_queue";
   const actionText = isInQueue ? "leave queue" : "join queue";
   const handleClick = isInQueue ? handleLeave : handleJoin;
-  // TODO
   const buttonClass = isInQueue
-    ? "bg-muted-foreground text-muted-foreground-foreground hover:bg-muted-foreground/80"
-    : "bg-primary text-primary-foreground hover:bg-primary/80";
+    ? "bg-secondary text-secondary-foreground/80 hover:bg-secondary/60"
+    : "";
 
   return (
     <CardFooter>

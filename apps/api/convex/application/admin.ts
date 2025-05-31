@@ -356,3 +356,15 @@ export const deleteNote = adminMutation({
     });
   },
 });
+
+// helpful for debugging
+export const kickSession = internalAction({
+  args: {
+    sessionId: v.id("sessions"),
+  },
+  handler: async (ctx, args) => {
+    await ctx.runAction(internal.application.queue.handleLeave, {
+      sessionId: args.sessionId,
+    });
+  },
+});
