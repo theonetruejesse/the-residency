@@ -26,15 +26,7 @@ export function Interview(props: InterviewProps) {
     sessionUrl: session.sessionUrl!, // at this point, sessionUrl should be non-null
   });
 
-  // Debug: Toggle isConnected every 30 seconds
-  const [isConnected, setIsConnected] = React.useState(true);
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setIsConnected((prev) => !prev);
-    }, 30000); // 30 seconds
-    return () => clearInterval(interval);
-  }, []);
-
+  const isConnected = true;
   // PROD
   // const isConnected = status === "connected";
   // useDetectLeave(isConnected);
