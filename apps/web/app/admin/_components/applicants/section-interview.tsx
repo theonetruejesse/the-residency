@@ -53,6 +53,7 @@ const InterviewWrapper = ({ interview, children }: InterviewWrapperProps) => {
     <div className="space-y-4">
       <audio
         src={interview.interview.audioUrl}
+        preload="metadata"
         controls
         className="w-full py-1"
       />

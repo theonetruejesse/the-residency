@@ -13,7 +13,6 @@ const MAX_CALL = 10 * 60 * 1000; // 10 minutes in milliseconds
 export const MAX_SESSION_DURATION = MAX_CALL + MAX_WAIT;
 
 // ENV VARIABLES (+ validation)
-// todo, clean this up later
 export const ELEVEN_LABS_AGENT_ID = process.env.ELEVEN_LABS_AGENT_ID;
 export const ELEVEN_LABS_WEBHOOK_SECRET =
   process.env.ELEVEN_LABS_WEBHOOK_SECRET;

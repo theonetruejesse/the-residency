@@ -16,31 +16,17 @@ export const RANKING_OPTIONS = v.union(
   v.literal("likely_accept")
 );
 
+// current round the user is in
 export const ROUND_OPTIONS = v.union(
   v.literal("intake"),
   v.literal("first_round"),
   v.literal("second_round")
-); // current round the user is in
+);
 
 // todo: update here later
 export const COHORT_OPTIONS = v.union(
   v.literal("SUMMER_2025"),
   v.literal("FALL_2025")
-);
-
-export const CRITERIA_OPTIONS = v.union(
-  v.literal("mission"),
-  v.literal("intelligence"),
-  v.literal("vision"),
-  v.literal("traction"),
-  v.literal("determination")
-);
-
-export const GRADE_OPTIONS = v.union(
-  v.literal("high"),
-  v.literal("medium"),
-  v.literal("low"),
-  v.literal("unclear")
 );
 
 export const Applicants = Table("applicants", {
@@ -79,21 +65,6 @@ export const Links = Table("links", {
   linkedin: v.optional(v.string()),
   github: v.optional(v.string()),
   website: v.optional(v.string()), // todo, array of url + description
-});
-
-export const Interviews = Table("interviews", {
-  applicantId: v.id("applicants"),
-  conversationId: v.string(), // elevenlabs conversation id
-  audioUrl: v.string(), // url to the audio file, stored in uploadthing
-  score: v.number(), // final score for the interview
-});
-
-export const Grades = Table("grades", {
-  criteria: CRITERIA_OPTIONS,
-  grade: GRADE_OPTIONS,
-  interviewId: v.id("interviews"),
-  rationale: v.string(), // why this grade?
-  quote: v.string(), // quote from the interview
 });
 
 export const Notes = Table("notes", {

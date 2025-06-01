@@ -18,6 +18,7 @@ import {
   agentFirstMessage,
   agentSystemPrompt,
 } from "../utils/agent";
+import { Id } from "../_generated/dataModel";
 
 export const generateContent = internalAction({
   args: {
@@ -130,3 +131,56 @@ const syncAgentConfig = async () => {
 
   return updatedAgent;
 };
+
+export const downloadAudio = internalAction({
+  args: {
+    applicantId: v.id("applicants"),
+  },
+  handler: async (ctx, args) => {
+    const data = await ctx.runQuery(
+      internal.application.applicant.getApplicantInterview,
+      { applicantId: args.applicantId }
+    );
+    if (!data) throw new Error("Interview not found");
+
+    const { conversationId, _id: interviewId } = data.interview;
+
+    const readStream =
+      await elevenClient.conversationalAi.getConversationAudio(conversationId);
+
+    // Generate upload URL
+    const url = await ctx.storage.generateUploadUrl();
+
+    // Convert stream to buffer
+    const chunks: Buffer[] = [];
+    for await (const chunk of readStream) {
+      chunks.push(Buffer.from(chunk));
+    }
+    const audioBuffer = Buffer.concat(chunks);
+
+    // Upload to Convex storage
+    const uploadResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "audio/mpeg",
+      },
+      body: audioBuffer,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error(
+        `Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`
+      );
+    }
+
+    const { storageId } = await uploadResponse.json();
+    const audioUrl = await ctx.storage.getUrl(storageId as Id<"_storage">);
+
+    if (!audioUrl) throw new Error("Failed to upload audio");
+
+    await ctx.runMutation(internal.application.session.setInterviewUrl, {
+      interviewId,
+      audioUrl,
+    });
+  },
+});

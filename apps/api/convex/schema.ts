@@ -5,12 +5,10 @@ import {
   Backgrounds,
   Links,
   Missions,
-  Grades,
-  Interviews,
   Notes,
 } from "./model/applicants";
 import { Users } from "./model/users";
-import { Personas, Sessions } from "./model/sessions";
+import { Personas, Sessions, Grades, Interviews } from "./model/sessions";
 
 export default defineSchema({
   applicants: Applicants.table

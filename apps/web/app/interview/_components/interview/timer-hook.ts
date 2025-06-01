@@ -2,14 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Timer hook
+const MAX_TIME = 10 * 60; // 10 minute call
+
 export const useInterviewTimer = (isConnected: boolean) => {
-  const [timeLeft, setTimeLeft] = useState(10 * 60);
+  const [timeLeft, setTimeLeft] = useState(MAX_TIME);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isConnected) {
-      setTimeLeft(15 * 60);
+      setTimeLeft(MAX_TIME);
       intervalRef.current = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
