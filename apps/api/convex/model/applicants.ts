@@ -29,6 +29,21 @@ export const COHORT_OPTIONS = v.union(
   v.literal("FALL_2025")
 );
 
+export const CRITERIA_OPTIONS = v.union(
+  v.literal("mission"),
+  v.literal("intelligence"),
+  v.literal("vision"),
+  v.literal("traction"),
+  v.literal("determination")
+);
+
+export const GRADE_OPTIONS = v.union(
+  v.literal("high"),
+  v.literal("medium"),
+  v.literal("low"),
+  v.literal("unclear")
+);
+
 export const Applicants = Table("applicants", {
   cohort: COHORT_OPTIONS,
   status: STATUS_OPTIONS,
@@ -71,4 +86,19 @@ export const Notes = Table("notes", {
   applicantId: v.id("applicants"),
   createdBy: v.id("users"),
   note: v.string(),
+});
+
+export const Interviews = Table("interviews", {
+  applicantId: v.id("applicants"),
+  conversationId: v.string(), // elevenlabs conversation id
+  audioUrl: v.string(), // url to the audio file, stored in uploadthing
+  score: v.optional(v.string()), // final score for the interview
+});
+
+export const Grades = Table("grades", {
+  criteria: CRITERIA_OPTIONS,
+  grade: GRADE_OPTIONS,
+  interviewId: v.id("interviews"),
+  rationale: v.string(), // why this grade?
+  quote: v.string(), // quote from the interview
 });

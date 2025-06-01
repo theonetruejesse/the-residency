@@ -6,9 +6,11 @@ import {
   Links,
   Missions,
   Notes,
+  Interviews,
+  Grades,
 } from "./model/applicants";
 import { Users } from "./model/users";
-import { Personas, Sessions, Grades, Interviews } from "./model/sessions";
+import { Personas, Sessions } from "./model/sessions";
 
 export default defineSchema({
   applicants: Applicants.table

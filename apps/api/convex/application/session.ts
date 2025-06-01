@@ -86,15 +86,3 @@ export const createSessionPersona = internalMutation({
     });
   },
 });
-
-// INTERVIEW STUFF
-
-export const setInterviewUrl = internalMutation({
-  args: {
-    interviewId: v.id("interviews"),
-    audioUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.interviewId, { audioUrl: args.audioUrl });
-  },
-});
