@@ -133,7 +133,6 @@ export default internalMutation({
         applicantId: applicant.id,
         conversationId: `conversation-${applicant.index}`,
         audioUrl: sampleAudioUrl,
-        score: Math.floor(Math.random() * 100).toString(),
       });
 
       // Create grades for all criteria

@@ -13,7 +13,7 @@ const extractDirectQuotes =
   "Extract direct quotes from the applicant that most clearly demonstrate";
 
 const gradeStatement =
-  "Within your justification, grade their interview performance for this criteria on the scale of either being: HIGH, MEDIUM, LOW, or UNCLEAR.";
+  "Justify your assessment, then conclude by classifying the interviewee's performance as grades: HIGH, MEDIUM, LOW, or UNCLEAR. Use UNCLEAR if there is insufficient information to assign a definitive grade. End your response with 'Therefore the grade for this criteron is: <GRADE>'";
 
 export const agentCriterias = {
   mission: {

@@ -49,14 +49,18 @@ const InterviewWrapper = ({ interview, children }: InterviewWrapperProps) => {
     );
   }
 
+  const audioUrl = interview.interview.audioUrl;
+
   return (
     <div className="space-y-4">
-      <audio
-        src={interview.interview.audioUrl}
-        preload="metadata"
-        controls
-        className="w-full py-1"
-      />
+      {audioUrl && (
+        <audio
+          src={audioUrl}
+          preload="metadata"
+          controls
+          className="w-full py-1"
+        />
+      )}
       {children}
     </div>
   );
@@ -86,12 +90,10 @@ const GradesTabs = ({ interview }: GradesTabsProps) => {
       </TabsList>
       <TabsContent value="score" className="pt-2">
         <ScoreTable interview={i} />
-        {i.interview.score && (
-          <div className="flex items-center gap-2 mt-4">
-            <span className="font-semibold">final score:</span>
-            <Badge className="bg-green-500">{i.interview.score}</Badge>
-          </div>
-        )}
+        {/* <div className="flex items-center gap-2 mt-4">
+          <span className="font-semibold">final score:</span>
+          <Badge className="bg-green-500">{i.interview.score}</Badge>
+        </div> */}
       </TabsContent>
       {i.grades.map((g) => (
         <CriteriaTab key={g.criteria} grade={g} />

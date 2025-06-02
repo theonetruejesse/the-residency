@@ -178,7 +178,7 @@ export const downloadAudio = internalAction({
 
     if (!audioUrl) throw new Error("Failed to upload audio");
 
-    await ctx.runMutation(internal.application.applicant.setInterviewUrl, {
+    await ctx.runMutation(internal.application.interview.setInterviewUrl, {
       interviewId,
       audioUrl,
     });

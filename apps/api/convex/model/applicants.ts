@@ -91,8 +91,9 @@ export const Notes = Table("notes", {
 export const Interviews = Table("interviews", {
   applicantId: v.id("applicants"),
   conversationId: v.string(), // elevenlabs conversation id
-  audioUrl: v.string(), // url to the audio file, stored in uploadthing
-  score: v.optional(v.string()), // final score for the interview
+
+  // we set this field after initial interview creation
+  audioUrl: v.optional(v.string()), // url to the audio file, stored in uploadthing
 });
 
 export const Grades = Table("grades", {
