@@ -22,7 +22,7 @@ export function InterviewButton({
   const handleButtonClick = async () => {
     if (!isConnected) {
       await startConversation();
-    } else if (timeLeft > 5 * 60) {
+    } else if (timeLeft > 2 * 60) {
       setShowConfirmation(true);
     } else {
       await stopConversation();
@@ -44,13 +44,13 @@ export function InterviewButton({
       >
         {isConnected ? (
           <span className="flex items-center justify-center">
-            End Interview
+            end interview
             <span className="ml-3 text-muted-foreground font-mono tabular-nums">
               {formatTime(timeLeft)}
             </span>
           </span>
         ) : (
-          "Start Interview"
+          "start interview"
         )}
       </Button>
 
@@ -100,7 +100,7 @@ function ConfirmationOverlay({
           >
             <div className="flex flex-col text-center sm:text-left">
               <h3 className="text-lg leading-none font-semibold mb-4">
-                End Interview Early?
+                end interview early?
               </h3>
               <p className="text-muted-foreground text-sm">
                 there&apos;s still plenty of time left. are you sure you want to
@@ -122,7 +122,7 @@ function ConfirmationOverlay({
               className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
             >
               <XIcon />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">close</span>
             </button>
           </motion.div>
         </>

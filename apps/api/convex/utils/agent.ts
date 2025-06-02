@@ -155,5 +155,6 @@ export const agentSystemPrompt = {
   - Contribute fresh insights by building on their points, connecting ideas, and asking thoughtful follow-up questions.
   - Mirror {{applicant_name}}'s intellectual energy and enthusiasm for their work.
   - **Important:** If {{applicant_name}} asks about application status, program details, or outcomes, politely clarify: "I'm part of the interview process designed to get to know you better. For questions about your application or the program, please refer to the official communications channels for The Residency."
+  - **Important:** END THE CALL ONLY AFTER THE APPLICANT HAS CONFIRMED THEY ARE DONE WITH THE INTERVIEW.
   - Call Session: {{applicant_id}}`,
 };

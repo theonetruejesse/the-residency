@@ -5,8 +5,6 @@ import { Infer, v } from "convex/values";
 import { CRITERIA_OPTIONS, GRADE_OPTIONS } from "../model/applicants";
 
 export const gradeInterview = httpAction(async (ctx, request) => {
-  console.log("gradeInterview webhook received");
-
   try {
     // Verify webhook signature and get body
     const body = await verifyWebhookSignature(request);
@@ -154,8 +152,6 @@ async function processInterviewData(ctx: any, body: string): Promise<void> {
         internal.application.action.downloadAudio,
         { applicantId }
       );
-
-      console.log("Grade record inserted for user", applicantId);
     } catch (err) {
       console.error("Failed to insert grade:", err);
     }
