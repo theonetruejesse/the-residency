@@ -2,6 +2,19 @@ import { type FullApplicantType } from "@residency/api";
 import { useMemo, useState, useEffect } from "react";
 import { useApplicantStore } from "./query-provider";
 import { QueryType } from "./query-store";
+import { saveCriterias, type CriteriaWeights } from "../redis-criteria";
+
+export const useCriterias = () => {
+  const criterias = useApplicantStore((state) => state.criterias);
+  const setCriterias = useApplicantStore((state) => state.setCriterias);
+
+  const updateCriterias = async (newWeights: CriteriaWeights) => {
+    setCriterias(newWeights);
+    await saveCriterias(newWeights);
+  };
+
+  return { criterias, updateCriterias };
+};
 
 // we debounce the search which helps prevent laggy ui when typing
 export const useSearch = () => {

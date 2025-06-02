@@ -9,6 +9,7 @@ import {
   TabsContent,
 } from "@residency/ui/components/tabs";
 import { AlertCircle } from "lucide-react";
+import { ScoreBadge } from "./helper-badges";
 
 interface ScoreSectionProps {
   interview: FullApplicantType["interview"];
@@ -90,10 +91,10 @@ const GradesTabs = ({ interview }: GradesTabsProps) => {
       </TabsList>
       <TabsContent value="score" className="pt-2">
         <ScoreTable interview={i} />
-        {/* <div className="flex items-center gap-2 mt-4">
+        <div className="flex items-center gap-2 mt-4">
           <span className="font-semibold">final score:</span>
-          <Badge className="bg-green-500">{i.interview.score}</Badge>
-        </div> */}
+          <ScoreBadge grades={i.grades} />
+        </div>
       </TabsContent>
       {i.grades.map((g) => (
         <CriteriaTab key={g.criteria} grade={g} />

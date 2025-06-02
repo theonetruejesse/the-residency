@@ -6,7 +6,7 @@ import { Search } from "lucide-react";
 import { useState } from "react";
 import { useSearch } from "./query-hooks";
 
-export const HeaderSearchBar = () => {
+export const SearchBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { searchTerm, setSearchTerm, clearSearch } = useSearch();
 

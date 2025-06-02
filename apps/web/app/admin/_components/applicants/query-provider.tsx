@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { createApplicantQueryStore, ApplicantQueryStore } from "./query-store";
+import type { CriteriaWeights } from "../redis-criteria";
 import { api } from "@residency/api";
 import { useStore } from "zustand";
 
@@ -41,11 +42,13 @@ const ApplicantQueryContext = createContext<{
 
 interface ApplicantQueryProviderProps {
   children: React.ReactNode;
+  criterias: CriteriaWeights;
 }
 export const ApplicantQueryProvider = ({
   children,
+  criterias,
 }: ApplicantQueryProviderProps) => {
-  const [store] = useState(() => createApplicantQueryStore());
+  const [store] = useState(() => createApplicantQueryStore(criterias));
 
   // Intake
   const intakeData = usePaginatedQuery(

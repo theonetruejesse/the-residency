@@ -1,12 +1,6 @@
 import { createStore } from "zustand";
 import type { FullApplicantType } from "@residency/api";
-
-export type QueryResult = {
-  results: FullApplicantType[];
-  status: "LoadingFirstPage" | "CanLoadMore" | "Exhausted" | "LoadingMore";
-  loadMore: (numItems: number) => void;
-  totalCount: number;
-};
+import type { CriteriaWeights } from "../redis-criteria";
 
 export type QueryType =
   | "intake"
@@ -16,10 +10,21 @@ export type QueryType =
   | "rejected"
   | "waitlisted";
 
+export type QueryResult = {
+  results: FullApplicantType[];
+  status: "LoadingFirstPage" | "CanLoadMore" | "Exhausted" | "LoadingMore";
+  loadMore: (numItems: number) => void;
+  totalCount: number;
+};
+
 export interface ApplicantQueryStore {
   // Query data
   queries: Record<QueryType, QueryResult>;
   setQueryResults: (queryType: QueryType, result: QueryResult) => void;
+
+  // Criteria weights
+  criterias: CriteriaWeights;
+  setCriterias: (criterias: CriteriaWeights) => void;
 
   // Search state
   searchTerm: string;
@@ -34,17 +39,21 @@ const initialQueryState: QueryResult = {
   totalCount: 0,
 };
 
-export const createApplicantQueryStore = () =>
+const DEFAULT_QUERIES = {
+  intake: initialQueryState,
+  firstRound: initialQueryState,
+  secondRound: initialQueryState,
+  accepted: initialQueryState,
+  rejected: initialQueryState,
+  waitlisted: initialQueryState,
+};
+
+export const createApplicantQueryStore = (criterias: CriteriaWeights) =>
   createStore<ApplicantQueryStore>((set, get) => ({
-    searchTerm: "",
-    queries: {
-      intake: initialQueryState,
-      firstRound: initialQueryState,
-      secondRound: initialQueryState,
-      accepted: initialQueryState,
-      rejected: initialQueryState,
-      waitlisted: initialQueryState,
-    },
+    criterias,
+    setCriterias: (criterias) => set({ criterias }),
+
+    queries: DEFAULT_QUERIES,
     setQueryResults: (queryType, result) =>
       set((state) => ({
         queries: {
@@ -56,6 +65,7 @@ export const createApplicantQueryStore = () =>
         },
       })),
 
+    searchTerm: "",
     setSearchTerm: (term) => set({ searchTerm: term }),
     clearSearch: () => set({ searchTerm: "" }),
   }));

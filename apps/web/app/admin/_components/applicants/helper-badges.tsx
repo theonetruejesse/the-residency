@@ -1,6 +1,8 @@
-import type { FullApplicantType } from "@residency/api";
+import type { FullApplicantType, InterviewGrade } from "@residency/api";
 import { Badge } from "@residency/ui/components/badge";
 import { ChevronDown } from "lucide-react";
+import { useCriterias } from "./query-hooks";
+import { CriteriaWeights } from "../redis-criteria";
 
 export type Rankings = FullApplicantType["applicant"]["decision"]["ranking"];
 export type StatusActions = "approve" | "waitlist" | "reject";
@@ -104,3 +106,70 @@ export const RoundBadge = ({ round }: RoundBadgeProps) => (
     {`${roundLabels[round]}`}
   </Badge>
 );
+
+const scoreColors: Record<string, string> = {
+  high: "bg-green-50 text-green-700 border-green-200",
+  medium: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  low: "bg-red-50 text-red-700 border-red-200",
+};
+
+type Grades = InterviewGrade["grades"];
+
+interface ScoreBadgeProps {
+  grades: Grades;
+}
+
+export const ScoreBadge = ({ grades }: ScoreBadgeProps) => {
+  const { criterias } = useCriterias();
+  const score = calculateScore(grades, criterias);
+
+  let scoreCn = null;
+  if (score >= 80) {
+    scoreCn = "bg-green-50 text-green-700 border-green-200";
+  } else if (score >= 60) {
+    scoreCn = "bg-yellow-50 text-yellow-700 border-yellow-200";
+  } else {
+    scoreCn = "bg-red-50 text-red-700 border-red-200";
+  }
+
+  return (
+    <Badge
+      variant="outline"
+      className={`inline-block font-semibold ${scoreCn}`}
+    >{`${score}%`}</Badge>
+  );
+};
+
+// calculate the score based on the grades * weights
+// if the grade is unclear, it is not included in the calculation
+const calculateScore = (
+  grades: InterviewGrade["grades"],
+  criterias: CriteriaWeights
+) => {
+  let score = 0;
+  let totalWeight = 0;
+
+  for (const grade of grades) {
+    if (grade.grade !== "unclear") {
+      const gradeValue = getGradeValue(grade.grade);
+      const criteriaWeight = criterias[grade.criteria];
+      score += gradeValue * criteriaWeight;
+      totalWeight += criteriaWeight;
+    }
+  }
+  if (totalWeight === 0) return 0;
+  return Number(((score / totalWeight) * 100).toFixed(0));
+};
+
+const getGradeValue = (grade: Grades[number]["grade"]) => {
+  switch (grade) {
+    case "high":
+      return 1;
+    case "medium":
+      return 2 / 3;
+    case "low":
+      return 1 / 3;
+    default:
+      return 0;
+  }
+};

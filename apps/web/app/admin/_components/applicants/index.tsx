@@ -14,26 +14,23 @@ import {
   TabsContent,
 } from "@residency/ui/components/tabs";
 import { DisplayDone } from "./display-done";
-import { ApplicantQueryProvider } from "./query-provider";
 import { DisplayPending } from "./display-pending";
-import { HeaderSearchBar } from "./header-searchbar";
-import { HeaderGrade } from "./header-grade";
+import { SearchBar } from "./header-search-bar";
+import { CriteriasSlider } from "./header-criterias-slider";
 
 export const ListApplicants = () => {
   return (
-    <ApplicantQueryProvider>
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="applicants">
-          <AccordionTrigger className="text-lg font-medium lowercase">
-            applicants summer 2025
-          </AccordionTrigger>
-          <AccordionContent>
-            <Separator className="mb-8 my-4" />
-            <ViewApplicants />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </ApplicantQueryProvider>
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value="applicants">
+        <AccordionTrigger className="text-lg font-medium lowercase">
+          applicants summer 2025
+        </AccordionTrigger>
+        <AccordionContent>
+          <Separator className="mb-8 my-4" />
+          <ViewApplicants />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
 
@@ -54,9 +51,9 @@ const ViewHeader = () => {
         <TabsTrigger value="done">done</TabsTrigger>
       </TabsList>
       <div className="ml-1">
-        <HeaderGrade />
+        <CriteriasSlider />
       </div>
-      <HeaderSearchBar />
+      <SearchBar />
     </div>
   );
 };

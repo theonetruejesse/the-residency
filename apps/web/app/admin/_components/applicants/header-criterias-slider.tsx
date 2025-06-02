@@ -8,44 +8,41 @@ import {
 } from "@residency/ui/components/popover";
 import { Slider } from "@residency/ui/components/slider";
 import { useState, useEffect } from "react";
+import { useCriterias } from "./query-hooks";
+import type { Criteria, CriteriaWeights } from "../redis-criteria";
 
-const CRITERIA = [
-  "mission",
-  "intelligence",
-  "vision",
-  "traction",
-  "determination",
-] as const;
-const DEFAULT_WEIGHT = 20;
+export const CriteriasSlider = () => {
+  const { criterias, updateCriterias } = useCriterias();
+  // Get criteria keys dynamically from the criterias object
+  const CRITERIA = Object.keys(criterias) as Criteria[];
 
-export const HeaderGrade = () => {
-  const [weights, setWeights] = useState<Record<string, number>>(
-    CRITERIA.reduce(
-      (acc, criteria) => ({ ...acc, [criteria]: DEFAULT_WEIGHT }),
-      {} as Record<string, number>
-    )
-  );
-
-  const [originalWeights] = useState<Record<string, number>>(
-    CRITERIA.reduce(
-      (acc, criteria) => ({ ...acc, [criteria]: DEFAULT_WEIGHT }),
-      {} as Record<string, number>
-    )
-  );
-
+  const [weights, setWeights] = useState<CriteriaWeights>(criterias);
+  const [originalWeights] = useState<CriteriaWeights>(criterias);
   const [hasChanges, setHasChanges] = useState(false);
-
-  // Popover open state
   const [open, setOpen] = useState(false);
+
+  // Update local weights when criterias change from the store
+  useEffect(() => {
+    setWeights(criterias);
+  }, [criterias]);
 
   useEffect(() => {
     const changed = CRITERIA.some(
       (criteria) => weights[criteria] !== originalWeights[criteria]
     );
     setHasChanges(changed);
-  }, [weights, originalWeights]);
+  }, [weights, originalWeights, CRITERIA]);
 
-  const handleSliderChange = (criteria: string, newValue: number[]) => {
+  const handleReset = () => {
+    setWeights({ ...originalWeights });
+  };
+
+  const handleSave = async () => {
+    await updateCriterias(weights);
+    setOpen(false);
+  };
+
+  const handleSliderChange = (criteria: Criteria, newValue: number[]) => {
     const newWeight = newValue[0];
     if (newWeight === undefined) return;
 
@@ -63,7 +60,7 @@ export const HeaderGrade = () => {
 
     if (totalOtherWeight === 0) return; // Prevent division by zero
 
-    const newWeights: Record<string, number> = {
+    const newWeights: CriteriaWeights = {
       ...weights,
       [criteria]: newWeight,
     };
@@ -96,16 +93,6 @@ export const HeaderGrade = () => {
     setWeights(newWeights);
   };
 
-  const handleReset = () => {
-    setWeights({ ...originalWeights });
-  };
-
-  const handleSave = () => {
-    console.log("Saving weights:", weights);
-    // Here you would typically save to your backend or state management
-    setOpen(false); // Close the popover after saving
-  };
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -122,7 +109,7 @@ export const HeaderGrade = () => {
       <PopoverContent className="w-sm" align="start">
         <div className="space-y-4">
           {CRITERIA.map((criteria) => {
-            const weight = weights[criteria] ?? DEFAULT_WEIGHT;
+            const weight = weights[criteria];
             return (
               <div key={criteria} className="flex items-center gap-4">
                 <span className="text-sm font-medium min-w-[100px]">
@@ -154,11 +141,32 @@ export const HeaderGrade = () => {
               reset
             </Button>
           )}
-          <Button onClick={handleSave} disabled={!hasChanges}>
-            save
-          </Button>
+          <SaveButton hasChanges={hasChanges} handleSave={handleSave} />
         </div>
       </PopoverContent>
     </Popover>
+  );
+};
+
+interface SaveButtonProps {
+  hasChanges: boolean;
+  handleSave: () => Promise<void>;
+}
+
+const SaveButton = ({ hasChanges, handleSave }: SaveButtonProps) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveClick = async () => {
+    setIsSaving(true);
+    await handleSave();
+    setIsSaving(false);
+  };
+  return (
+    <Button
+      onClick={async () => handleSaveClick()}
+      disabled={!hasChanges || isSaving}
+    >
+      {isSaving ? "saving..." : "save"}
+    </Button>
   );
 };
