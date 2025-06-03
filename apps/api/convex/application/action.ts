@@ -10,14 +10,14 @@ import {
   WEB_URL,
 } from "../constants";
 import { rolePrompt, taglinePrompt } from "../utils/prompts";
-import { Missions } from "../model/applicants";
 import { internal } from "../_generated/api";
 import { AGENT_CONFIG } from "../utils/agent_config";
 import { Id } from "../_generated/dataModel";
 
 export const generateContent = internalAction({
   args: {
-    ...Missions.withoutSystemFields,
+    interest: v.string(),
+    accomplishment: v.string(),
   },
   returns: v.object({
     role: v.string(),

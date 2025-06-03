@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { internalAction } from "../_generated/server";
+import { internalAction, internalMutation } from "../_generated/server";
 import { ELEVEN_LABS_AGENT_ID } from "../constants";
 import { elevenClient } from "../constants";
 import { AGENT_CONFIG } from "../utils/agent_config";

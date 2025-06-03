@@ -1,5 +1,10 @@
 import { v } from "convex/values";
-import { internalQuery, internalMutation } from "../_generated/server";
+import {
+  internalQuery,
+  internalMutation,
+  internalAction,
+} from "../_generated/server";
+import { internal } from "../_generated/api";
 
 export const getSession = internalQuery({
   args: { sessionId: v.id("sessions") },
@@ -72,17 +77,40 @@ export const getSessionPersona = internalQuery({
   },
 });
 
-export const createSessionPersona = internalMutation({
+export const createSessionPersona = internalAction({
+  args: {
+    sessionId: v.id("sessions"),
+    interest: v.string(),
+    accomplishment: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { interest, accomplishment, sessionId } = args;
+
+    const { role, tagline } = await ctx.runAction(
+      internal.application.action.generateContent,
+      {
+        interest,
+        accomplishment,
+      }
+    );
+
+    await ctx.runMutation(internal.application.session.createPersona, {
+      sessionId,
+      role,
+      tagline,
+    });
+
+    return null;
+  },
+});
+
+export const createPersona = internalMutation({
   args: {
     sessionId: v.id("sessions"),
     role: v.string(),
     tagline: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("personas", {
-      sessionId: args.sessionId,
-      role: args.role,
-      tagline: args.tagline,
-    });
+    return await ctx.db.insert("personas", args);
   },
 });

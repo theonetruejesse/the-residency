@@ -56,7 +56,6 @@ const userFn = async (
   return await AuthenticationRequired({ ctx });
 };
 
-export const adminAction = customAction(action, customCtx(adminFn));
 export const adminMutation = customMutation(mutation, customCtx(adminFn));
 export const adminQuery = customQuery(query, customCtx(adminFn));
 

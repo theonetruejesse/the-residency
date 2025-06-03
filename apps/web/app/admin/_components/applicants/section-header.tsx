@@ -8,7 +8,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@residency/ui/components/select";
-import { useAction, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { ChevronRight, Info } from "lucide-react";
 import { useState } from "react";
 import type { StatusActions, StatusStates, Rankings } from "./helper-badges";
@@ -218,9 +218,11 @@ const useStatusDecision = ({
 }: ApplicantDecisionProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const approveRound = useAction(api.application.admin.approveRound);
-  const waitlistApplicant = useAction(api.application.admin.waitlistApplicant);
-  const rejectApplicant = useAction(api.application.admin.rejectApplicant);
+  const approveRound = useMutation(api.application.admin.approveRound);
+  const waitlistApplicant = useMutation(
+    api.application.admin.waitlistApplicant
+  );
+  const rejectApplicant = useMutation(api.application.admin.rejectApplicant);
 
   const handleAction = async (decision: StatusActions) => {
     try {

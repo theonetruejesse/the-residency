@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { action, internalMutation } from "../_generated/server";
+import { mutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { Id, Doc } from "../_generated/dataModel";
 import { Backgrounds, BasicInfo, Links, Missions } from "../model/applicants";
@@ -14,32 +14,27 @@ import {
   WaitListMember,
 } from "../types/application.types";
 
-const intakeArgs = {
-  basicInfo: v.object({
-    ...BasicInfo.withoutSystemFields,
-  }),
-  mission: v.object({
-    ...Missions.withoutSystemFields,
-  }),
-  background: v.object({
-    ...Backgrounds.withoutSystemFields,
-  }),
-  link: v.object({
-    ...Links.withoutSystemFields,
-  }),
-};
-
-export const submitIntake = action({
-  args: intakeArgs,
+export const submitIntake = mutation({
+  args: {
+    basicInfo: v.object({
+      ...BasicInfo.withoutSystemFields,
+    }),
+    mission: v.object({
+      ...Missions.withoutSystemFields,
+    }),
+    background: v.object({
+      ...Backgrounds.withoutSystemFields,
+    }),
+    link: v.object({
+      ...Links.withoutSystemFields,
+    }),
+  },
   returns: v.id("applicants"),
   handler: async (ctx, args): Promise<Id<"applicants">> => {
-    const { basicInfoId, missionId, backgroundId, linkId } =
-      await ctx.runMutation(internal.application.index.fillApplicantTables, {
-        basicInfo: args.basicInfo,
-        mission: args.mission,
-        background: args.background,
-        link: args.link,
-      });
+    const basicInfoId = await ctx.db.insert("basicInfo", args.basicInfo);
+    const missionId = await ctx.db.insert("missions", args.mission);
+    const backgroundId = await ctx.db.insert("backgrounds", args.background);
+    const linkId = await ctx.db.insert("links", args.link);
 
     const applicantId = await ctx.runMutation(
       internal.application.applicant.createApplicant,
@@ -51,23 +46,13 @@ export const submitIntake = action({
       }
     );
 
-    await ctx.runAction(internal.application.emails.sendEmail, {
+    await ctx.scheduler.runAfter(0, internal.application.emails.sendEmail, {
       email: args.basicInfo.email,
       name: args.basicInfo.firstName,
       emailType: "intake-confirmation",
     });
-    return applicantId;
-  },
-});
 
-export const fillApplicantTables = internalMutation({
-  args: intakeArgs,
-  handler: async (ctx, args) => {
-    const basicInfoId = await ctx.db.insert("basicInfo", args.basicInfo);
-    const missionId = await ctx.db.insert("missions", args.mission);
-    const backgroundId = await ctx.db.insert("backgrounds", args.background);
-    const linkId = await ctx.db.insert("links", args.link);
-    return { basicInfoId, missionId, backgroundId, linkId };
+    return applicantId;
   },
 });
 
@@ -108,6 +93,35 @@ export const handleLeave = userApplicantAction({
 });
 
 // QUERIES
+
+// returns all waiting list members: sessions, personas
+export const getWaitingList = userQuery({
+  args: {},
+  handler: async (ctx): Promise<WaitListMember[]> => {
+    const sessions = await ctx.runQuery(
+      internal.application.queue.listWaitingSessions
+    );
+
+    return await Promise.all(
+      sessions.map(async (session: Doc<"sessions">) => {
+        const persona = await ctx.runQuery(
+          internal.application.session.getSessionPersona,
+          { sessionId: session._id }
+        );
+
+        const defaultRole = "AI Curator";
+        const defaultTagline = "Founder scaling consumer AI company";
+
+        return {
+          sessionId: session._id,
+          role: persona?.role || defaultRole,
+          tagline: persona?.tagline || defaultTagline,
+        };
+      })
+    );
+  },
+});
+
 export const getSessionStatus = userApplicantQuery({
   args: {},
   handler: async (ctx): Promise<SessionStatus> => {
@@ -129,32 +143,6 @@ export const getSessionStatus = userApplicantQuery({
       internal.application.queue.isQueueFull
     );
     return isQueueFull ? "join_queue" : "join_call";
-  },
-});
-
-// returns all waiting list members: sessions, personas
-export const getWaitingList = userQuery({
-  args: {},
-  handler: async (ctx): Promise<WaitListMember[]> => {
-    const sessions = await ctx.runQuery(
-      internal.application.queue.listWaitingSessions
-    );
-
-    return await Promise.all(
-      sessions.map(async (session: Doc<"sessions">) => {
-        const persona = await ctx.runQuery(
-          internal.application.session.getSessionPersona,
-          { sessionId: session._id }
-        );
-        if (!persona) throw new Error(`No persona found for ${session._id}`);
-
-        return {
-          sessionId: session._id,
-          role: persona.role,
-          tagline: persona.tagline,
-        };
-      })
-    );
   },
 });
 

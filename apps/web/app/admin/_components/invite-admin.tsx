@@ -6,7 +6,7 @@ import { RequiredIndicator } from "@/components/required-indicator";
 import { ActionButton } from "@/components/action-button";
 import { useState } from "react";
 import { api } from "@residency/api";
-import { useAction } from "convex/react";
+import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { Button } from "@residency/ui/components/button";
 import { CirclePlus } from "lucide-react";
@@ -144,7 +144,7 @@ const DEFAULT_FORM_DATA: InviteFormData = {
 };
 
 const useInviteForm = (onSuccess?: () => void) => {
-  const inviteAdmin = useAction(api.application.admin.inviteAdmin);
+  const inviteAdmin = useMutation(api.application.admin.inviteAdmin);
   const [formData, setFormData] = useState<InviteFormData>(DEFAULT_FORM_DATA);
   const [errors, setErrors] = useState<InviteFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);

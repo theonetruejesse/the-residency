@@ -7,16 +7,17 @@ import {
   ROUND_OPTIONS,
   STATUS_OPTIONS,
 } from "../model/applicants";
-import { adminAction, adminMutation, adminQuery } from "../utils/wrappers";
+import { adminMutation, adminQuery } from "../utils/wrappers";
 import { paginationOptsValidator } from "convex/server";
 import { CURRENT_COHORT } from "../constants";
-import { internalAction } from "../_generated/server";
+import { internalMutation } from "../_generated/server";
 import type { FullApplicantType } from "../types/application.types";
 
-export const rejectApplicant = adminAction({
+export const rejectApplicant = adminMutation({
   args: {
     applicantId: v.id("applicants"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const { basicInfo } = await ctx.runQuery(
       internal.application.applicant.getApplicantBasicInfo,
@@ -32,18 +33,21 @@ export const rejectApplicant = adminAction({
       }
     );
 
-    await ctx.runAction(internal.application.emails.sendEmail, {
+    await ctx.scheduler.runAfter(0, internal.application.emails.sendEmail, {
       email: basicInfo.email,
       name: basicInfo.firstName,
       emailType: "rejection",
     });
+
+    return null;
   },
 });
 
-export const waitlistApplicant = adminAction({
+export const waitlistApplicant = adminMutation({
   args: {
     applicantId: v.id("applicants"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const { basicInfo } = await ctx.runQuery(
       internal.application.applicant.getApplicantBasicInfo,
@@ -59,18 +63,21 @@ export const waitlistApplicant = adminAction({
       }
     );
 
-    await ctx.runAction(internal.application.emails.sendEmail, {
+    await ctx.scheduler.runAfter(0, internal.application.emails.sendEmail, {
       email: basicInfo.email,
       name: basicInfo.firstName,
       emailType: "waitlist",
     });
+
+    return null;
   },
 });
 
-export const approveRound = adminAction({
+export const approveRound = adminMutation({
   args: {
     applicantId: v.id("applicants"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const { applicantId } = args;
     const { applicant, basicInfo } = await ctx.runQuery(
@@ -83,117 +90,119 @@ export const approveRound = adminAction({
 
     switch (round) {
       case "intake":
-        await ctx.runAction(internal.application.admin.approveIntake, {
+        await ctx.runMutation(internal.application.admin.approveIntake, {
           applicantId: args.applicantId,
           name: firstName,
           email,
         });
         break;
       case "first_round":
-        await ctx.runAction(internal.application.admin.approveFirstRound, {
+        await ctx.runMutation(internal.application.admin.approveFirstRound, {
           applicantId: args.applicantId,
           name: firstName,
           email,
         });
         break;
       case "second_round":
-        await ctx.runAction(internal.application.admin.approveSecondRound, {
+        await ctx.runMutation(internal.application.admin.approveSecondRound, {
           applicantId: args.applicantId,
         });
         break;
     }
+    return null;
   },
 });
 
-export const approveIntake = internalAction({
+export const approveIntake = internalMutation({
   args: {
     applicantId: v.id("applicants"),
     name: v.string(),
     email: v.string(),
   },
+  returns: v.id("sessions"),
   handler: async (ctx, args): Promise<Id<"sessions">> => {
-    // 1. update applicant round
+    const { applicantId } = args;
+
     await ctx.runMutation(internal.application.applicant.updateApplicantRound, {
-      applicantId: args.applicantId,
+      applicantId,
       round: "first_round",
     });
 
-    // 2. fetch mission context
+    const userId = await ctx.runMutation(
+      internal.application.user.createApplicantUser,
+      { applicantId }
+    );
+    await ctx.runMutation(internal.application.applicant.setApplicantUserId, {
+      applicantId,
+      userId,
+    });
+
     const mission = await ctx.runQuery(
       internal.application.applicant.getApplicantMission,
-      { applicantId: args.applicantId }
+      { applicantId }
     );
     if (!mission) throw new Error("Mission not found");
 
-    // 3. create session and generate content in parallel
-    const [sessionId, { role, tagline }] = await Promise.all([
-      ctx.runMutation(internal.application.session.createSession, {
-        applicantId: args.applicantId,
+    const sessionId = await ctx.runMutation(
+      internal.application.session.createSession,
+      {
+        applicantId,
         missionId: mission._id,
-      }),
-      ctx.runAction(internal.application.action.generateContent, {
+      }
+    );
+
+    await ctx.scheduler.runAfter(
+      0,
+      internal.application.session.createSessionPersona,
+      {
+        sessionId,
         interest: mission.interest,
         accomplishment: mission.accomplishment,
-      }),
-    ]);
-
-    // 4. create session persona and applicant user in parallel
-    const [_, userId] = await Promise.all([
-      ctx.runMutation(internal.application.session.createSessionPersona, {
-        sessionId,
-        role,
-        tagline,
-      }),
-      ctx.runMutation(internal.application.user.createApplicantUser, {
-        applicantId: args.applicantId,
-      }),
-    ]);
-
-    // 5. invite applicant user, set applicant user id, and send email in parallel
-    await Promise.all([
-      ctx.runAction(internal.application.action.inviteApplicantUser, {
-        userId,
-      }),
-      ctx.runMutation(internal.application.applicant.setApplicantUserId, {
-        applicantId: args.applicantId,
-        userId,
-      }),
-      ctx.runAction(internal.application.emails.sendEmail, {
-        email: args.email,
-        name: args.name,
-        emailType: "to-first",
-      }),
-    ]);
+      }
+    );
+    await ctx.scheduler.runAfter(
+      0,
+      internal.application.action.inviteApplicantUser,
+      { userId }
+    );
+    await ctx.scheduler.runAfter(0, internal.application.emails.sendEmail, {
+      email: args.email,
+      name: args.name,
+      emailType: "to-first",
+    });
 
     return sessionId;
   },
 });
 
-export const approveFirstRound = internalAction({
+export const approveFirstRound = internalMutation({
   args: {
     applicantId: v.id("applicants"),
     name: v.string(),
     email: v.string(),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
-    await Promise.all([
-      ctx.runMutation(internal.application.applicant.updateApplicantRound, {
-        applicantId: args.applicantId,
-        round: "second_round",
-      }),
-      ctx.runAction(internal.application.emails.sendEmail, {
-        email: args.email,
-        name: args.name,
-        emailType: "to-second",
-      }),
-    ]);
+    await ctx.runMutation(internal.application.applicant.updateApplicantRound, {
+      applicantId: args.applicantId,
+      round: "second_round",
+    });
+
+    await ctx.scheduler.runAfter(0, internal.application.emails.sendEmail, {
+      email: args.email,
+      name: args.name,
+      emailType: "to-second",
+    });
+
+    return null;
   },
 });
 
-export const approveSecondRound = internalAction({
+export const approveSecondRound = internalMutation({
   args: {
     applicantId: v.id("applicants"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     await ctx.runMutation(
       internal.application.applicant.updateApplicantStatus,
@@ -203,25 +212,29 @@ export const approveSecondRound = internalAction({
       }
     );
 
-    // we send emails manually for accepted applicants
+    return null;
   },
 });
 
-export const inviteAdmin = adminAction({
+export const inviteAdmin = adminMutation({
   args: v.object({
     basicInfo: BasicInfo.table.validator,
   }),
+  returns: v.null(),
   handler: async (ctx, args) => {
     const { basicInfo } = args;
+
     const userId = await ctx.runMutation(
       internal.application.user.createAdminUser,
       { basicInfo }
     );
 
-    await ctx.runAction(internal.application.action.inviteAdmin, {
+    await ctx.scheduler.runAfter(0, internal.application.action.inviteAdmin, {
       userId,
       email: basicInfo.email,
     });
+
+    return null;
   },
 });
 
