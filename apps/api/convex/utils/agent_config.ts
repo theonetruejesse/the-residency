@@ -1,6 +1,8 @@
 // make sure to keep the structure the same. just change the content.
 
-export const agentDynamicVariables = {
+const agentMaxDuration = 600;
+
+const agentDynamicVariables = {
   dynamic_variable_placeholders: {
     applicant_name: "john doe",
     applicant_id: "123",
@@ -15,7 +17,7 @@ const extractDirectQuotes =
 const gradeStatement =
   "Justify your assessment, then conclude by classifying the interviewee's performance as grades: HIGH, MEDIUM, LOW, or UNCLEAR. Use UNCLEAR if there is insufficient information to assign a definitive grade. End your response with 'Therefore the grade for this criteron is: <GRADE>'";
 
-export const agentCriterias = {
+const agentCriterias = {
   mission: {
     description: `${extractDirectQuotes} their deep, purpose-driven motivation behind their projects. Look for statements that reveal their underlying "why" beyond external factors like fame, money, or career advancement. Focus on quotes showing intrinsic curiosity, desire to solve meaningful problems, or commitment to advancing knowledge for the betterment of the world. Include expressions of how their personal journey, values, or experiences shape their research mission. Look for evidence they are driven by genuine intellectual passion rather than purely transactional motivations. ${gradeStatement}`,
     type: "string",
@@ -48,10 +50,10 @@ export const agentCriterias = {
   },
 };
 
-export const agentFirstMessage =
+const agentFirstMessage =
   "Hey there {{applicant_name}}, I'm Visionary, the first round interviewer for The Residency. To start, can you tell me about your story?";
 
-export const agentSystemPrompt = {
+const agentSystemPrompt = {
   prompt: `
   # Personality  
 
@@ -157,4 +159,40 @@ export const agentSystemPrompt = {
   - **Important:** If {{applicant_name}} asks about application status, program details, or outcomes, politely clarify: "I'm part of the interview process designed to get to know you better. For questions about your application or the program, please refer to the official communications channels for The Residency."
   - **Important:** END THE CALL ONLY AFTER THE APPLICANT HAS CONFIRMED THEY ARE DONE WITH THE INTERVIEW.
   - Call Session: {{applicant_id}}`,
+};
+
+const agentToolIds = ["ZqnsLmXO6EvGbZy0dBA4"];
+const agentTools = [
+  {
+    id: "ZqnsLmXO6EvGbZy0dBA4",
+    params: { system_tool_type: "end_call" },
+    response_timeout_secs: 20,
+    type: "system",
+    name: "end_call",
+    description: `
+End the call when:
+  1. Applicant indicates they have asked all questions or expressed satisfaction with topic coverage.
+  2. Interviewer explicitly states the scheduled time is ending or the conversation is concluding (e.g., "That brings us to the end," "We're nearing the end").
+  3. Applicant uses a clear closing phrase *after* interviewer signals conclusion (e.g., "Thank you," "Goodbye").
+  Do NOT end if applicant closes prematurely BEFORE interviewer signals end or key areas are covered.
+`,
+  },
+];
+
+export const AGENT_CONFIG = {
+  platform_settings: {
+    data_collection: agentCriterias,
+  },
+  conversation_config: {
+    agent: {
+      dynamic_variables: agentDynamicVariables,
+      prompt: agentSystemPrompt,
+      first_message: agentFirstMessage,
+      tool_ids: agentToolIds,
+      tools: agentTools,
+    },
+    conversation: {
+      max_duration_seconds: agentMaxDuration,
+    },
+  },
 };

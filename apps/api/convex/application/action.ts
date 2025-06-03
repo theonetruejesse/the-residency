@@ -12,12 +12,7 @@ import {
 import { rolePrompt, taglinePrompt } from "../utils/prompts";
 import { Missions } from "../model/applicants";
 import { internal } from "../_generated/api";
-import {
-  agentCriterias,
-  agentDynamicVariables,
-  agentFirstMessage,
-  agentSystemPrompt,
-} from "../utils/agent";
+import { AGENT_CONFIG } from "../utils/agent_config";
 import { Id } from "../_generated/dataModel";
 
 export const generateContent = internalAction({
@@ -115,18 +110,7 @@ export const generateSessionUrl = internalAction({
 const syncAgentConfig = async () => {
   const updatedAgent = await elevenClient.conversationalAi.updateAgent(
     ELEVEN_LABS_AGENT_ID as string,
-    {
-      platform_settings: {
-        data_collection: agentCriterias,
-      },
-      conversation_config: {
-        agent: {
-          dynamic_variables: agentDynamicVariables,
-          prompt: agentSystemPrompt,
-          first_message: agentFirstMessage,
-        },
-      },
-    }
+    AGENT_CONFIG
   );
 
   return updatedAgent;

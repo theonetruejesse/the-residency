@@ -13,7 +13,6 @@ import { CURRENT_COHORT } from "../constants";
 import { internalAction } from "../_generated/server";
 import type { FullApplicantType } from "../types/application.types";
 
-// todo, send emails with resend
 export const rejectApplicant = adminAction({
   args: {
     applicantId: v.id("applicants"),
@@ -397,18 +396,6 @@ export const deleteNote = adminMutation({
   handler: async (ctx, args) => {
     await ctx.runMutation(internal.application.applicant.deleteApplicantNote, {
       noteId: args.noteId,
-    });
-  },
-});
-
-// helpful for debugging
-export const kickSession = internalAction({
-  args: {
-    sessionId: v.id("sessions"),
-  },
-  handler: async (ctx, args) => {
-    await ctx.runAction(internal.application.queue.handleLeave, {
-      sessionId: args.sessionId,
     });
   },
 });
