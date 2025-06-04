@@ -47,7 +47,9 @@ const PostSession = ({ firstName }: { firstName: string }) => {
     <div className="flex items-center justify-center min-h-svh pb-15">
       <Card className="w-[600px] glass">
         <CardHeader>
-          <CardTitle className="text-2xl">Thanks for Interviewing!</CardTitle>
+          <CardTitle className="text-3xl font-mono font-medium">
+            Thanks for Interviewing!
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-lg">

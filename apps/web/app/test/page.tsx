@@ -1,12 +1,9 @@
-import { TopNav } from "@/components/topnav";
+import { SignOutButton } from "@clerk/nextjs";
 
-export default function TestPage() {
+export default function Page() {
   return (
     <div>
-      <TopNav />
-      <div className="flex justify-center items-center h-screen">
-        <h1>Test</h1>
-      </div>
+      <SignOutButton />
     </div>
   );
 }

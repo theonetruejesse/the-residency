@@ -4,7 +4,7 @@ export const ChaliceChatCopy = (props: { firstName: string }) => {
   return (
     <Card className="flex flex-col items-center gap-4 glass p-8 mb-4 lowercase">
       <div className="flex flex-col items-center gap-8">
-        <h1 className="text-4xl font-bold">
+        <h1 className="text-4xl font-semibold font-mono">
           Hi {props.firstName}! Welcome to Chalice Chat.
         </h1>
 

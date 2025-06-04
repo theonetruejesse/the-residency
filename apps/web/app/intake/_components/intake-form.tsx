@@ -54,7 +54,7 @@ const FormContent = memo(({ setIsSubmitted, intakeId }: FormContentProps) => {
         className="p-8 space-y-6 rounded-lg shadow-md bg-white/80 backdrop-blur-sm mx-2"
       >
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-gray-800 font-mono">
             the residency application
           </h2>
         </div>
@@ -70,7 +70,7 @@ const Submission = memo(() => {
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <div className="text-center glass h-[280px] flex flex-col px-16 items-center justify-center">
-        <h1 className="text-5xl font-bold mb-4">
+        <h1 className="text-5xl mb-4 font-mono font-medium">
           thank you for your application!
         </h1>
         <p className="text-gray-600 text-xl">

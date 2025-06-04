@@ -1,19 +1,22 @@
-import { Geist, Geist_Mono } from "next/font/google";
-
-import "@residency/ui/globals.css";
+import { Manrope } from "next/font/google";
 import { Providers } from "@/components/providers";
 import backgroundTexture from "@/public/background.png";
 import { ReactScan } from "@/components/react-scan";
 import { Toaster } from "@residency/ui/components/sonner";
+import localFont from "next/font/local";
+import "@residency/ui/globals.css";
 
-const fontSans = Geist({
+const fontSans = Manrope({
   subsets: ["latin"],
   variable: "--font-sans",
 });
 
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
+const fontHeadline = localFont({
+  src: "../public/fonts/tiempos-headline-light.woff2",
+  style: "normal",
   variable: "--font-mono",
+  display: "swap",
+  fallback: ["Georgia", "Times New Roman", "serif"],
 });
 
 export default function RootLayout({
@@ -23,14 +26,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <ReactScan />
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
+        className={`${fontSans.variable} ${fontHeadline.variable} font-sans antialiased`}
         style={{
           backgroundImage: `url(${backgroundTexture.src})`,
           backgroundRepeat: "repeat",
         }}
       >
+        <ReactScan />
         <Providers>{children}</Providers>
         <Toaster />
       </body>
