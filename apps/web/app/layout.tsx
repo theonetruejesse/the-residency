@@ -1,7 +1,7 @@
 import { Manrope } from "next/font/google";
 import { Providers } from "@/components/providers";
 import backgroundTexture from "@/public/background.png";
-import { ReactScan } from "@/components/react-scan";
+// import { ReactScan } from "@/components/react-scan";
 import { Toaster } from "@residency/ui/components/sonner";
 import localFont from "next/font/local";
 import "@residency/ui/globals.css";
@@ -33,7 +33,7 @@ export default function RootLayout({
           backgroundRepeat: "repeat",
         }}
       >
-        <ReactScan />
+        {/* <ReactScan /> */}
         <Providers>{children}</Providers>
         <Toaster />
       </body>
