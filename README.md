@@ -2,13 +2,19 @@
 
 ## Overview
 
-This is a first round interview agent for The Residency. It is a web application that allows candidates to interview with The Residency via a voice call.
+This is a first round interview agent for The Residency. It's organized as a monorepo with the following packages:
 
-## Tech Stack
+- `apps/web`: Next.js application
+- `apps/api`: Convex API
+- `packages/ui`: Shadcn UI based components
+- `packages/email`: Email templates with Resend
 
-- Next.js
-- TypeScript
-- Tailwind CSS
-- Eleven Labs
-- Convex
-- Shadcn UI
+## Tech Stack (big pieces)
+
+- Eleven Labs (conversational ai)
+- Next.js (frontend)
+- Convex (backend/database)
+- Shadcn (ui)
+- Resend (email)
+- Clerk (auth)
+- Upstash (redis)
