@@ -1,6 +1,7 @@
-import { RESIDENCY_URL } from "@/lib/constants";
 import { redirect } from "next/navigation";
+import { getOrCreateIntake } from "./intake/_store/redis-intake";
 
-export default function Page() {
-  redirect(RESIDENCY_URL);
+export default async function Page() {
+  const intakeId = await getOrCreateIntake();
+  redirect(`/intake?s=${intakeId}`);
 }

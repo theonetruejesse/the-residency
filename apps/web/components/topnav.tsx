@@ -1,4 +1,4 @@
-import { SignOutButton, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 
 export const TopNav = () => {
   return (

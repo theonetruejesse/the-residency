@@ -78,7 +78,7 @@ const GivenBasicInfo = ({ basicInfo }: GivenBasicInfoProps) => {
   const { firstName, lastName, email, phoneNumber } = basicInfo;
   return (
     <div className="flex flex-row justify-start items-center gap-2">
-      <h3 className="text-xl font-medium lowercase mb-2 flex items-center gap-1.5">
+      <h3 className="text-xl font-medium lowercase flex items-center gap-1.5">
         {`${firstName} ${lastName}`}
         <Tooltip>
           <TooltipTrigger asChild>
